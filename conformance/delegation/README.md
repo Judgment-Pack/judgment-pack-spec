@@ -2,7 +2,8 @@
 
 The conformance cases of [RFC 0030](../../rfcs/0030-agent-principals-and-delegated-authority.md)'s
 amendment of 2026-11-22 for the delegation statement, steps 1 to 7 and the narrowing check of §3:
-the build-order step *ES256* of its *Acceptance plan*. They are staged in no Core corpus, as the
+the build-order step *ES256* of its *Acceptance plan*; and its cases for the admission reads of §2a,
+tables 4 and 5. They are staged in no Core corpus, as the
 witness and dialect vectors are, are not served by the site, and are normative for nothing while the
 RFC is a Draft. Each case states its expected verdict.
 
@@ -10,6 +11,7 @@ RFC is a Draft. Each case states its expected verdict.
 | --- | --- | --- |
 | [`es256-statements.json`](es256-statements.json) | 55: table 1 (30) and table 2 (25) | `5a687a254c35989951345cea7b7f7b5cdf3a2edc2cc1f02918ed2e3f7d900f8b` |
 | [`ed25519-statements.json`](ed25519-statements.json) | 39: the row `ed25519-unchanged` of table 1 | `b1bdfe50cbab49f6408395511c0f9fbee897193f6c58f63328a6d677b99c3bd9` |
+| [`admission-reads.json`](admission-reads.json) | 35: table 4 (22) and table 5 (13) | `57c8011e7b21ce0fbf4441a85061f01ae5686f5928720325e79fad18f3fdb095` |
 
 ## How they were made
 
@@ -58,5 +60,31 @@ The ES256 signatures are `r||s` at low S, except where a case makes another. `es
 signature as a key service may answer it, DER of `(r, n − s)` at 72 bytes, since a DER low-S
 signature is at most 71 bytes long.
 
-Table 3, the scope binding, and tables 4 and 5, the reads, are later steps of the build order and
-are not here.
+Table 3, the scope binding, is a later step of the build order and is not here.
+
+## The read cases
+
+`admission-reads.json` is hand-written and needs no signer: a read is not signed, and its bodies
+are `canon` bytes, which are reproducible. It holds one case per name of tables 4 and 5, a row
+naming several cases being several, with `read-v2-binding-step-12` (a step-12 refusal answering a
+binding read). It is frozen once both implementations pin it; a change is a new digest. Each case
+holds:
+
+- `name`, `table` (`4` or `5`) and `kind`, as the RFC's tables give them;
+- `applies`, the side the case is for, `issuing-host`, `sender` or both, each with what that side
+  does. A body no conforming sender emits says `"sender": "never emits; refuses on read-malformed"`
+  (or the answer it names): a sender passes it by never sending such a body and by refusing under
+  that name when it is so answered;
+- `senders`, the implementations whose sender part it is, `gateway`, `library` or both; the
+  `skills` and skill-load cases are the library's;
+- `readVersion`, the sender's configured version, and `hostReads`, the versions the host double
+  reads;
+- `inputs`: the chain, by the name of a case in `ed25519-statements.json`, whose link digests the
+  body's `chain` holds; `host`, `at` and `audience`; the call (`null` for a binding read), the
+  standing read's principal, or the load; the approved `version` and the loaded `skills` as the
+  sender holds them, unordered where a case orders them; and the host double's `policy` where a
+  case needs one;
+- `body` and `answer`, the exact bytes as strings, `null` where none is sent or none comes back;
+  `skill-load-resume` holds one of each per read, in order;
+- `expect`: `verdict`, the RFC's expected verdict; `sender`, what the sender reports; `counted`;
+  `reads`, how many reads the sender makes, so that nothing is resent; and for table 5 `loaded`.

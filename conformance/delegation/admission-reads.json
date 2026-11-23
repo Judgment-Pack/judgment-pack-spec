@@ -1,0 +1,1599 @@
+{
+ "note": "Hand-written cases of RFC 0030's tables 4 and 5 (section 2a, the admission reads on the wire), one per name, and read-v2-binding-step-12. body and answer are the exact canon bytes as strings, null where none is sent; skill-load-resume holds one of each per read, in order. inputs.chain names a case of ed25519-statements.json, whose link digests body's chain holds. applies holds the side a case is for: issuing-host, sender, or both, each with what that side does; senders names the implementations whose sender part it is. readVersion is the sender's configured version and hostReads the versions the host double reads. expect.verdict is the RFC's expected verdict, expect.sender what the sender reports, expect.counted whether anything is counted, expect.reads how many reads the sender makes, and for table 5 expect.loaded what is loaded. Synthetic data only.",
+ "chains": "ed25519-statements.json",
+ "cases": [
+  {
+   "name": "read-v1-call",
+   "table": 4,
+   "kind": "P",
+   "applies": {
+    "issuing-host": "admits and counts the call",
+    "sender": "sends body byte for byte, makes one read, and reports expect.sender"
+   },
+   "senders": [
+    "gateway"
+   ],
+   "readVersion": "1",
+   "hostReads": [
+    "1",
+    "2"
+   ],
+   "inputs": {
+    "chain": "a valid root",
+    "host": "desk",
+    "at": "2026-10-30T01:00:00.000Z",
+    "audience": {
+     "kind": "gateway",
+     "name": "gateway:test"
+    },
+    "call": {
+     "source": "tickets/live",
+     "tool": "query",
+     "effect": "read-external",
+     "count": true
+    }
+   },
+   "body": "{\"at\":\"2026-10-30T01:00:00.000Z\",\"audience\":{\"kind\":\"gateway\",\"name\":\"gateway:test\"},\"call\":{\"count\":true,\"effect\":\"read-external\",\"source\":\"tickets/live\",\"tool\":\"query\"},\"chain\":[\"sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429\"],\"host\":\"desk\",\"readVersion\":\"1\"}",
+   "answer": "{\"admission\":\"admit\"}",
+   "expect": {
+    "verdict": "admit",
+    "sender": "admit",
+    "counted": true,
+    "reads": 1
+   }
+  },
+  {
+   "name": "read-v2-library-no-skills",
+   "table": 4,
+   "kind": "B",
+   "applies": {
+    "issuing-host": "admits",
+    "sender": "sends body byte for byte, makes one read, and reports expect.sender"
+   },
+   "senders": [
+    "library"
+   ],
+   "readVersion": "2",
+   "hostReads": [
+    "1",
+    "2"
+   ],
+   "inputs": {
+    "chain": "a valid root",
+    "host": "desk",
+    "at": "2026-10-30T01:00:00.000Z",
+    "audience": {
+     "kind": "gateway",
+     "name": "gateway:test"
+    },
+    "call": {
+     "source": "tickets/live",
+     "tool": "query",
+     "effect": "read-external",
+     "count": false
+    },
+    "version": "sha256:e36b74acc9fcf3a4bdf222f12eb1e68662aae5026e8fa289459140f12f51e327",
+    "skills": []
+   },
+   "body": "{\"at\":\"2026-10-30T01:00:00.000Z\",\"audience\":{\"kind\":\"gateway\",\"name\":\"gateway:test\"},\"call\":{\"count\":false,\"effect\":\"read-external\",\"skills\":[],\"source\":\"tickets/live\",\"tool\":\"query\",\"version\":\"sha256:e36b74acc9fcf3a4bdf222f12eb1e68662aae5026e8fa289459140f12f51e327\"},\"chain\":[\"sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429\"],\"host\":\"desk\",\"readVersion\":\"2\"}",
+   "answer": "{\"admission\":\"admit\"}",
+   "expect": {
+    "verdict": "admit",
+    "sender": "admit",
+    "counted": false,
+    "reads": 1
+   }
+  },
+  {
+   "name": "read-v2-library-two-skills",
+   "table": 4,
+   "kind": "P",
+   "applies": {
+    "issuing-host": "admits",
+    "sender": "sends body byte for byte, makes one read, and reports expect.sender"
+   },
+   "senders": [
+    "library"
+   ],
+   "readVersion": "2",
+   "hostReads": [
+    "1",
+    "2"
+   ],
+   "inputs": {
+    "chain": "a valid root",
+    "host": "desk",
+    "at": "2026-10-30T01:00:00.000Z",
+    "audience": {
+     "kind": "gateway",
+     "name": "gateway:test"
+    },
+    "call": {
+     "source": "tickets/live",
+     "tool": "query",
+     "effect": "read-external",
+     "count": false
+    },
+    "version": "sha256:e36b74acc9fcf3a4bdf222f12eb1e68662aae5026e8fa289459140f12f51e327",
+    "skills": [
+     {
+      "id": "issue-style",
+      "digest": "sha256:54c58da035256c83611efb3bf1d4568f14bb07f0d90b0dc5a78b7c5771e53299"
+     },
+     {
+      "id": "expense-policy",
+      "digest": "sha256:0db9962ec1788a72f134587be9a2738c5f3db7bf53d57c0c2a28bdde20960ade"
+     }
+    ]
+   },
+   "body": "{\"at\":\"2026-10-30T01:00:00.000Z\",\"audience\":{\"kind\":\"gateway\",\"name\":\"gateway:test\"},\"call\":{\"count\":false,\"effect\":\"read-external\",\"skills\":[{\"digest\":\"sha256:0db9962ec1788a72f134587be9a2738c5f3db7bf53d57c0c2a28bdde20960ade\",\"id\":\"expense-policy\"},{\"digest\":\"sha256:54c58da035256c83611efb3bf1d4568f14bb07f0d90b0dc5a78b7c5771e53299\",\"id\":\"issue-style\"}],\"source\":\"tickets/live\",\"tool\":\"query\",\"version\":\"sha256:e36b74acc9fcf3a4bdf222f12eb1e68662aae5026e8fa289459140f12f51e327\"},\"chain\":[\"sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429\"],\"host\":\"desk\",\"readVersion\":\"2\"}",
+   "answer": "{\"admission\":\"admit\"}",
+   "expect": {
+    "verdict": "admit",
+    "sender": "admit",
+    "counted": false,
+    "reads": 1
+   }
+  },
+  {
+   "name": "read-v2-skill-refused",
+   "table": 4,
+   "kind": "N",
+   "applies": {
+    "issuing-host": "refuses skill-refused under its policy; counts nothing",
+    "sender": "sends body byte for byte, makes one read, and reports expect.sender"
+   },
+   "senders": [
+    "library"
+   ],
+   "readVersion": "2",
+   "hostReads": [
+    "1",
+    "2"
+   ],
+   "inputs": {
+    "chain": "a valid root",
+    "host": "desk",
+    "at": "2026-10-30T01:00:00.000Z",
+    "audience": {
+     "kind": "gateway",
+     "name": "gateway:test"
+    },
+    "call": {
+     "source": "tickets/live",
+     "tool": "query",
+     "effect": "read-external",
+     "count": false
+    },
+    "version": "sha256:e36b74acc9fcf3a4bdf222f12eb1e68662aae5026e8fa289459140f12f51e327",
+    "skills": [
+     {
+      "id": "expense-policy",
+      "digest": "sha256:0db9962ec1788a72f134587be9a2738c5f3db7bf53d57c0c2a28bdde20960ade"
+     },
+     {
+      "id": "issue-style",
+      "digest": "sha256:54c58da035256c83611efb3bf1d4568f14bb07f0d90b0dc5a78b7c5771e53299"
+     }
+    ],
+    "policy": {
+     "skillsRefused": [
+      "issue-style"
+     ]
+    }
+   },
+   "body": "{\"at\":\"2026-10-30T01:00:00.000Z\",\"audience\":{\"kind\":\"gateway\",\"name\":\"gateway:test\"},\"call\":{\"count\":false,\"effect\":\"read-external\",\"skills\":[{\"digest\":\"sha256:0db9962ec1788a72f134587be9a2738c5f3db7bf53d57c0c2a28bdde20960ade\",\"id\":\"expense-policy\"},{\"digest\":\"sha256:54c58da035256c83611efb3bf1d4568f14bb07f0d90b0dc5a78b7c5771e53299\",\"id\":\"issue-style\"}],\"source\":\"tickets/live\",\"tool\":\"query\",\"version\":\"sha256:e36b74acc9fcf3a4bdf222f12eb1e68662aae5026e8fa289459140f12f51e327\"},\"chain\":[\"sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429\"],\"host\":\"desk\",\"readVersion\":\"2\"}",
+   "answer": "{\"admission\":\"refuse\",\"refusal\":\"skill-refused\"}",
+   "expect": {
+    "verdict": "skill-refused",
+    "sender": "skill-refused",
+    "counted": false,
+    "reads": 1
+   }
+  },
+  {
+   "name": "read-v2-gateway",
+   "table": 4,
+   "kind": "P",
+   "applies": {
+    "issuing-host": "admits and counts the call",
+    "sender": "sends body byte for byte, makes one read, and reports expect.sender"
+   },
+   "senders": [
+    "gateway"
+   ],
+   "readVersion": "2",
+   "hostReads": [
+    "1",
+    "2"
+   ],
+   "inputs": {
+    "chain": "a valid root",
+    "host": "desk",
+    "at": "2026-10-30T01:00:00.000Z",
+    "audience": {
+     "kind": "gateway",
+     "name": "gateway:test"
+    },
+    "call": {
+     "source": "tickets/live",
+     "tool": "query",
+     "effect": "read-external",
+     "count": true
+    },
+    "version": "sha256:e36b74acc9fcf3a4bdf222f12eb1e68662aae5026e8fa289459140f12f51e327",
+    "skills": null
+   },
+   "body": "{\"at\":\"2026-10-30T01:00:00.000Z\",\"audience\":{\"kind\":\"gateway\",\"name\":\"gateway:test\"},\"call\":{\"count\":true,\"effect\":\"read-external\",\"skills\":null,\"source\":\"tickets/live\",\"tool\":\"query\",\"version\":\"sha256:e36b74acc9fcf3a4bdf222f12eb1e68662aae5026e8fa289459140f12f51e327\"},\"chain\":[\"sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429\"],\"host\":\"desk\",\"readVersion\":\"2\"}",
+   "answer": "{\"admission\":\"admit\"}",
+   "expect": {
+    "verdict": "admit",
+    "sender": "admit",
+    "counted": true,
+    "reads": 1
+   }
+  },
+  {
+   "name": "read-v2-version-null",
+   "table": 4,
+   "kind": "B",
+   "applies": {
+    "issuing-host": "refuses tool-version-refused, its policy requiring a version; counts nothing",
+    "sender": "sends body byte for byte, makes one read, and reports expect.sender"
+   },
+   "senders": [
+    "gateway"
+   ],
+   "readVersion": "2",
+   "hostReads": [
+    "1",
+    "2"
+   ],
+   "inputs": {
+    "chain": "a valid root",
+    "host": "desk",
+    "at": "2026-10-30T01:00:00.000Z",
+    "audience": {
+     "kind": "gateway",
+     "name": "gateway:test"
+    },
+    "call": {
+     "source": "tickets/live",
+     "tool": "query",
+     "effect": "read-external",
+     "count": true
+    },
+    "version": null,
+    "skills": null,
+    "policy": {
+     "versionRequired": true
+    }
+   },
+   "body": "{\"at\":\"2026-10-30T01:00:00.000Z\",\"audience\":{\"kind\":\"gateway\",\"name\":\"gateway:test\"},\"call\":{\"count\":true,\"effect\":\"read-external\",\"skills\":null,\"source\":\"tickets/live\",\"tool\":\"query\",\"version\":null},\"chain\":[\"sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429\"],\"host\":\"desk\",\"readVersion\":\"2\"}",
+   "answer": "{\"admission\":\"refuse\",\"refusal\":\"tool-version-refused\"}",
+   "expect": {
+    "verdict": "tool-version-refused",
+    "sender": "tool-version-refused",
+    "counted": false,
+    "reads": 1
+   }
+  },
+  {
+   "name": "read-v2-version-null-not-required",
+   "table": 4,
+   "kind": "B",
+   "applies": {
+    "issuing-host": "admits, its policy requiring no version, and counts the call",
+    "sender": "sends body byte for byte, makes one read, and reports expect.sender"
+   },
+   "senders": [
+    "gateway"
+   ],
+   "readVersion": "2",
+   "hostReads": [
+    "1",
+    "2"
+   ],
+   "inputs": {
+    "chain": "a valid root",
+    "host": "desk",
+    "at": "2026-10-30T01:00:00.000Z",
+    "audience": {
+     "kind": "gateway",
+     "name": "gateway:test"
+    },
+    "call": {
+     "source": "tickets/live",
+     "tool": "query",
+     "effect": "read-external",
+     "count": true
+    },
+    "version": null,
+    "skills": null,
+    "policy": {
+     "versionRequired": false
+    }
+   },
+   "body": "{\"at\":\"2026-10-30T01:00:00.000Z\",\"audience\":{\"kind\":\"gateway\",\"name\":\"gateway:test\"},\"call\":{\"count\":true,\"effect\":\"read-external\",\"skills\":null,\"source\":\"tickets/live\",\"tool\":\"query\",\"version\":null},\"chain\":[\"sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429\"],\"host\":\"desk\",\"readVersion\":\"2\"}",
+   "answer": "{\"admission\":\"admit\"}",
+   "expect": {
+    "verdict": "admit",
+    "sender": "admit",
+    "counted": true,
+    "reads": 1
+   }
+  },
+  {
+   "name": "read-v2-version-refused",
+   "table": 4,
+   "kind": "N",
+   "applies": {
+    "issuing-host": "refuses tool-version-refused: the subject approved another digest; counts nothing",
+    "sender": "sends body byte for byte, makes one read, and reports expect.sender"
+   },
+   "senders": [
+    "gateway"
+   ],
+   "readVersion": "2",
+   "hostReads": [
+    "1",
+    "2"
+   ],
+   "inputs": {
+    "chain": "a valid root",
+    "host": "desk",
+    "at": "2026-10-30T01:00:00.000Z",
+    "audience": {
+     "kind": "gateway",
+     "name": "gateway:test"
+    },
+    "call": {
+     "source": "tickets/live",
+     "tool": "query",
+     "effect": "read-external",
+     "count": true
+    },
+    "version": "sha256:e36b74acc9fcf3a4bdf222f12eb1e68662aae5026e8fa289459140f12f51e327",
+    "skills": null,
+    "policy": {
+     "approvedVersion": "sha256:d33dda94693f8de3fec052a38d1342cb19c90bac37b057c739107df699c9ac45"
+    }
+   },
+   "body": "{\"at\":\"2026-10-30T01:00:00.000Z\",\"audience\":{\"kind\":\"gateway\",\"name\":\"gateway:test\"},\"call\":{\"count\":true,\"effect\":\"read-external\",\"skills\":null,\"source\":\"tickets/live\",\"tool\":\"query\",\"version\":\"sha256:e36b74acc9fcf3a4bdf222f12eb1e68662aae5026e8fa289459140f12f51e327\"},\"chain\":[\"sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429\"],\"host\":\"desk\",\"readVersion\":\"2\"}",
+   "answer": "{\"admission\":\"refuse\",\"refusal\":\"tool-version-refused\"}",
+   "expect": {
+    "verdict": "tool-version-refused",
+    "sender": "tool-version-refused",
+    "counted": false,
+    "reads": 1
+   }
+  },
+  {
+   "name": "read-v2-order",
+   "table": 4,
+   "kind": "N",
+   "applies": {
+    "issuing-host": "refuses subject-unauthorized, before tool-version-refused; counts nothing",
+    "sender": "sends body byte for byte, makes one read, and reports expect.sender"
+   },
+   "senders": [
+    "gateway"
+   ],
+   "readVersion": "2",
+   "hostReads": [
+    "1",
+    "2"
+   ],
+   "inputs": {
+    "chain": "a valid root",
+    "host": "desk",
+    "at": "2026-10-30T01:00:00.000Z",
+    "audience": {
+     "kind": "gateway",
+     "name": "gateway:test"
+    },
+    "call": {
+     "source": "tickets/live",
+     "tool": "query",
+     "effect": "read-external",
+     "count": true
+    },
+    "version": "sha256:e36b74acc9fcf3a4bdf222f12eb1e68662aae5026e8fa289459140f12f51e327",
+    "skills": null,
+    "policy": {
+     "subjectAuthorized": false,
+     "approvedVersion": "sha256:d33dda94693f8de3fec052a38d1342cb19c90bac37b057c739107df699c9ac45"
+    }
+   },
+   "body": "{\"at\":\"2026-10-30T01:00:00.000Z\",\"audience\":{\"kind\":\"gateway\",\"name\":\"gateway:test\"},\"call\":{\"count\":true,\"effect\":\"read-external\",\"skills\":null,\"source\":\"tickets/live\",\"tool\":\"query\",\"version\":\"sha256:e36b74acc9fcf3a4bdf222f12eb1e68662aae5026e8fa289459140f12f51e327\"},\"chain\":[\"sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429\"],\"host\":\"desk\",\"readVersion\":\"2\"}",
+   "answer": "{\"admission\":\"refuse\",\"refusal\":\"subject-unauthorized\"}",
+   "expect": {
+    "verdict": "subject-unauthorized",
+    "sender": "subject-unauthorized",
+    "counted": false,
+    "reads": 1
+   }
+  },
+  {
+   "name": "read-v2-binding",
+   "table": 4,
+   "kind": "P",
+   "applies": {
+    "issuing-host": "admits the binding; counts nothing",
+    "sender": "sends body byte for byte, makes one read, and reports expect.sender"
+   },
+   "senders": [
+    "gateway"
+   ],
+   "readVersion": "2",
+   "hostReads": [
+    "1",
+    "2"
+   ],
+   "inputs": {
+    "chain": "a valid root",
+    "host": "desk",
+    "at": "2026-10-30T01:00:00.000Z",
+    "audience": {
+     "kind": "gateway",
+     "name": "gateway:test"
+    },
+    "call": null
+   },
+   "body": "{\"at\":\"2026-10-30T01:00:00.000Z\",\"audience\":{\"kind\":\"gateway\",\"name\":\"gateway:test\"},\"call\":null,\"chain\":[\"sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429\"],\"host\":\"desk\",\"readVersion\":\"2\"}",
+   "answer": "{\"admission\":\"admit\"}",
+   "expect": {
+    "verdict": "admit",
+    "sender": "admit",
+    "counted": false,
+    "reads": 1
+   }
+  },
+  {
+   "name": "read-v2-binding-step-12",
+   "table": 4,
+   "kind": "N",
+   "applies": {
+    "sender": "sends body byte for byte, and refuses the binding admission-unknown when answered a step-12 refusal"
+   },
+   "senders": [
+    "gateway"
+   ],
+   "readVersion": "2",
+   "hostReads": [
+    "1",
+    "2"
+   ],
+   "inputs": {
+    "chain": "a valid root",
+    "host": "desk",
+    "at": "2026-10-30T01:00:00.000Z",
+    "audience": {
+     "kind": "gateway",
+     "name": "gateway:test"
+    },
+    "call": null
+   },
+   "body": "{\"at\":\"2026-10-30T01:00:00.000Z\",\"audience\":{\"kind\":\"gateway\",\"name\":\"gateway:test\"},\"call\":null,\"chain\":[\"sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429\"],\"host\":\"desk\",\"readVersion\":\"2\"}",
+   "answer": "{\"admission\":\"refuse\",\"refusal\":\"tool-version-refused\"}",
+   "expect": {
+    "verdict": "admission-unknown",
+    "sender": "admission-unknown",
+    "counted": false,
+    "reads": 1
+   }
+  },
+  {
+   "name": "read-v2-standing",
+   "table": 4,
+   "kind": "P",
+   "applies": {
+    "issuing-host": "answers current",
+    "sender": "sends body byte for byte, makes one read, and reports expect.sender"
+   },
+   "senders": [
+    "gateway"
+   ],
+   "readVersion": "2",
+   "hostReads": [
+    "1",
+    "2"
+   ],
+   "inputs": {
+    "chain": "a valid root",
+    "host": "desk",
+    "at": "2026-10-30T01:00:00.000Z",
+    "audience": {
+     "kind": "gateway",
+     "name": "gateway:test"
+    },
+    "standing": {
+     "kind": "person",
+     "issuer": "https://login.example.com/",
+     "subject": "approver@example.com"
+    }
+   },
+   "body": "{\"audience\":{\"kind\":\"gateway\",\"name\":\"gateway:test\"},\"host\":\"desk\",\"readVersion\":\"2\",\"standing\":{\"issuer\":\"https://login.example.com/\",\"kind\":\"person\",\"subject\":\"approver@example.com\"}}",
+   "answer": "{\"standing\":\"current\"}",
+   "expect": {
+    "verdict": "current",
+    "sender": "current",
+    "counted": false,
+    "reads": 1
+   }
+  },
+  {
+   "name": "read-version-unknown",
+   "table": 4,
+   "kind": "N",
+   "applies": {
+    "issuing-host": "answers read-version-unsupported; counts nothing",
+    "sender": "never emits; refuses on read-version-unsupported, and sends no version \"1\" read"
+   },
+   "senders": [
+    "gateway",
+    "library"
+   ],
+   "readVersion": "2",
+   "hostReads": [
+    "1",
+    "2"
+   ],
+   "inputs": {
+    "chain": "a valid root",
+    "host": "desk",
+    "at": "2026-10-30T01:00:00.000Z",
+    "audience": {
+     "kind": "gateway",
+     "name": "gateway:test"
+    },
+    "call": {
+     "source": "tickets/live",
+     "tool": "query",
+     "effect": "read-external",
+     "count": true
+    },
+    "version": "sha256:e36b74acc9fcf3a4bdf222f12eb1e68662aae5026e8fa289459140f12f51e327",
+    "skills": null
+   },
+   "body": "{\"at\":\"2026-10-30T01:00:00.000Z\",\"audience\":{\"kind\":\"gateway\",\"name\":\"gateway:test\"},\"call\":{\"count\":true,\"effect\":\"read-external\",\"skills\":null,\"source\":\"tickets/live\",\"tool\":\"query\",\"version\":\"sha256:e36b74acc9fcf3a4bdf222f12eb1e68662aae5026e8fa289459140f12f51e327\"},\"chain\":[\"sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429\"],\"host\":\"desk\",\"readVersion\":\"3\"}",
+   "answer": "{\"refusal\":\"read-version-unsupported\"}",
+   "expect": {
+    "verdict": "read-version-unsupported",
+    "sender": "read-version-unsupported",
+    "counted": false,
+    "reads": 1
+   }
+  },
+  {
+   "name": "read-version-not-a-string",
+   "table": 4,
+   "kind": "N",
+   "applies": {
+    "issuing-host": "answers read-malformed",
+    "sender": "never emits; refuses on read-malformed"
+   },
+   "senders": [
+    "gateway",
+    "library"
+   ],
+   "readVersion": "2",
+   "hostReads": [
+    "1",
+    "2"
+   ],
+   "inputs": {
+    "chain": "a valid root",
+    "host": "desk",
+    "at": "2026-10-30T01:00:00.000Z",
+    "audience": {
+     "kind": "gateway",
+     "name": "gateway:test"
+    },
+    "call": {
+     "source": "tickets/live",
+     "tool": "query",
+     "effect": "read-external",
+     "count": true
+    },
+    "version": "sha256:e36b74acc9fcf3a4bdf222f12eb1e68662aae5026e8fa289459140f12f51e327",
+    "skills": null
+   },
+   "body": "{\"at\":\"2026-10-30T01:00:00.000Z\",\"audience\":{\"kind\":\"gateway\",\"name\":\"gateway:test\"},\"call\":{\"count\":true,\"effect\":\"read-external\",\"skills\":null,\"source\":\"tickets/live\",\"tool\":\"query\",\"version\":\"sha256:e36b74acc9fcf3a4bdf222f12eb1e68662aae5026e8fa289459140f12f51e327\"},\"chain\":[\"sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429\"],\"host\":\"desk\",\"readVersion\":2}",
+   "answer": "{\"refusal\":\"read-malformed\"}",
+   "expect": {
+    "verdict": "read-malformed",
+    "sender": "read-malformed",
+    "counted": false,
+    "reads": 1
+   }
+  },
+  {
+   "name": "read-v2-to-v1-host",
+   "table": 4,
+   "kind": "N",
+   "applies": {
+    "issuing-host": "reads only \"1\" and answers read-version-unsupported",
+    "sender": "sends body byte for byte, makes one read, and reports expect.sender, and sends no version \"1\" read"
+   },
+   "senders": [
+    "gateway"
+   ],
+   "readVersion": "2",
+   "hostReads": [
+    "1"
+   ],
+   "inputs": {
+    "chain": "a valid root",
+    "host": "desk",
+    "at": "2026-10-30T01:00:00.000Z",
+    "audience": {
+     "kind": "gateway",
+     "name": "gateway:test"
+    },
+    "call": {
+     "source": "tickets/live",
+     "tool": "query",
+     "effect": "read-external",
+     "count": true
+    },
+    "version": "sha256:e36b74acc9fcf3a4bdf222f12eb1e68662aae5026e8fa289459140f12f51e327",
+    "skills": null
+   },
+   "body": "{\"at\":\"2026-10-30T01:00:00.000Z\",\"audience\":{\"kind\":\"gateway\",\"name\":\"gateway:test\"},\"call\":{\"count\":true,\"effect\":\"read-external\",\"skills\":null,\"source\":\"tickets/live\",\"tool\":\"query\",\"version\":\"sha256:e36b74acc9fcf3a4bdf222f12eb1e68662aae5026e8fa289459140f12f51e327\"},\"chain\":[\"sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429\"],\"host\":\"desk\",\"readVersion\":\"2\"}",
+   "answer": "{\"refusal\":\"read-version-unsupported\"}",
+   "expect": {
+    "verdict": "read-version-unsupported",
+    "sender": "read-version-unsupported",
+    "counted": false,
+    "reads": 1
+   }
+  },
+  {
+   "name": "read-v1-sender-new-answer",
+   "table": 4,
+   "kind": "N",
+   "applies": {
+    "sender": "sends body byte for byte, and refuses admission-unknown: a version \"1\" sender reads neither new answer form"
+   },
+   "senders": [
+    "gateway",
+    "library"
+   ],
+   "readVersion": "1",
+   "hostReads": [
+    "1",
+    "2"
+   ],
+   "inputs": {
+    "chain": "a valid root",
+    "host": "desk",
+    "at": "2026-10-30T01:00:00.000Z",
+    "audience": {
+     "kind": "gateway",
+     "name": "gateway:test"
+    },
+    "call": {
+     "source": "tickets/live",
+     "tool": "query",
+     "effect": "read-external",
+     "count": true
+    }
+   },
+   "body": "{\"at\":\"2026-10-30T01:00:00.000Z\",\"audience\":{\"kind\":\"gateway\",\"name\":\"gateway:test\"},\"call\":{\"count\":true,\"effect\":\"read-external\",\"source\":\"tickets/live\",\"tool\":\"query\"},\"chain\":[\"sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429\"],\"host\":\"desk\",\"readVersion\":\"1\"}",
+   "answer": "{\"refusal\":\"read-version-unsupported\"}",
+   "expect": {
+    "verdict": "admission-unknown",
+    "sender": "admission-unknown",
+    "counted": false,
+    "reads": 1
+   }
+  },
+  {
+   "name": "read-v1-with-skills",
+   "table": 4,
+   "kind": "N",
+   "applies": {
+    "issuing-host": "answers read-malformed",
+    "sender": "never emits; refuses on read-malformed; a version \"1\" sender so answered refuses admission-unknown"
+   },
+   "senders": [
+    "gateway",
+    "library"
+   ],
+   "readVersion": "1",
+   "hostReads": [
+    "1",
+    "2"
+   ],
+   "inputs": {
+    "chain": "a valid root",
+    "host": "desk",
+    "at": "2026-10-30T01:00:00.000Z",
+    "audience": {
+     "kind": "gateway",
+     "name": "gateway:test"
+    },
+    "call": {
+     "source": "tickets/live",
+     "tool": "query",
+     "effect": "read-external",
+     "count": true
+    }
+   },
+   "body": "{\"at\":\"2026-10-30T01:00:00.000Z\",\"audience\":{\"kind\":\"gateway\",\"name\":\"gateway:test\"},\"call\":{\"count\":true,\"effect\":\"read-external\",\"skills\":[{\"digest\":\"sha256:0db9962ec1788a72f134587be9a2738c5f3db7bf53d57c0c2a28bdde20960ade\",\"id\":\"expense-policy\"}],\"source\":\"tickets/live\",\"tool\":\"query\"},\"chain\":[\"sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429\"],\"host\":\"desk\",\"readVersion\":\"1\"}",
+   "answer": "{\"refusal\":\"read-malformed\"}",
+   "expect": {
+    "verdict": "read-malformed",
+    "sender": "admission-unknown",
+    "counted": false,
+    "reads": 1
+   }
+  },
+  {
+   "name": "read-v2-skills-missing",
+   "table": 4,
+   "kind": "N",
+   "applies": {
+    "issuing-host": "answers read-malformed",
+    "sender": "never emits; refuses on read-malformed"
+   },
+   "senders": [
+    "gateway",
+    "library"
+   ],
+   "readVersion": "2",
+   "hostReads": [
+    "1",
+    "2"
+   ],
+   "inputs": {
+    "chain": "a valid root",
+    "host": "desk",
+    "at": "2026-10-30T01:00:00.000Z",
+    "audience": {
+     "kind": "gateway",
+     "name": "gateway:test"
+    },
+    "call": {
+     "source": "tickets/live",
+     "tool": "query",
+     "effect": "read-external",
+     "count": false
+    },
+    "version": "sha256:e36b74acc9fcf3a4bdf222f12eb1e68662aae5026e8fa289459140f12f51e327",
+    "skills": [
+     {
+      "id": "expense-policy",
+      "digest": "sha256:0db9962ec1788a72f134587be9a2738c5f3db7bf53d57c0c2a28bdde20960ade"
+     },
+     {
+      "id": "issue-style",
+      "digest": "sha256:54c58da035256c83611efb3bf1d4568f14bb07f0d90b0dc5a78b7c5771e53299"
+     }
+    ]
+   },
+   "body": "{\"at\":\"2026-10-30T01:00:00.000Z\",\"audience\":{\"kind\":\"gateway\",\"name\":\"gateway:test\"},\"call\":{\"count\":false,\"effect\":\"read-external\",\"source\":\"tickets/live\",\"tool\":\"query\",\"version\":\"sha256:e36b74acc9fcf3a4bdf222f12eb1e68662aae5026e8fa289459140f12f51e327\"},\"chain\":[\"sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429\"],\"host\":\"desk\",\"readVersion\":\"2\"}",
+   "answer": "{\"refusal\":\"read-malformed\"}",
+   "expect": {
+    "verdict": "read-malformed",
+    "sender": "read-malformed",
+    "counted": false,
+    "reads": 1
+   }
+  },
+  {
+   "name": "read-v2-skills-unsorted",
+   "table": 4,
+   "kind": "N",
+   "applies": {
+    "issuing-host": "answers read-malformed",
+    "sender": "never emits; refuses on read-malformed"
+   },
+   "senders": [
+    "gateway",
+    "library"
+   ],
+   "readVersion": "2",
+   "hostReads": [
+    "1",
+    "2"
+   ],
+   "inputs": {
+    "chain": "a valid root",
+    "host": "desk",
+    "at": "2026-10-30T01:00:00.000Z",
+    "audience": {
+     "kind": "gateway",
+     "name": "gateway:test"
+    },
+    "call": {
+     "source": "tickets/live",
+     "tool": "query",
+     "effect": "read-external",
+     "count": false
+    },
+    "version": "sha256:e36b74acc9fcf3a4bdf222f12eb1e68662aae5026e8fa289459140f12f51e327",
+    "skills": [
+     {
+      "id": "expense-policy",
+      "digest": "sha256:0db9962ec1788a72f134587be9a2738c5f3db7bf53d57c0c2a28bdde20960ade"
+     },
+     {
+      "id": "issue-style",
+      "digest": "sha256:54c58da035256c83611efb3bf1d4568f14bb07f0d90b0dc5a78b7c5771e53299"
+     }
+    ]
+   },
+   "body": "{\"at\":\"2026-10-30T01:00:00.000Z\",\"audience\":{\"kind\":\"gateway\",\"name\":\"gateway:test\"},\"call\":{\"count\":false,\"effect\":\"read-external\",\"skills\":[{\"digest\":\"sha256:54c58da035256c83611efb3bf1d4568f14bb07f0d90b0dc5a78b7c5771e53299\",\"id\":\"issue-style\"},{\"digest\":\"sha256:0db9962ec1788a72f134587be9a2738c5f3db7bf53d57c0c2a28bdde20960ade\",\"id\":\"expense-policy\"}],\"source\":\"tickets/live\",\"tool\":\"query\",\"version\":\"sha256:e36b74acc9fcf3a4bdf222f12eb1e68662aae5026e8fa289459140f12f51e327\"},\"chain\":[\"sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429\"],\"host\":\"desk\",\"readVersion\":\"2\"}",
+   "answer": "{\"refusal\":\"read-malformed\"}",
+   "expect": {
+    "verdict": "read-malformed",
+    "sender": "read-malformed",
+    "counted": false,
+    "reads": 1
+   }
+  },
+  {
+   "name": "read-v2-skills-repeated",
+   "table": 4,
+   "kind": "N",
+   "applies": {
+    "issuing-host": "answers read-malformed",
+    "sender": "never emits; refuses on read-malformed"
+   },
+   "senders": [
+    "gateway",
+    "library"
+   ],
+   "readVersion": "2",
+   "hostReads": [
+    "1",
+    "2"
+   ],
+   "inputs": {
+    "chain": "a valid root",
+    "host": "desk",
+    "at": "2026-10-30T01:00:00.000Z",
+    "audience": {
+     "kind": "gateway",
+     "name": "gateway:test"
+    },
+    "call": {
+     "source": "tickets/live",
+     "tool": "query",
+     "effect": "read-external",
+     "count": false
+    },
+    "version": "sha256:e36b74acc9fcf3a4bdf222f12eb1e68662aae5026e8fa289459140f12f51e327",
+    "skills": [
+     {
+      "id": "expense-policy",
+      "digest": "sha256:0db9962ec1788a72f134587be9a2738c5f3db7bf53d57c0c2a28bdde20960ade"
+     },
+     {
+      "id": "issue-style",
+      "digest": "sha256:54c58da035256c83611efb3bf1d4568f14bb07f0d90b0dc5a78b7c5771e53299"
+     }
+    ]
+   },
+   "body": "{\"at\":\"2026-10-30T01:00:00.000Z\",\"audience\":{\"kind\":\"gateway\",\"name\":\"gateway:test\"},\"call\":{\"count\":false,\"effect\":\"read-external\",\"skills\":[{\"digest\":\"sha256:0db9962ec1788a72f134587be9a2738c5f3db7bf53d57c0c2a28bdde20960ade\",\"id\":\"expense-policy\"},{\"digest\":\"sha256:0db9962ec1788a72f134587be9a2738c5f3db7bf53d57c0c2a28bdde20960ade\",\"id\":\"expense-policy\"}],\"source\":\"tickets/live\",\"tool\":\"query\",\"version\":\"sha256:e36b74acc9fcf3a4bdf222f12eb1e68662aae5026e8fa289459140f12f51e327\"},\"chain\":[\"sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429\"],\"host\":\"desk\",\"readVersion\":\"2\"}",
+   "answer": "{\"refusal\":\"read-malformed\"}",
+   "expect": {
+    "verdict": "read-malformed",
+    "sender": "read-malformed",
+    "counted": false,
+    "reads": 1
+   }
+  },
+  {
+   "name": "read-v2-call-and-load",
+   "table": 4,
+   "kind": "N",
+   "applies": {
+    "issuing-host": "answers read-malformed",
+    "sender": "never emits; refuses on read-malformed"
+   },
+   "senders": [
+    "gateway",
+    "library"
+   ],
+   "readVersion": "2",
+   "hostReads": [
+    "1",
+    "2"
+   ],
+   "inputs": {
+    "chain": "a valid root",
+    "host": "desk",
+    "at": "2026-10-30T01:00:00.000Z",
+    "audience": {
+     "kind": "gateway",
+     "name": "gateway:test"
+    },
+    "call": {
+     "source": "tickets/live",
+     "tool": "query",
+     "effect": "read-external",
+     "count": false
+    },
+    "version": "sha256:e36b74acc9fcf3a4bdf222f12eb1e68662aae5026e8fa289459140f12f51e327",
+    "skills": [
+     {
+      "id": "expense-policy",
+      "digest": "sha256:0db9962ec1788a72f134587be9a2738c5f3db7bf53d57c0c2a28bdde20960ade"
+     }
+    ]
+   },
+   "body": "{\"at\":\"2026-10-30T01:00:00.000Z\",\"audience\":{\"kind\":\"gateway\",\"name\":\"gateway:test\"},\"call\":{\"count\":false,\"effect\":\"read-external\",\"skills\":[{\"digest\":\"sha256:0db9962ec1788a72f134587be9a2738c5f3db7bf53d57c0c2a28bdde20960ade\",\"id\":\"expense-policy\"}],\"source\":\"tickets/live\",\"tool\":\"query\",\"version\":\"sha256:e36b74acc9fcf3a4bdf222f12eb1e68662aae5026e8fa289459140f12f51e327\"},\"chain\":[\"sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429\"],\"host\":\"desk\",\"load\":{\"skill\":{\"digest\":\"sha256:54c58da035256c83611efb3bf1d4568f14bb07f0d90b0dc5a78b7c5771e53299\",\"id\":\"issue-style\"},\"skills\":[{\"digest\":\"sha256:0db9962ec1788a72f134587be9a2738c5f3db7bf53d57c0c2a28bdde20960ade\",\"id\":\"expense-policy\"}]},\"readVersion\":\"2\"}",
+   "answer": "{\"refusal\":\"read-malformed\"}",
+   "expect": {
+    "verdict": "read-malformed",
+    "sender": "read-malformed",
+    "counted": false,
+    "reads": 1
+   }
+  },
+  {
+   "name": "read-body-over-cap",
+   "table": 4,
+   "kind": "B",
+   "applies": {
+    "issuing-host": "answers read-malformed: the body is over 65536 bytes",
+    "sender": "never emits; refuses on read-malformed"
+   },
+   "senders": [
+    "gateway",
+    "library"
+   ],
+   "readVersion": "2",
+   "hostReads": [
+    "1",
+    "2"
+   ],
+   "inputs": {
+    "chain": "a valid root",
+    "host": "desk",
+    "at": "2026-10-30T01:00:00.000Z",
+    "audience": {
+     "kind": "gateway",
+     "name": "gateway:test"
+    },
+    "call": {
+     "source": "tickets/live",
+     "tool": "query",
+     "effect": "read-external",
+     "count": false
+    },
+    "version": "sha256:e36b74acc9fcf3a4bdf222f12eb1e68662aae5026e8fa289459140f12f51e327",
+    "skills": "760 skills, s0000 to s0759"
+   },
+   "body": "{\"at\":\"2026-10-30T01:00:00.000Z\",\"audience\":{\"kind\":\"gateway\",\"name\":\"gateway:test\"},\"call\":{\"count\":false,\"effect\":\"read-external\",\"skills\":[{\"digest\":\"sha256:a5fa1c5844c633dc004f701d416f5cfc58a1a0b2eb132084c0e3bb36feed1d6f\",\"id\":\"s0000\"},{\"digest\":\"sha256:22c79209fdfb5c9f392b811749b521ce6d11c53b56ef9495d470e1d1d3200056\",\"id\":\"s0001\"},{\"digest\":\"sha256:8fbefef934408b31aa5ab86b4c8842c7c71b45418c85e4b11c4f2a963861f08d\",\"id\":\"s0002\"},{\"digest\":\"sha256:2634613587ca339a6302a3a4759351040991ae0cf7c100540b17b57c64d94595\",\"id\":\"s0003\"},{\"digest\":\"sha256:ab96b6aa9016e8ab28c123139016bb86b29219643dcad38b252de7b469bd1ec7\",\"id\":\"s0004\"},{\"digest\":\"sha256:86017cf23fd6f9211f388f9e5aadb93a01aeece4984c7a377d9425a1611fb3c2\",\"id\":\"s0005\"},{\"digest\":\"sha256:afe590e6dd7608a148e77fb7f3dd7131db6cd54c2bc7b9af2d00f03d471620ed\",\"id\":\"s0006\"},{\"digest\":\"sha256:4b91de8dea2c6f47c5529cff435646cebcb16e2c88759f708a33916dcdfe4ff1\",\"id\":\"s0007\"},{\"digest\":\"sha256:a1a3485a7adca17aacc9aa6e531960940ab9e747714d2e1588b2b9d04d251bda\",\"id\":\"s0008\"},{\"digest\":\"sha256:535a665edafd836e5b52d67b601b287237a2ff52656602bce847767e797e656e\",\"id\":\"s0009\"},{\"digest\":\"sha256:07d69de70149ab7fbd22e185f6406c5a591d2973ae04933149db8722ca00c277\",\"id\":\"s0010\"},{\"digest\":\"sha256:09966479147fede5edb88071f163c2bfc54e2dc1ffde719db52f07e460bddb65\",\"id\":\"s0011\"},{\"digest\":\"sha256:1609bebdd87389074a2ea8482fdc2d0a95ebea8b776a962c26acd028aaa5e5b6\",\"id\":\"s0012\"},{\"digest\":\"sha256:cdb95c802355ae13772c86db9979c3069c88211bdde8b453350b150c9965ae9d\",\"id\":\"s0013\"},{\"digest\":\"sha256:2ef7e7e2715f72b48fc7c736e38a68381dea709e483c6bff1cb6e01c3af32d20\",\"id\":\"s0014\"},{\"digest\":\"sha256:e6dd52258cc47e425a01310ec9f92bd5854fa271df6cb8054a22b2fd44831f04\",\"id\":\"s0015\"},{\"digest\":\"sha256:95a913bd7f1940dab28b055b1c02a154a5ffd4d88793711e34a50f4bb96225c1\",\"id\":\"s0016\"},{\"digest\":\"sha256:1b6070c8f08465bdc2871e2d8c12cfd92881546ac2664f825487cad8947be8f1\",\"id\":\"s0017\"},{\"digest\":\"sha256:ba14b134e108d0eecae41993affb7cbbb694c40c53997e5d14e994cafe7cd689\",\"id\":\"s0018\"},{\"digest\":\"sha256:0115a56fd7154adae5d884d0c3675bcb3ff669cf74576aab78168dc380b7641a\",\"id\":\"s0019\"},{\"digest\":\"sha256:706797c2958a0d3bb5f0837a60b63f471dcad0d7358b8a54be14fee05acd479d\",\"id\":\"s0020\"},{\"digest\":\"sha256:2d65f0e0dc7c2358e4eb9f675d3fe6ebd2d60b3d07c53833fd0f0b29be3a06b6\",\"id\":\"s0021\"},{\"digest\":\"sha256:d14180ca7e9e1dfadbac06edbc54985d7faa8cff810993b4c65b679ef1b40dd4\",\"id\":\"s0022\"},{\"digest\":\"sha256:1bef77da27e33360a9a6786c5f84a055cf3c88619793f8a101cd444ae5ab89a3\",\"id\":\"s0023\"},{\"digest\":\"sha256:2a2ee7aecfb5942379b9a33b090788761b5121e85b561d5a37cc87f742ad5329\",\"id\":\"s0024\"},{\"digest\":\"sha256:b762dc4c170f6f67b3c133cc44ca8d7ff90fdef8e3294e4da231d429a810b6f9\",\"id\":\"s0025\"},{\"digest\":\"sha256:01b2efb0644a85f60b8e2e6d0f6dff0b7dbf3539bf733d1037ebc45eb5790be8\",\"id\":\"s0026\"},{\"digest\":\"sha256:c7033ca2aecc071d2a51cb7cda472c5fe62a7308f810d7756d5c3fcb53e9e777\",\"id\":\"s0027\"},{\"digest\":\"sha256:ea85af0df4374a73e02677b098bea9b03159b5d0232b9a0467e39216d106c4cd\",\"id\":\"s0028\"},{\"digest\":\"sha256:0b4f4856dc2e7a6139d38f2432a31d564b53c42a52451c61c9e7cc3501ac875d\",\"id\":\"s0029\"},{\"digest\":\"sha256:45596136460f351b25e95d00207706f66e24fbd89a21e8b0ea025f3920a21d13\",\"id\":\"s0030\"},{\"digest\":\"sha256:29effb272d803efa741d4dd7eef1535ebdcce1c19f68b99e6f6566ed220a94d1\",\"id\":\"s0031\"},{\"digest\":\"sha256:263dedd44dd3aa890a5e22e8413ee4a850b14b8a5efcae7d480ee152b894a0e3\",\"id\":\"s0032\"},{\"digest\":\"sha256:97d39fff5d025992cc9191053413e8d55c55bc338793ba2abd01957aa8408efb\",\"id\":\"s0033\"},{\"digest\":\"sha256:2d4cf14c06e7ed7261b0114cdff0a9aebea1432e80a94dd9a74a48bbe8e33a01\",\"id\":\"s0034\"},{\"digest\":\"sha256:0859986d065a4738de640850d4622c657b2d5dd1e0a77f2deb54c64c11f0cc88\",\"id\":\"s0035\"},{\"digest\":\"sha256:c100f86e2712c81de3b1c574c42a24780f5fa930520d5fe6c3f8234481e956fc\",\"id\":\"s0036\"},{\"digest\":\"sha256:26a4fdf52acecef7a0980555dea71b8281bdb7c81e964f5c6a70b8cc383dc03c\",\"id\":\"s0037\"},{\"digest\":\"sha256:512cad68da25d90ade2232d43ce5503702c680a229438384f8adcabbbeda7327\",\"id\":\"s0038\"},{\"digest\":\"sha256:40cec19e1d3a5018c263fba1eba98958cf84bce8bffdd951f65316411d5fae4f\",\"id\":\"s0039\"},{\"digest\":\"sha256:337d0008dd7342bd84310ecd5c65140dca90d713a0725c2f2dfc58748c491338\",\"id\":\"s0040\"},{\"digest\":\"sha256:ed8deac7a62a7930eeb0dc351fa95e2d6d1ffa5a2c0f0df301df76b090a7d64a\",\"id\":\"s0041\"},{\"digest\":\"sha256:273a71f78978e5e6d38bf3b9700ac20bc4ab65a98ae647f77d4f74573f721f02\",\"id\":\"s0042\"},{\"digest\":\"sha256:6aaf2c3bb2769aad18ebe904a94b8d74055f4b50bead226e5c5582de5aa04fbd\",\"id\":\"s0043\"},{\"digest\":\"sha256:e9b2096b086e764366f8825d89e3ebd0cea4075e6439b551c9335c30afda52b3\",\"id\":\"s0044\"},{\"digest\":\"sha256:33e9a8d80a25fbd98adc11bd7e4e489516ca7961754df1721d257020cd085976\",\"id\":\"s0045\"},{\"digest\":\"sha256:6cd9ec01f6afb879e5fc94e9b8a592b46f3dba784b3dec73fe8207cd8a8f519f\",\"id\":\"s0046\"},{\"digest\":\"sha256:667bf89c99e139b57aa10dc87906e83613f88ec1c7c1bab69614ac82688115a1\",\"id\":\"s0047\"},{\"digest\":\"sha256:6ab6c20dc423af423549918ee6cda860e5a9ef061c4d5c2ca65bc858cd232a03\",\"id\":\"s0048\"},{\"digest\":\"sha256:2da58130480819efeb3db83ceaed3d9102e55fb893814a20aad28c58171f5d1b\",\"id\":\"s0049\"},{\"digest\":\"sha256:ddbe0a6b28e6a280d6f28f0050ab40be37c49dba40c4ba316bbbf422e666fc39\",\"id\":\"s0050\"},{\"digest\":\"sha256:d4ac76f9c52660fda44d8c19b4a916738d7ba3a34d4ef8f214a9b9124eb55bf9\",\"id\":\"s0051\"},{\"digest\":\"sha256:61853a94f87c7134abf3611530b0d38f3e856db4fbd827f2c57efab29c9a1a70\",\"id\":\"s0052\"},{\"digest\":\"sha256:fe2dc1066d8b9c35b0e9ecd77aff3a3351e3ccd6083a23730c13bf1d68b4be15\",\"id\":\"s0053\"},{\"digest\":\"sha256:7a497926fcd94e0ac8cf6bd10f6f9f5b09730479a267ca13aa44f74f643129ac\",\"id\":\"s0054\"},{\"digest\":\"sha256:23047888d445bc33e25dcd630aa0dc355bf76d1154c578f3511b816f468f70cf\",\"id\":\"s0055\"},{\"digest\":\"sha256:244abf22118d2ca0c57d8332d45ccf9996c5acef1c46a4fe64eb3aa6219ec28e\",\"id\":\"s0056\"},{\"digest\":\"sha256:75de6bc07b07407c6cfb788f0019b8a1b9c4cbf8fcf51fd552721b02830a2ee0\",\"id\":\"s0057\"},{\"digest\":\"sha256:9cea4454dd0a989f0a643dc19e5f243d2bb629e781f05e346e082cb8d5633762\",\"id\":\"s0058\"},{\"digest\":\"sha256:c583dd31d5d6556f2e0f36386567b1cb08dbae71a11f5bd8236f6b930b2f8945\",\"id\":\"s0059\"},{\"digest\":\"sha256:34ae7e457573a46e5f5640c5655144ce30054909f00998e3740f78d594010286\",\"id\":\"s0060\"},{\"digest\":\"sha256:d4040a65e96c31ca1e99dfb24edc29677a3d80a4dd408e807b757a63f8c4b45d\",\"id\":\"s0061\"},{\"digest\":\"sha256:2f7ac30235feaee7bd42d6bdd8c8e9ce91e398855392000423cd2b975bdc333c\",\"id\":\"s0062\"},{\"digest\":\"sha256:f5c1d9423e4dbc73dbee7b67cef4a53a9ae7782429af180cab518aaa2c090f8d\",\"id\":\"s0063\"},{\"digest\":\"sha256:c8bb06ad0980c3ab10a78c8d4ba33a0f1a5b246f8b1427f83fe5a2433fa11f32\",\"id\":\"s0064\"},{\"digest\":\"sha256:6cb1fb2386dc2cc630cd5ed7bf811099babdb6b67efd01254d404c908acb320b\",\"id\":\"s0065\"},{\"digest\":\"sha256:df9362e5a508f3bc0d4bb2a063755d6b4c5c91acb82da8429ed14c2b9c13eed8\",\"id\":\"s0066\"},{\"digest\":\"sha256:8f28e0660c797ae4c855a276bb035df0e4e48cac76895e777c0c0de0a4a14e25\",\"id\":\"s0067\"},{\"digest\":\"sha256:5ecf51e526a0df8967060a2770ca6663b3154d9a52d9030cef96c339bf8a8c83\",\"id\":\"s0068\"},{\"digest\":\"sha256:3313cb2869870cd96dec6c5787d0f4dcbd5d2885453dfdaabc0708c31aa1975d\",\"id\":\"s0069\"},{\"digest\":\"sha256:ef1b2607152362ae643eaef87cd66d347f3cb60a4376e83f8af973acc31901c9\",\"id\":\"s0070\"},{\"digest\":\"sha256:a31dd17b4915689d480a4c247632d6f757980a24264959d116988ccc7a10311a\",\"id\":\"s0071\"},{\"digest\":\"sha256:6474427631f93440a2edf6681a4eed051c585f4a76e42c200b73f8707cfa8e7e\",\"id\":\"s0072\"},{\"digest\":\"sha256:0a39f60e038599e91a921d73a3d10642db623c6321d51e5ca8bbbd9e897d5a05\",\"id\":\"s0073\"},{\"digest\":\"sha256:9ed83bc290f86ac659c0a959db74d922b41fe30906e886e343d44e1fdf71bce5\",\"id\":\"s0074\"},{\"digest\":\"sha256:90725d8d158b47f102809cd531e9c56e8cdbd1e0c5ee486a427c5a30f3273117\",\"id\":\"s0075\"},{\"digest\":\"sha256:ea146d1013cbe1cd5a6a08b2c997a72149dae05c353cf0cd1250c0dbc74ea48b\",\"id\":\"s0076\"},{\"digest\":\"sha256:eb947a65efbc7a5bf2e41d93a3fe4445310e320546066d535b89e52554fe30c2\",\"id\":\"s0077\"},{\"digest\":\"sha256:a5e7bffadd4da2019328e05ae066823b2aa17e78fe094f40f0aeaa94c075bd95\",\"id\":\"s0078\"},{\"digest\":\"sha256:ac9faf24d7d1c72827f5cff756746b9c34b489dcbf340ea409cbf69d0d5ce79c\",\"id\":\"s0079\"},{\"digest\":\"sha256:4957abc69ac43a6f7a9b2c1bef715536b6c099fb74d038ef0d756fdd577f1b28\",\"id\":\"s0080\"},{\"digest\":\"sha256:b506ec6f049ac17e9a5b70dc9af5a6b52e9f193debbb7ee64ce1a501ca2a46b6\",\"id\":\"s0081\"},{\"digest\":\"sha256:ae8107039963ba1c429e1ac5ca7422ff59ca6fa968b343e099514b47c4c81158\",\"id\":\"s0082\"},{\"digest\":\"sha256:2381e091256e144349bde0e771025ffde5a748c9c0e8dfdd8863eddf2ef8ce95\",\"id\":\"s0083\"},{\"digest\":\"sha256:ab72a714766214e412a0db882e83ebe6dd8d2208fdb325e8e51d70ca13472c2c\",\"id\":\"s0084\"},{\"digest\":\"sha256:e79d03a4766fdab5d7b88f56f8979bcd538a0397b773f9185480c7e307ef76be\",\"id\":\"s0085\"},{\"digest\":\"sha256:8dfb5f1db81c2f7930747829c39e3e048c2592175aecd22b35b21074c0cde31a\",\"id\":\"s0086\"},{\"digest\":\"sha256:44f27b034b36668d2540c0d2b107df59371e786adefc81b485f3bd0c5401cf0b\",\"id\":\"s0087\"},{\"digest\":\"sha256:8379f75f9ae768ced0bc9df9dda83f64380741efdbe8685b328a183fd7c3f692\",\"id\":\"s0088\"},{\"digest\":\"sha256:7dc16cde5aec88907a721648bcdf0b92554b67332d96a7b6f588cddd773658f2\",\"id\":\"s0089\"},{\"digest\":\"sha256:3f68b203073d355d065ceebba5d86b3b713d5038958626f39adab304578b3c82\",\"id\":\"s0090\"},{\"digest\":\"sha256:495bf05d1e0e64becd87adc47cf33a1ab253d5cfce107306149f7206c42ecd69\",\"id\":\"s0091\"},{\"digest\":\"sha256:ef64e404ce4f5b6d3804430ad810acb74ede8791a37b0fc67288b0533f0e05cc\",\"id\":\"s0092\"},{\"digest\":\"sha256:53d02dda8cadebf1a198f7c00edd5ff43c5e25c232a2559115d7edfc5f4fe8e5\",\"id\":\"s0093\"},{\"digest\":\"sha256:f882b55f6b26d0c19dbb37a8d5d2d7f3c201497b32a92bf0a108c56a4cb7fc20\",\"id\":\"s0094\"},{\"digest\":\"sha256:673aafa80b8ae297a2584775cef6b91259f24512bd3fed00fd5f3df964b4d4f5\",\"id\":\"s0095\"},{\"digest\":\"sha256:cf12c118459f3a125d2b2017337080f5acad117f4ac862c0fcbb2a57f921e18f\",\"id\":\"s0096\"},{\"digest\":\"sha256:74e50444880dcb397f25457fa3651b8535548da8323bfb431f5db5175f60e046\",\"id\":\"s0097\"},{\"digest\":\"sha256:38e01ea2ea4767f6495025b74af6730b5fca6a78e031f329b034ca3dd7dcb05e\",\"id\":\"s0098\"},{\"digest\":\"sha256:3c77c1c877574b9fb6591e1548e61769e74f039a9274083ab0a89a94eebbb1b4\",\"id\":\"s0099\"},{\"digest\":\"sha256:cd83d1db33eee2c19c56779515b39e57ce92687ff0104097ca20d613b5e6826b\",\"id\":\"s0100\"},{\"digest\":\"sha256:438826c8e763ddaff17c3e07189896afe7b92a6b0132cfa8c1f17ed16f245062\",\"id\":\"s0101\"},{\"digest\":\"sha256:0183f8e6796c24b86deb32ec4f8c54bc14969c1945941e922c3deda4f86b805e\",\"id\":\"s0102\"},{\"digest\":\"sha256:7d4279e7e6f1c61f45393672fc115a5ce77df042d92afc8d9637e7b569dcca62\",\"id\":\"s0103\"},{\"digest\":\"sha256:5c5e40eff0ecc0ec49afb83f87be06bbf115c44502b42149c63aba38bc1c2a17\",\"id\":\"s0104\"},{\"digest\":\"sha256:4c4232c4d120cd72f05c6b1c0afc084f89922c950eee4ef7da5b30f1cfe9108a\",\"id\":\"s0105\"},{\"digest\":\"sha256:b3cecfa1aa049c45c26bc8b7999a67d1826fd4b8aabb8f01264b4ed194c04467\",\"id\":\"s0106\"},{\"digest\":\"sha256:d0824e9ff06d64441c76e87f1358f9a3ab08cc1bfe4d6874df0de89a6733d4ed\",\"id\":\"s0107\"},{\"digest\":\"sha256:d79401a4971e80f4c741840b6715e7d664532de7707ca78ba3722b7af70df74f\",\"id\":\"s0108\"},{\"digest\":\"sha256:c4262a6d2afa40bf6dd196ea0aa759ba90a2bebdb2bd570357425b37446434a5\",\"id\":\"s0109\"},{\"digest\":\"sha256:50b6116fe3b7d96acdb9ce178e466dc3fc042ad9edf415026204d7c0f367cbe4\",\"id\":\"s0110\"},{\"digest\":\"sha256:6eb435ed18af843be6472449f466b733e1b1ada8b52ab1bf27c3408a9eae5f5d\",\"id\":\"s0111\"},{\"digest\":\"sha256:0cbf5737b6ab0b98fefe830b821c8e413b26309c60fc75c8d03f062d9fbcd8d9\",\"id\":\"s0112\"},{\"digest\":\"sha256:b2233fed7e0ec63671f8c8c78021c3cd79cd1c872bfc2694c6d899d3b20074f2\",\"id\":\"s0113\"},{\"digest\":\"sha256:e173bff344525e791ff827deb73831b9a643fbee1c1df85ff0bc5ae27a55d9b5\",\"id\":\"s0114\"},{\"digest\":\"sha256:d71523e4e430b39f2c987280d9c11bd656e0ee7c08da9f8f349a64379f97eebe\",\"id\":\"s0115\"},{\"digest\":\"sha256:65c6a88116e620ba87fcf1b11cbe4fa82260085138f7114c6a7bb02b9044e206\",\"id\":\"s0116\"},{\"digest\":\"sha256:fc1a95c538a25e8b80c4c3a6bf7ac1fc074201cda62a4c761f26a2a0c0112bd4\",\"id\":\"s0117\"},{\"digest\":\"sha256:5a720f95795229f2a2ba1d507e304c13ea1203638dd942b295f975c36be9b25d\",\"id\":\"s0118\"},{\"digest\":\"sha256:73750b858cd1f4321176aada50f8cbc0340086a757c2d802f20ca75ee311095a\",\"id\":\"s0119\"},{\"digest\":\"sha256:456b75cf0257acd6ffb0ef0445397a7df84d7c42dacaf3c72958c38943acdb4d\",\"id\":\"s0120\"},{\"digest\":\"sha256:a973a9e8fcd48069a3bfb1663fb6dd3801c454628770bc0f0fb4979e34d09684\",\"id\":\"s0121\"},{\"digest\":\"sha256:c9b09002dc688d022719e2e4769afe20719c3966f8d22d478e33efdf22a7d8fc\",\"id\":\"s0122\"},{\"digest\":\"sha256:7dffbea5395be592defa1acded82aba210e817176c49d91ec1e73d9eec290045\",\"id\":\"s0123\"},{\"digest\":\"sha256:f45f9f26361baaceb5348ebe3aa141d61f2b7cd1fff1398a8359480930fa4010\",\"id\":\"s0124\"},{\"digest\":\"sha256:2f3c547ddb73cb25652e4aca4670b024229210f46fe08d618d5637a539dfd08f\",\"id\":\"s0125\"},{\"digest\":\"sha256:df625645921f782a6fdab16425b9449ded2dcbdd4493caa680d1d252b4ef45a1\",\"id\":\"s0126\"},{\"digest\":\"sha256:3cc9ac133a8762fb646ea4b0f22bbc74714a345263f48a0e27b83ea9fc8f2e94\",\"id\":\"s0127\"},{\"digest\":\"sha256:2f433f823312f326ff9fbebff69c071650849585981d8b26b8ac1e96bb80a5c4\",\"id\":\"s0128\"},{\"digest\":\"sha256:606e6a0963190d4e82e780f7095eab04e1f4be7f5d399c9602a20249b8e0e8f5\",\"id\":\"s0129\"},{\"digest\":\"sha256:7d762a00166baa8f873f0d5af84b4e6420962e8d64361c108b4f4035b1470cbe\",\"id\":\"s0130\"},{\"digest\":\"sha256:9b670b866eccead49bbc1e83ff7cbe9ad886f6f3e09e84df2dca153f2f234a74\",\"id\":\"s0131\"},{\"digest\":\"sha256:3a56aa4999408111c221a8c52247da89054cab4b241e25355d01edbbb024a3a8\",\"id\":\"s0132\"},{\"digest\":\"sha256:d5a444b413505fb917693bfbef116f778e978920b7ad8df97d99fac0b56aac5f\",\"id\":\"s0133\"},{\"digest\":\"sha256:61f57dba2b9d8e98a24dc320675098a9d8165dec810d1c3a50e2b723d6bcc008\",\"id\":\"s0134\"},{\"digest\":\"sha256:f56d44726bfa2f8386d8460ce0819cf7c3d7ed42dfd4a152012ab8e09b204405\",\"id\":\"s0135\"},{\"digest\":\"sha256:43778eadf4a23065ae589cf1cd08dcf00645ac3126b3484801817d97e53f076e\",\"id\":\"s0136\"},{\"digest\":\"sha256:af8590eac18450919fe2998cb46058953f563379574b06b156fc5c6a772366ec\",\"id\":\"s0137\"},{\"digest\":\"sha256:738972da54e8265c8fb18e3755bd00c82ed67618e2a741d79cc435c5d3842c3e\",\"id\":\"s0138\"},{\"digest\":\"sha256:8e3bee3a6eff83a398c30f7ac5a21445cfcbff2ac3da6b1f3f6052a0753bf2c0\",\"id\":\"s0139\"},{\"digest\":\"sha256:99a5deff72d7e007cc3e52d514a9d42e81a31b69c36e8dd233a0eed917b4fa6b\",\"id\":\"s0140\"},{\"digest\":\"sha256:9bec23e8b6a8517625f8b4e29a6653d010b4557cc889f7a7636652775605c54a\",\"id\":\"s0141\"},{\"digest\":\"sha256:02a7193895cfdecc49770b2bd69e126bb97d224c906871b3fa6b00cd86613020\",\"id\":\"s0142\"},{\"digest\":\"sha256:6b1c3c3d0ba706ede3c397a4390826398f054d1d3c54a79c3172b6e393a23bc2\",\"id\":\"s0143\"},{\"digest\":\"sha256:13e7cb0c058b874ff014342873f42b21851c974bae4d97b008ae9068abd87a40\",\"id\":\"s0144\"},{\"digest\":\"sha256:51a8725a5d84740679655e22a1ae9c95d15b0e0cf5af9d90c76b50d858d463ce\",\"id\":\"s0145\"},{\"digest\":\"sha256:a09d7a973803f66a1a4441c10b14f1f2d7a9562686d1a791ce6857b8271f5c4b\",\"id\":\"s0146\"},{\"digest\":\"sha256:ace695628c418bcc29bc82921b52e60632f0b460da1a71c85a4bea7434d38b89\",\"id\":\"s0147\"},{\"digest\":\"sha256:61e336c568b81a8d33632a8b3ed0ce48d8eec2b3461995e7d4435cf65391c0a4\",\"id\":\"s0148\"},{\"digest\":\"sha256:024377a45734197049e32d1a9566f46da544816bafe23f4f2fdcbc79184ed243\",\"id\":\"s0149\"},{\"digest\":\"sha256:ec40300f7a8875845fe94eafe6818e53ee75ba0cc5c0d9070f2056dc63659bb2\",\"id\":\"s0150\"},{\"digest\":\"sha256:5740b861a23238e9b12760cefb6324b37f7e55dd7a141e3ace210b71acc2db8e\",\"id\":\"s0151\"},{\"digest\":\"sha256:597f3efd79215cebb3d2478c4c14e0e42d55c2c24f94465e90c999803cc54eb0\",\"id\":\"s0152\"},{\"digest\":\"sha256:891db1264925b626a26bd2d4a564113ce9b7109a55a765f5513cb2df42ad1510\",\"id\":\"s0153\"},{\"digest\":\"sha256:9144dd791f4b195e63e2b84612f97b12ae1c20d8a56035edee984e6a89fc401e\",\"id\":\"s0154\"},{\"digest\":\"sha256:98b35a91411dee755b50c9d2a83a9c4c4842a849ddd13618a4b5c4481e4bec6f\",\"id\":\"s0155\"},{\"digest\":\"sha256:35d255ef42146f1b5726b8a1c3735dd136ff7b1bfac73e9c15cbfd498c87a14f\",\"id\":\"s0156\"},{\"digest\":\"sha256:76a05e3cf57e165a5c44599ce1527af1f1e6d98569392da7eda7b374c0af3a5f\",\"id\":\"s0157\"},{\"digest\":\"sha256:f9a96ee73c1afd25a4b754e0d8709e6e6bf47438d79a3aec04b81e2b5087da79\",\"id\":\"s0158\"},{\"digest\":\"sha256:b12a3825df0e8bbaeaa97a8a31755d0da7990b93d6dbfdfea98ff9d239ddafe7\",\"id\":\"s0159\"},{\"digest\":\"sha256:f792478b39c7bf54704df06dd68a15e2da6bc0c9f2cdaf94f5a7282085a01310\",\"id\":\"s0160\"},{\"digest\":\"sha256:4afb854080852c13ce3da52f2ecd39dc13e74ee9d3685b648b76699eb7d8321c\",\"id\":\"s0161\"},{\"digest\":\"sha256:25236ee489c2b7600e76f15cc6e02e0ed19d8ed3e9c3733ce9b2cfce980c4844\",\"id\":\"s0162\"},{\"digest\":\"sha256:b7f923d5234cb4fd98b7eb6267a05e773cf1d18ef66fd5ee02f1c1563edd9471\",\"id\":\"s0163\"},{\"digest\":\"sha256:4aa76bf600ee485ed707f196b80a0426eb7c245b7c1a78fc82bab5472c23576e\",\"id\":\"s0164\"},{\"digest\":\"sha256:ab68b969d0fdbd038d6554d664a1ac71c71d11cedd06fa466e256a54a85a16fe\",\"id\":\"s0165\"},{\"digest\":\"sha256:b908791b924ec8f4002ad0ddf45ded6cd0afafeb47e18ddea59d696178b2272f\",\"id\":\"s0166\"},{\"digest\":\"sha256:b964d3edc7b00fc385aa14877ec65f0efc0ef86f0f28996438cfb909ca30e0f2\",\"id\":\"s0167\"},{\"digest\":\"sha256:fe9550cbcdc285b6df4b33a145bd63e5a45db13ec515bf5c2499b24a28572279\",\"id\":\"s0168\"},{\"digest\":\"sha256:8612d617cddc64b0dac472489fb34d37e8b853b15b60450f3b6688deadf5ff9e\",\"id\":\"s0169\"},{\"digest\":\"sha256:9ab970af642d17fad1bc522f0228c7f623ba9794900045d44ba444edc02cdb70\",\"id\":\"s0170\"},{\"digest\":\"sha256:a988c53a9c744d60b1edb80b4232bc9954b86bfd69de29de005e288954087001\",\"id\":\"s0171\"},{\"digest\":\"sha256:5bddf73433f504a1f47c7c869900879ef027da7c0c366525c09f2ce6c8422a6f\",\"id\":\"s0172\"},{\"digest\":\"sha256:4ff5bde5c2c57d2d6cdd94b063504c692f62cb79c6800f1e8440f16cad9613d8\",\"id\":\"s0173\"},{\"digest\":\"sha256:a453004008dd5d4cb821c96dc94efd9c0e071f23825e25c7b1ec31c3b01c9fd1\",\"id\":\"s0174\"},{\"digest\":\"sha256:75f49446eda44e61887ec96a6d2c1af6e9d856c91633ffa647b85309f264f0bd\",\"id\":\"s0175\"},{\"digest\":\"sha256:21a6d9046e957d17ddf205c6780951c7a2d8f6c29f1a9a18c945fecd9850d067\",\"id\":\"s0176\"},{\"digest\":\"sha256:958819114c05a051845bf3352db50c6c3cb7c23ff10cb5664a01c3a95897288e\",\"id\":\"s0177\"},{\"digest\":\"sha256:c1b58163a12e805b314426bff858d402832979a4c6f7cfca168adef68742b533\",\"id\":\"s0178\"},{\"digest\":\"sha256:a64bc9f2f033a485f08c6da34b4841807b4496d3540bc46ab33dc53f399995ac\",\"id\":\"s0179\"},{\"digest\":\"sha256:8a092ad768348a9a03ad93249f4acbbc41d4e092b23d14ff6a36e23bb06df86b\",\"id\":\"s0180\"},{\"digest\":\"sha256:e7b7206a844412f7747ee08fb1b5d5fd1137e199dc14798051509e33324cae09\",\"id\":\"s0181\"},{\"digest\":\"sha256:e6c7480ec0bdad8c64b6920217ea08178db781e8c0e649aaacae9219b44cf30c\",\"id\":\"s0182\"},{\"digest\":\"sha256:6dad0c1d6fdd8362d4bb8215e91b77c0245e0741a0db5eb2c50f0a9055a70c6e\",\"id\":\"s0183\"},{\"digest\":\"sha256:ca7a5cd36e28ff3a7a67d656d336d17f06038d6dc4a1102f8e54ea1024f6a190\",\"id\":\"s0184\"},{\"digest\":\"sha256:80d182fe415cff06501016821e2625b1ef85a571892805653b4f4c2c2a36e0e5\",\"id\":\"s0185\"},{\"digest\":\"sha256:bf19d7b69ef96c7c47fb512692e6d1c88014f43a711117d72c20464653432193\",\"id\":\"s0186\"},{\"digest\":\"sha256:799ef736d23f536413641efcf587d94e0cfc38e2a32625b4e17b5ada6c281274\",\"id\":\"s0187\"},{\"digest\":\"sha256:425f6dcbdc326ee59b23f83c99e38cf7a04c2c1a40217e51a8db792c75ed1053\",\"id\":\"s0188\"},{\"digest\":\"sha256:be5a6cc3173df9897a05c201ddadd9f154a69aa4d06d1cc76a99f08d25af9e6f\",\"id\":\"s0189\"},{\"digest\":\"sha256:984673bb695a612aa840cc08c73144af3cea1124df463d17279166060fabc3ba\",\"id\":\"s0190\"},{\"digest\":\"sha256:b88aad784e35e95a7156fa941751fd3d52c9eb5cc8b68160e07d3e1d2d5d6cd3\",\"id\":\"s0191\"},{\"digest\":\"sha256:5e0029e22ee84cb9cb6cc5221a2d02785201f4bf2a3d119cba368a2d4fcf3e57\",\"id\":\"s0192\"},{\"digest\":\"sha256:661aaf491f80228fd1ec7ea2ba87ebc121dd87ebfadd24b6a1c8e13170d80a05\",\"id\":\"s0193\"},{\"digest\":\"sha256:247f379106a27ee4850d8fbc5f197484185f6a9621be62b1f1192833e17fc4eb\",\"id\":\"s0194\"},{\"digest\":\"sha256:8c4866edb364b53d2290d0bc50cc6c4fa924493bad65819ae6c484bca223e41a\",\"id\":\"s0195\"},{\"digest\":\"sha256:e0e6c9a6ca3edbb2f86335df237fe47d2bfcb596b61943b35a5bc881b2b287f7\",\"id\":\"s0196\"},{\"digest\":\"sha256:dad80970073f30447b05e58bf33d114c1eff33fc964d7bbc436c5fe5a223e12a\",\"id\":\"s0197\"},{\"digest\":\"sha256:593e0af53ba48b6811c07303db2c6a804d21037f302fc7670074fa9a76a27544\",\"id\":\"s0198\"},{\"digest\":\"sha256:c795ed1bd4b90168530eb262e65ab6c35b477cacc62f5966a2ef04a5d8136c4b\",\"id\":\"s0199\"},{\"digest\":\"sha256:b0c6267af448518ff436cd83928761a161a8466507a1fa0efd66a0c190b37fb0\",\"id\":\"s0200\"},{\"digest\":\"sha256:1ba4f1ca75d144d545ff34049c2d41ba24c446f28193316063a1690d4b0d0320\",\"id\":\"s0201\"},{\"digest\":\"sha256:00368de35451307d6f94ac9465acdfb9cd72ef010fd1ca34f566f5d1bd26fb18\",\"id\":\"s0202\"},{\"digest\":\"sha256:2d7ee2f84a658506319401e1e495e26ca5f2191353b7f671ac041f659fbd6a31\",\"id\":\"s0203\"},{\"digest\":\"sha256:adb7397ad3d0ddbe24a8a927ffedc9c18f87c60e35a90dd5d2148ca785004689\",\"id\":\"s0204\"},{\"digest\":\"sha256:04cefe161988ee2610c04f8a2046d13a20273aa19cdfb6929d9487754a752dc6\",\"id\":\"s0205\"},{\"digest\":\"sha256:7d2709334ed421fe9e97bcf234b5f07feed149a9bee43e5b0812c1dbdd3b69ce\",\"id\":\"s0206\"},{\"digest\":\"sha256:1940f28c393acb5455e70c5d8e077087da482156725f0002707e3e6f122ee7d9\",\"id\":\"s0207\"},{\"digest\":\"sha256:78a23e65faaf3994c067d077a10c0581d841df1b84f39088c970d8682371f942\",\"id\":\"s0208\"},{\"digest\":\"sha256:4eeb67da2355aef69386f4d6c301ff1e5482a8c71527afb71b9e5787b3232653\",\"id\":\"s0209\"},{\"digest\":\"sha256:6f640e6e972df82babdff5344a242701abda203cfaadb04ffc6e59677f565804\",\"id\":\"s0210\"},{\"digest\":\"sha256:a63eadce76b4f73fc0dd26e569846505c1c7b2d53759ad72ba7d778d2754d284\",\"id\":\"s0211\"},{\"digest\":\"sha256:d18e8ab4ad00e6834c1410ceb14872a9d7c80422ca0b8c77f3a7a8d40d11ad8d\",\"id\":\"s0212\"},{\"digest\":\"sha256:17491b278d3f5ec5184ee58b8b0128453c7fbf9cb8045dc769cd48ef7af67e3b\",\"id\":\"s0213\"},{\"digest\":\"sha256:0dab87718f5afc16e2e5495dad971db587f2872522c8f8d5d8b6e730b380c11f\",\"id\":\"s0214\"},{\"digest\":\"sha256:fd6f929d57992cb68c531e23834aa41ef3df5defe42071db5232ae90f1b6d251\",\"id\":\"s0215\"},{\"digest\":\"sha256:2b6b91bf0e5d1975f2c579eefd3b64a8cb7187345fd16fb6795c49d18e987d25\",\"id\":\"s0216\"},{\"digest\":\"sha256:b052a4e83f1c2fcebe1c8fd26603124342d362da4a0cbf2cea86d94e5350b49c\",\"id\":\"s0217\"},{\"digest\":\"sha256:52acc13229fc8ffb8515eae3f19c515a162f7768c637f60ac6b4ad47af4eff72\",\"id\":\"s0218\"},{\"digest\":\"sha256:c04d8fea528d0940897d1747e5691bd1678dd5b6f5b1333c7ad462e2e7391d54\",\"id\":\"s0219\"},{\"digest\":\"sha256:9fd443b0efd25bb43dcc02bc22c11db69520783aa16ebb067f072fd597117a55\",\"id\":\"s0220\"},{\"digest\":\"sha256:4f42680f089b400564927d12fbb566930327be54378043d78e27b864b88ff236\",\"id\":\"s0221\"},{\"digest\":\"sha256:a3399fa6067079550763c5af8b1f0ca73f4751e0f833efe7d8cf8a909198dac8\",\"id\":\"s0222\"},{\"digest\":\"sha256:c1370b2ebaf679bb92467e92746655978d3bf3030f4063bec5cb0003f4ce66f7\",\"id\":\"s0223\"},{\"digest\":\"sha256:5822b27678964ff1931f440fbcd704954aef1f51d55101707e86c8746d1ec5f8\",\"id\":\"s0224\"},{\"digest\":\"sha256:8f5599f346e9f3771f01a5c5ab2c22264ee60f475ed2728f3370c04014919d8d\",\"id\":\"s0225\"},{\"digest\":\"sha256:55bad43a628295a5b0d979b811ac60f16b9554f3884304a5e3d6e058a479f4a1\",\"id\":\"s0226\"},{\"digest\":\"sha256:ba951fae72f2d7b444346d89182b9931ce14a95ab2cf1a902ffe5ca1474ae408\",\"id\":\"s0227\"},{\"digest\":\"sha256:745729ad6cb45b815863402561341ffdbe68441f4b7b59d7ad526c96084dafb9\",\"id\":\"s0228\"},{\"digest\":\"sha256:c24c62bca724febf9734ed038fb5e331fbd8375fcbf6f5027e2ae17c252a4f4e\",\"id\":\"s0229\"},{\"digest\":\"sha256:061f3d62d4506cba794fe21709f993b555abc1a2dda4e4d878f2ce67ef4f6fbe\",\"id\":\"s0230\"},{\"digest\":\"sha256:2dac3652591ddfc3733e7aeaf35299dc06fef0747f8258651921910933cc0cf1\",\"id\":\"s0231\"},{\"digest\":\"sha256:52c919f4d8a19df79ae52f06d791929ce9f82424fb3d891264d43307c39aef1b\",\"id\":\"s0232\"},{\"digest\":\"sha256:0ee0b5d31dad093a4da9756ba3a840475e8f94dd0f96875a813fe8e1ff7bc022\",\"id\":\"s0233\"},{\"digest\":\"sha256:2daaba1e1fa4e25239c86630e1322d91b652de47da16a58ef43604233be5eb13\",\"id\":\"s0234\"},{\"digest\":\"sha256:29e208a5a40a722405f204d5a0a03467b78d72eee995f45e3361fb66ede69a72\",\"id\":\"s0235\"},{\"digest\":\"sha256:a47c53156536a510df2d567b82725ab21bc528e94d53d377224cacc7427fd23d\",\"id\":\"s0236\"},{\"digest\":\"sha256:7c45c68840b7bc6ab36c4c783b30cc9c6490b6d56b812a24a7eb9f9bf50dde6d\",\"id\":\"s0237\"},{\"digest\":\"sha256:9d223f002a3e0ec4fa45617a589ddb7d72565f8b8ce276e1fea836906f7f0740\",\"id\":\"s0238\"},{\"digest\":\"sha256:767360167078ee70cb43f5dc73840713b4a5ccad63915fdbec8dddd296277e7a\",\"id\":\"s0239\"},{\"digest\":\"sha256:48f6dd387385502bd4c9e526e94f52c4390a2e15d4c33f648125e2b4bdd01ff5\",\"id\":\"s0240\"},{\"digest\":\"sha256:59b0cce8ca387d7e4ba47654eccfc5557c071bbe0f8fdf7276be9b8a40772163\",\"id\":\"s0241\"},{\"digest\":\"sha256:65dc13365a6aa0e8a25d915500f59a8cd46583ae6e7869de0ae16a4ea14f55f9\",\"id\":\"s0242\"},{\"digest\":\"sha256:f5eb4855c0f9c9da9cb9c0b57692c817f8ed73344568f2dc7a2865ebcce24c8a\",\"id\":\"s0243\"},{\"digest\":\"sha256:a9b41dbde81cf5029ad0fc8416bec184b12ce2d23fd54f27bd080f0fe5a85e3f\",\"id\":\"s0244\"},{\"digest\":\"sha256:9f249be1b7932a049c2a396c9f98696db6706d8b2cf09e9a5b840f9692b89a3e\",\"id\":\"s0245\"},{\"digest\":\"sha256:0e717b99f6e8d74666295777b79f2b0b05a82083553f501bab85799a9b2d31aa\",\"id\":\"s0246\"},{\"digest\":\"sha256:a4a81d37c1e936397cb77b0fa82190a51c14c64120b6614f8b2c29da693b6f06\",\"id\":\"s0247\"},{\"digest\":\"sha256:8b9f6ed958e43d5c344164ab2e43dc3d44eedf9b04aa84f2cb568416484b229f\",\"id\":\"s0248\"},{\"digest\":\"sha256:51a16136cec7a4f2852357de15bfa36d37bb8f554d5162084d65c7f55802c678\",\"id\":\"s0249\"},{\"digest\":\"sha256:474bde84dca69c97a8e58cd43ebfc0a6cdeb3e88e41d51f811b72c678018ea42\",\"id\":\"s0250\"},{\"digest\":\"sha256:7090ca2d4e327ee5c2622c83f62183affe35bd8fa33e4bb16f1aa85b1a866a06\",\"id\":\"s0251\"},{\"digest\":\"sha256:35066febee12936787bb1238923f00ac5d9aebf66b9fd1d961f3b8d97e314ff7\",\"id\":\"s0252\"},{\"digest\":\"sha256:27e27c125ecf850c3d844831861cbd5e489aac87c4fcffcdf826dfae382a9fc0\",\"id\":\"s0253\"},{\"digest\":\"sha256:c6e5a431b4a9c8d300e4852c7102c3caed7843966162009fd45cffd8c5d4e9ad\",\"id\":\"s0254\"},{\"digest\":\"sha256:6e4e8012905e4e6eb94babd8fc01f4f4127c2b982e6a0c9606b9519c06a1aaea\",\"id\":\"s0255\"},{\"digest\":\"sha256:fc0b1194a4eea7a03b75a01d4339f924f97358f1cb534cbc594667126d96f194\",\"id\":\"s0256\"},{\"digest\":\"sha256:17ea0a5c5605cbf48bb2ee861bbf6995f614ec0db12d2ff9e34942aec0e71c75\",\"id\":\"s0257\"},{\"digest\":\"sha256:86815f1c6874134ff02991a1f8e170eecbb19fddb0961977d48b257ef1e551e8\",\"id\":\"s0258\"},{\"digest\":\"sha256:6160b05dfc3a3ab2276590b5afea8bdb80574e2388453af98b31c9da550b5988\",\"id\":\"s0259\"},{\"digest\":\"sha256:69c50c28916ac3c4b4c108f3fd3f972e2681aab26ac5dd6b07079846ae9ce5a6\",\"id\":\"s0260\"},{\"digest\":\"sha256:2da7882f7e9e6571b98350cc45e06bb928dc3ab1d2f9c87f3d3b26486c390462\",\"id\":\"s0261\"},{\"digest\":\"sha256:a6748dde2dbe595f4069152f7c5e36a154d9cba05bda1b141b13876dc11d1422\",\"id\":\"s0262\"},{\"digest\":\"sha256:18db4b99b61f644d3a056b12abd2e35b326910d8b4559d54ea46aa4aab209b59\",\"id\":\"s0263\"},{\"digest\":\"sha256:a6334c7780844caca7d3a559c4332ddc8ba68999ecac5b668b6efc0477f7a244\",\"id\":\"s0264\"},{\"digest\":\"sha256:b08d32502647f94bd8b11d0f60df0a8e7b7f86efb7429ee719ea89c171194b0a\",\"id\":\"s0265\"},{\"digest\":\"sha256:3c006cceee1d83c7bfcfb202f03ae76b66e22686f8c48626ba64b9ea280751b3\",\"id\":\"s0266\"},{\"digest\":\"sha256:8f575b565241bc512f79c8dc98d07a75f3de01937841d9cf1700e132a0a97a8d\",\"id\":\"s0267\"},{\"digest\":\"sha256:634db9d4d8b5afc393350410b2c5692afbf2e14ce9a9d6b1907dca0ee0469b9c\",\"id\":\"s0268\"},{\"digest\":\"sha256:060b5f4ea44dd25d73f3d7d415b2bc293198ca8f06a04ed9803c2f064fd01679\",\"id\":\"s0269\"},{\"digest\":\"sha256:49a36e8a9355d2aeef4e95c8311a1a467918b46b1549dccdd244424ee1aad85c\",\"id\":\"s0270\"},{\"digest\":\"sha256:481c048231a648d236e103b149a986d07969df7cafff36f2ba8032429dc6c954\",\"id\":\"s0271\"},{\"digest\":\"sha256:736cb7094a1fc4b4d79acb3918e6d6b5298436d8f6a0db45d986a496262cab5d\",\"id\":\"s0272\"},{\"digest\":\"sha256:5e2a38012066dcac6706ebee3599ee158885c60315fb66a3e0ef795ca19f76b7\",\"id\":\"s0273\"},{\"digest\":\"sha256:1bfbb8906d751dd9eba194b76b5e86d60f052cd56bb1c0103009606897a6e98b\",\"id\":\"s0274\"},{\"digest\":\"sha256:17b2bfd5cc9d48589d27a6e3a82c3d62d5c901268d4ceb68309951b4c6bb88e9\",\"id\":\"s0275\"},{\"digest\":\"sha256:f19b879e2b90b913e53010bc172f0e46025f8815e1ed513ea56a5a95cae7fad9\",\"id\":\"s0276\"},{\"digest\":\"sha256:9886a6930cc2659edd0e5466cc705249c920b1fa639ea35464b3f21398a3c25d\",\"id\":\"s0277\"},{\"digest\":\"sha256:914dc4b22c98f9b5e7fd79cffab4c49bf1adb75491f12da74005fdabbb3f5682\",\"id\":\"s0278\"},{\"digest\":\"sha256:d8b1d6a3db3b3c50e0c8fc98f73637478bb88191e54f4b18bce3caf4d74be5db\",\"id\":\"s0279\"},{\"digest\":\"sha256:b38501afe32ad13777182c64be47374df774549f1a667f87ec31dc876e6c8427\",\"id\":\"s0280\"},{\"digest\":\"sha256:5e804072638763aa2abdbd24b954523ac291e11fc427d84804b6fecb04f191eb\",\"id\":\"s0281\"},{\"digest\":\"sha256:45b75a62d1b3a90947a1d930abc22a579c887cfed0078f4be08d47346b99a8c2\",\"id\":\"s0282\"},{\"digest\":\"sha256:e9608c26845dcf31ed969cdfb80656e63b65dc476dd4bedafe042f2d295c3ede\",\"id\":\"s0283\"},{\"digest\":\"sha256:e5b07cbd5573f85856a30046cd1ddea746ea994705c833f3a7d87911ba88338e\",\"id\":\"s0284\"},{\"digest\":\"sha256:b0c8ca46b55e2b0bc1518160b4865ff158b37384f0c8700074dd73d1da660f17\",\"id\":\"s0285\"},{\"digest\":\"sha256:4928b1d5e6e1dc20fbd0a5126709cc6339b4c3f447e4c3bcccfb6c30b44075e4\",\"id\":\"s0286\"},{\"digest\":\"sha256:03b9157f3ffbffb8fe33ff1834952cdf2131ddf8da2792471ca771d0968bccc5\",\"id\":\"s0287\"},{\"digest\":\"sha256:1c141b08ebe861837017b3d9e77742f811d2a4ba506d5505129bca37f52bd08e\",\"id\":\"s0288\"},{\"digest\":\"sha256:93a6c5af59bf95690aa41c2157b85b256adeb4612ada642583c073c8b3f4b89a\",\"id\":\"s0289\"},{\"digest\":\"sha256:4c004a886e80fbf8b3a91be094cb9269a28e1a357d4093a54adbd59c69916e3b\",\"id\":\"s0290\"},{\"digest\":\"sha256:408a133178f66789c289406efb87968a4bc8e11cea798f697676410c72765a94\",\"id\":\"s0291\"},{\"digest\":\"sha256:ad9bc027221368293306403e821ce269fd0e110df44cfeefaccb4b09bd518cad\",\"id\":\"s0292\"},{\"digest\":\"sha256:362ea0d86fef7eda7384eff202d1a92e14cca4b2cb84a61f6e76e0ffae7ea886\",\"id\":\"s0293\"},{\"digest\":\"sha256:832fbdb864796deae3e94c8660452272fe065951d9b06dc5b2d614bcde1227db\",\"id\":\"s0294\"},{\"digest\":\"sha256:73ec5b21de69b1cbbf560668c1aa938acb8c1c09396e0c41adebdb80bf484415\",\"id\":\"s0295\"},{\"digest\":\"sha256:ea885ce92cba7ccb155e61dcfac58b41f341430917e1b0c70532a6e5b9a74864\",\"id\":\"s0296\"},{\"digest\":\"sha256:9167ca7aac0a7a49c82b6f1b4d23e0591bdc4a43c8a55e0381adaa8e09f178df\",\"id\":\"s0297\"},{\"digest\":\"sha256:b6f8110632740c9f0977bad2adb6974727a6f5bf41931d6aa1fbe4500e7d9420\",\"id\":\"s0298\"},{\"digest\":\"sha256:23a0de38ec6b5ff5997185690dfbbaa04fbaa25861e18ac9d7be27348640cb63\",\"id\":\"s0299\"},{\"digest\":\"sha256:a38e01de4102f034e25eca51d1175480ce403cbb8d9dfc4c447b208ebaf4f84d\",\"id\":\"s0300\"},{\"digest\":\"sha256:67997f35c3af0d456d4f3ae2baeb559e194415c7189f1a0f2bf0bd032ef8994e\",\"id\":\"s0301\"},{\"digest\":\"sha256:ac9b9a69c7ce0e1e3e7eccc38a8dc141fa509d1ee0eb2c02395bd579e1820344\",\"id\":\"s0302\"},{\"digest\":\"sha256:2210cd74a608c74b729cbe1e34db532fecabd77c96dd1c636393b137b82c036f\",\"id\":\"s0303\"},{\"digest\":\"sha256:ab629178518f18b2db8f6dc8e03d7e488e79b3a8f469b11ed36a90d0d9eb3089\",\"id\":\"s0304\"},{\"digest\":\"sha256:b2d4b4e3102f15916e3eb71f88efcab3600cf3bc2f4bfb3a13a091ad895f0fd5\",\"id\":\"s0305\"},{\"digest\":\"sha256:d97d649ffbef6e4ff963050368d0b091d8bb46cfdd6dfdebb826d0ad918484ac\",\"id\":\"s0306\"},{\"digest\":\"sha256:1ad2cf78d4cd10418139701f056f92c5a48306c3595dd700332083d83bc45dfe\",\"id\":\"s0307\"},{\"digest\":\"sha256:7b517cc19e19f210ace43683490b90c465bfa4fd599493e8d0396bd75c40d1a3\",\"id\":\"s0308\"},{\"digest\":\"sha256:7f66fd25d683c3190972b843de53dde374bb817fc2db50cc1ff540c5a0af05bc\",\"id\":\"s0309\"},{\"digest\":\"sha256:ae6482321210c8e75b86a6a67fde7f361df6ba5e7fb41f452c73f29300d161fc\",\"id\":\"s0310\"},{\"digest\":\"sha256:1fe600524f7da159500b0bd0d185ce285e90f2f9c11b58ad6a4bb0b1f2e21c66\",\"id\":\"s0311\"},{\"digest\":\"sha256:7ed9d553c7540a91575827d183832ef858aece4b5b3863bd27d167f37bb0fe08\",\"id\":\"s0312\"},{\"digest\":\"sha256:17489dfc029accedec60c7f5e03d76da5197c62bd5911ddb7cd3258ea2b57ef8\",\"id\":\"s0313\"},{\"digest\":\"sha256:081929bbbde96460d0fe26e61dca6891bfa73225563bc4f9cf6bf7ea8c8915f2\",\"id\":\"s0314\"},{\"digest\":\"sha256:1b74de7507205782fc4d980b30eb3e30904bdad880df7797ae4bfe2952992bf9\",\"id\":\"s0315\"},{\"digest\":\"sha256:df03c37630ada548b11cdb3cadbba957024d5fe599a94aea0fb5ccc64ccda1f9\",\"id\":\"s0316\"},{\"digest\":\"sha256:51979fac04cf7ce96fcecaa99e9019095026c307dda1a875b33fcaf826ad5ab5\",\"id\":\"s0317\"},{\"digest\":\"sha256:91b9bae848eee09af4b93b036f011931baba69a6477e4e2787eab73d4d0fcc99\",\"id\":\"s0318\"},{\"digest\":\"sha256:cec128fdf90f79831e744d993710dd89621c12ba19335bdcf8bde419de9a60de\",\"id\":\"s0319\"},{\"digest\":\"sha256:b806604f0b99a9958d1ec7067c7857184853bd41bd3e86f7515e1fa3da759025\",\"id\":\"s0320\"},{\"digest\":\"sha256:2cc11a5a0b7e1a6a3ea7074d661243067ee84e2a0d979bd973b2ce25d6720c9e\",\"id\":\"s0321\"},{\"digest\":\"sha256:f47f7beb09a7c64945871699409640f0ffbeb26427c4b2f54877466ec1e7d7f9\",\"id\":\"s0322\"},{\"digest\":\"sha256:bbde6333b517f18a14aa8088a26dcde9df725433148fa0a665569409c12fe287\",\"id\":\"s0323\"},{\"digest\":\"sha256:9d5eb10876fabbaae31183c239859bc83fd411029c0ab0d45b7145bcc639de21\",\"id\":\"s0324\"},{\"digest\":\"sha256:9217195cb04106b9a4464efe701e245cd8f1aade2c1511cee4358e1b6b556336\",\"id\":\"s0325\"},{\"digest\":\"sha256:df408f65adccb9eeacec922bf33be145d25c94b8be8235d0f2b22115e6f637c0\",\"id\":\"s0326\"},{\"digest\":\"sha256:8cbb6bb055675e03424a2b67295fc4b15324aeaa1841702f7eb08b11283e67de\",\"id\":\"s0327\"},{\"digest\":\"sha256:356e758a36650c0a74e04c2e0587e80d430e954432757a2a1e21e3f8b0661407\",\"id\":\"s0328\"},{\"digest\":\"sha256:b304bf678bab63ca11fcb20b2918d798001a664b90b618a321b18d59056a1c87\",\"id\":\"s0329\"},{\"digest\":\"sha256:baf866a516940a02c0bf6aa35719639bf873b534fc47e1f2d44fdae8f459c5bc\",\"id\":\"s0330\"},{\"digest\":\"sha256:274498512f6d8ef1ea68d936a2d33dc3dfa83ce1e111ec64bae866b989112d37\",\"id\":\"s0331\"},{\"digest\":\"sha256:a82dc44be2d81c71aad3526044a9aa3dd2b7ca1061e6dc50b50b121542ee21ab\",\"id\":\"s0332\"},{\"digest\":\"sha256:752a44862778f32ea7797ecdef2b039abe740f7c713cd50277bc7db5a7cdfbc2\",\"id\":\"s0333\"},{\"digest\":\"sha256:5cda1ecce6278330773e17cab3b679f821bdc8f79483c512a438e51bac8233da\",\"id\":\"s0334\"},{\"digest\":\"sha256:927087051793111e928b73bff9438920f85f5884553c740088c7608c949f3cf6\",\"id\":\"s0335\"},{\"digest\":\"sha256:79cc6afd6ce092758d2f678f212799f8cf5b808251fac8259cdd73e69a67330c\",\"id\":\"s0336\"},{\"digest\":\"sha256:57cb50c93dc77547055bddbb3da32a033ecf661bfb64f504728b1cb23e59b69b\",\"id\":\"s0337\"},{\"digest\":\"sha256:b1f6d3d6887586f087309a93103296ee179ec3d6db52d10b85d370fa39576266\",\"id\":\"s0338\"},{\"digest\":\"sha256:e2e59ec7669d56d41fabcef23e048b62b90a38f628837638ff65ffbeb3405e64\",\"id\":\"s0339\"},{\"digest\":\"sha256:9b92ebaaa45ea0da4f309275b85ce1e6dc02809c19566f1772507e7c079b7b02\",\"id\":\"s0340\"},{\"digest\":\"sha256:991363fac8d03e6fde2765ba820005a1fcd07a8e49cc195e5b34ffa4819d8592\",\"id\":\"s0341\"},{\"digest\":\"sha256:714af5c667a75fa49567504269435add68f9154c2044c3cf3dba41331c6f64cc\",\"id\":\"s0342\"},{\"digest\":\"sha256:3e8f120919f9e3f5f8e6d2fea4ff877c42f1614815b3ea7ada7398e88a3a85fe\",\"id\":\"s0343\"},{\"digest\":\"sha256:d8003b9235f844508f0c67d2b0b9d6c1122ae05d2296115aa4bd9af1d72dd7cc\",\"id\":\"s0344\"},{\"digest\":\"sha256:51deb01a743efc69360faac5912d35e495868d7465d3e4367d0f5d5846969017\",\"id\":\"s0345\"},{\"digest\":\"sha256:f1a601dc4dd04659ee15053daafb01dbe762a67e785ed6ad35eafb3907e73660\",\"id\":\"s0346\"},{\"digest\":\"sha256:3923d638928d6ddfa1a808f812f958eaac2c4aa0b59a43a82f5cf7f688e2de96\",\"id\":\"s0347\"},{\"digest\":\"sha256:50d987bb50b774a2bf5291d2c39d827b14bc729c09e5bb161c416d62570a1da9\",\"id\":\"s0348\"},{\"digest\":\"sha256:61e56ace8243afc8c2e524790fdd4e5c9b6b03672ec3e94ee421f6b96d262fd0\",\"id\":\"s0349\"},{\"digest\":\"sha256:c20b37ff3ed4c223bd2af76d51d5ced4da541e1ae15cec361ad20cf61721684e\",\"id\":\"s0350\"},{\"digest\":\"sha256:cc0d964d5864e141edfe3a47c705cfb37724219ad3a918cb01ad15d88f3349c7\",\"id\":\"s0351\"},{\"digest\":\"sha256:887e11c2e99262cfb19b6e8cdde17f36dfbbb067967b710ee277ecd46cd03cbf\",\"id\":\"s0352\"},{\"digest\":\"sha256:edee7c130f4b70a26945bd7288bf8e71655aaa7ee3dc22c27f4c5c5a6639919b\",\"id\":\"s0353\"},{\"digest\":\"sha256:f448f33626335dde2384ce563a7e3c86bf1e565bc1709e57f6261c960bd1da06\",\"id\":\"s0354\"},{\"digest\":\"sha256:4e4034e4c3d4247184d7f45d05d32a6a56420c5228ed8d0e145714a0878355c2\",\"id\":\"s0355\"},{\"digest\":\"sha256:d924520a6530b9f40517a587afedc757b59d6b77f29f84f8d9f5de2e49b591f1\",\"id\":\"s0356\"},{\"digest\":\"sha256:fdd4936e378c7435a7eb8ba2c4619bddf1d3a89594a4b7934172a458eda24896\",\"id\":\"s0357\"},{\"digest\":\"sha256:8a53b62fac434c7e56850292e23b080253c384cdea65a9a4134ae820dfc8a437\",\"id\":\"s0358\"},{\"digest\":\"sha256:9ce0d06a6f473cf553316514a5dc66bdfeb5424ae2d49cf676b1accc778806b2\",\"id\":\"s0359\"},{\"digest\":\"sha256:9dc431821862a91a813c7f8c2b513b94438d119fbe6f79417fe8fc1e2e38065d\",\"id\":\"s0360\"},{\"digest\":\"sha256:6e98536b4b85a7a30104da636a60e1665132c33d8179f35e1b22214aa5e90f28\",\"id\":\"s0361\"},{\"digest\":\"sha256:853cdd4663a6fd8df1c417853105e6819479c82f72bb12ad97b1609400c20769\",\"id\":\"s0362\"},{\"digest\":\"sha256:b6b98c2358788c396affbdfa1b91335142b67dd8a94d5486283ef17cffd5e0c2\",\"id\":\"s0363\"},{\"digest\":\"sha256:05586ab21ad920c2625641d065e39891b3facebd62892a17f0cb441e299ecca2\",\"id\":\"s0364\"},{\"digest\":\"sha256:e0b57e4e25ae0cb95719da3bc464478ed873fe338a4eab117da948fdccb7539b\",\"id\":\"s0365\"},{\"digest\":\"sha256:ae8070303c2dbe39e88b1fc9d75cb226ec183767e0ec7a112282486a937c5872\",\"id\":\"s0366\"},{\"digest\":\"sha256:d04b173e470960c3bbefd76bbe48242e824afcadbb60facb05981f64d77d812a\",\"id\":\"s0367\"},{\"digest\":\"sha256:0d94b294c0c2f6e825ad3af23f5f93c2123821648d76b638b919d1cff6c293f9\",\"id\":\"s0368\"},{\"digest\":\"sha256:891e18f537efbba338fe2747da2a2be46587711779ca8e2acb21ff458a8e5011\",\"id\":\"s0369\"},{\"digest\":\"sha256:7145e47145a2ecf12f607037794e9355b97d5a49ee1dbc3684b4889484b58022\",\"id\":\"s0370\"},{\"digest\":\"sha256:b3417775dc9524bdee4f921e12112394882498afc516201c764facd8505b4827\",\"id\":\"s0371\"},{\"digest\":\"sha256:99ffa4cf59392d02c02732307398a384a4f7dd007e8473a8c3c63f1e518dbd44\",\"id\":\"s0372\"},{\"digest\":\"sha256:8655f9dda5cedd5ef6658b36b4ac2216585c8821ac80e12e6fa4fc1eb561c006\",\"id\":\"s0373\"},{\"digest\":\"sha256:9634585ac71cae84604a1b295fba6f12959cabe617fc581332ab1b9e46e41d40\",\"id\":\"s0374\"},{\"digest\":\"sha256:e8a1caf4663f1921392079cc8e14d29d0b7c105c799f59721bcfa7146be50476\",\"id\":\"s0375\"},{\"digest\":\"sha256:874a78be96abdce792e2802422c2155f7424ea1ab542596af9085165d5fd4bd4\",\"id\":\"s0376\"},{\"digest\":\"sha256:65963a4a0f0595c0b70c7286f62bfd2ccce9999a96977992e531de081d83af0e\",\"id\":\"s0377\"},{\"digest\":\"sha256:2e25332e008373588ef9f5e2c7f4920876cbd53f6bec48c6230fda2a84673a78\",\"id\":\"s0378\"},{\"digest\":\"sha256:7d967ca16164bd1ff420fdf7149e665f1a44c30ba1f2b790990976076fa320df\",\"id\":\"s0379\"},{\"digest\":\"sha256:adc0a39f36d2b8fc65255319fc9a6beb6bc2b8b0daeb899b26c66ca199306138\",\"id\":\"s0380\"},{\"digest\":\"sha256:244656e9dc884977e830aa13c689f995ea0cc71dbd7483f456f844aafb8b46a7\",\"id\":\"s0381\"},{\"digest\":\"sha256:5594e9771794e379e5237bcfd36ca3168a5cc6fab024d5ddbdd9abf7df5c776b\",\"id\":\"s0382\"},{\"digest\":\"sha256:7b46ed1a4f503cfe8a26ad39d218caf1ca8d632aa30180079a8b1619c9fc3b2e\",\"id\":\"s0383\"},{\"digest\":\"sha256:6601288b4e3a3bb9d4fac3c12ce3b34db928629f11dbef16fe83f89ebc344858\",\"id\":\"s0384\"},{\"digest\":\"sha256:31ca1d3c3f14582996e42e24bdb7cc1325edc369c1be7d134f399f9100f3424a\",\"id\":\"s0385\"},{\"digest\":\"sha256:d8e7ca1e12aba83c3c14822d435184aa45854acc14cead6251e97234117b6569\",\"id\":\"s0386\"},{\"digest\":\"sha256:cf561322f261fb5a502424191251c557394a8a5653377e38c04fb73d0c26d2c2\",\"id\":\"s0387\"},{\"digest\":\"sha256:e474dffd9166c88f3a4f5283c2c692ca6f5ddc89ea442154256dc0ff4572dafe\",\"id\":\"s0388\"},{\"digest\":\"sha256:114ce88b8e47b6bd50b66e9367a10786554c3758527fd41a4d96fe6e7d9aae8b\",\"id\":\"s0389\"},{\"digest\":\"sha256:7b0395ea0298626c3546f7663330af3bdcd7569473b4e66c45a01d11379c7579\",\"id\":\"s0390\"},{\"digest\":\"sha256:e90aa661999547d90ec58688105e28ceac1e615cd7e38c6002ae7c176c0f4db7\",\"id\":\"s0391\"},{\"digest\":\"sha256:aa5a36f39422a3769bc4137605f5581244116788f9821073c1833acf7ed5dcc2\",\"id\":\"s0392\"},{\"digest\":\"sha256:885f66a1222f8f89acb44f7bd4dba7ffcc883057facd33eb1d96faec3fc9d9e1\",\"id\":\"s0393\"},{\"digest\":\"sha256:c3851568d862d932972c2748260d6fb3d8f25e7a6a643f6846737ee8dffc5e6d\",\"id\":\"s0394\"},{\"digest\":\"sha256:f25818c06a8c7b1bcd4b22d835d29293f452b1e8752c51d85d359179523b9c4b\",\"id\":\"s0395\"},{\"digest\":\"sha256:42ca5da45efe2243779fc11e28cc5263e84fdcbee5f3b3662591d3f94217b7ab\",\"id\":\"s0396\"},{\"digest\":\"sha256:701aa5710e0cc5c465d95454efb8060ee4d09886ea8489651738135fc764fb7f\",\"id\":\"s0397\"},{\"digest\":\"sha256:d85c636b1fc0b711b664dea1fc3d5ae0368368e7d6d5cb1c0281e0397e3f57af\",\"id\":\"s0398\"},{\"digest\":\"sha256:16d77fdb61034b23d8d8343076fde644fa30dee6e579ad041232723b4cbafbfc\",\"id\":\"s0399\"},{\"digest\":\"sha256:5a46fd04e15236749bdcb91a6aa9b84dd5dd0857fa86353b44a4ba9f81a39f61\",\"id\":\"s0400\"},{\"digest\":\"sha256:057d27607e6d417cdac0b1543f0d71a7490df085d3d3868ec7176331e8fe5801\",\"id\":\"s0401\"},{\"digest\":\"sha256:e326a63c62c774a4b35f3f6e4ffb9e5fc34377918f423e7198182969a6281fbb\",\"id\":\"s0402\"},{\"digest\":\"sha256:25784040d40976302229ae87b302496d50e8cdf386e283fbf8029f20d399bac6\",\"id\":\"s0403\"},{\"digest\":\"sha256:ce241eaddd82a4a5938557880a1b2f6b85fc148a974f623512f6a6999b1dde19\",\"id\":\"s0404\"},{\"digest\":\"sha256:3f062023616ca7586b414b7d6f2635d28dbf4450f7251990e85adbf68be0e07d\",\"id\":\"s0405\"},{\"digest\":\"sha256:8393205eb644b1a2043f092c7f0576cd89c047486a7a5c0dedf9994c7ac5af8a\",\"id\":\"s0406\"},{\"digest\":\"sha256:5bddaff4a58708fe9c7c3e245cb4464a6bd89bba88d3776bb01f6894c6aec08c\",\"id\":\"s0407\"},{\"digest\":\"sha256:41d8e726f5c8fc2cdb77f16c7de3b833349c81aa78410b4ac3da12db22185bed\",\"id\":\"s0408\"},{\"digest\":\"sha256:310f2cb0d17b7ce4fa71920bc25f7774ac316c11014905e945f3296ce25715db\",\"id\":\"s0409\"},{\"digest\":\"sha256:518d80aee0f2a4279d937a936e8d603fe1be2a8df15a0a5a10c322bed2dffd1a\",\"id\":\"s0410\"},{\"digest\":\"sha256:3b3de7d562da6d4b262febf86d0777b47cf08be1ada6eddf1f64c6d029931a41\",\"id\":\"s0411\"},{\"digest\":\"sha256:fb0c8a86e97e43ff91f8cafc427069b0502c5e11b5e8e87372925f0bd149fe9c\",\"id\":\"s0412\"},{\"digest\":\"sha256:21788d8b2a24b854dccdebec5fa5517575e2f1a062529ca08aabc9f3bfa4740c\",\"id\":\"s0413\"},{\"digest\":\"sha256:adba9c3c523074d884ec7b03e0a787846e4c6234aa1355d8608ca76ab256e05c\",\"id\":\"s0414\"},{\"digest\":\"sha256:9122b80c22880ba936d4abb34f880d64485f07a255712f2e5cce36780a00eb3d\",\"id\":\"s0415\"},{\"digest\":\"sha256:9e55bff8758147993e5499602e44d7f8a1670ea3cc23fd54a7a7146a021c61f7\",\"id\":\"s0416\"},{\"digest\":\"sha256:76b376a40a6ee8092ac37f635e80beb99e19fd8e4ce8a421092ea40ea522479c\",\"id\":\"s0417\"},{\"digest\":\"sha256:5b273bd09eb49d2d6fcdc8d75a4af901353c1be46e3a80f566e878bf09f65b05\",\"id\":\"s0418\"},{\"digest\":\"sha256:8c8be9a2705b45eff6f4d20c4d221fdc8bcd7634c00e644e6b32a12b5d1880b6\",\"id\":\"s0419\"},{\"digest\":\"sha256:f150fdec9fe9c756f4c76dfd5ec66f3456480e0379cb2c90ee52524bf218fb3f\",\"id\":\"s0420\"},{\"digest\":\"sha256:817ccf31f17c4bd5f4d91882ede773ac72be1c30cf63a79ffb9357e64c6d536f\",\"id\":\"s0421\"},{\"digest\":\"sha256:338801297a413a953802406b827f35999ca2b19b244a80c79f27882092e4d880\",\"id\":\"s0422\"},{\"digest\":\"sha256:ab20bf3145c7208c3889989e0710f5b7cbada45035d06e2dcc8b304060af1468\",\"id\":\"s0423\"},{\"digest\":\"sha256:40ecaaafebd35a4d6f69af811c280f64d4d3792904e4c4ccf62e36deb2992d61\",\"id\":\"s0424\"},{\"digest\":\"sha256:5f843ede0cce84728a7470755278a45aa37f5223e5751fbc7a6cadc0239a221c\",\"id\":\"s0425\"},{\"digest\":\"sha256:eadf6e2dee210f88419e628448556dd0f5e2374e0dc5a0b0d8adced915993251\",\"id\":\"s0426\"},{\"digest\":\"sha256:5464637b040eaa0ab93a808f162a84c1ed1d448c31420039d3014fad00087c9b\",\"id\":\"s0427\"},{\"digest\":\"sha256:62ea40cde08e515ec2cc7a2b3749bdc03040dab52f5f390a299787bcbe63b352\",\"id\":\"s0428\"},{\"digest\":\"sha256:ca5757d7bf64b84310972db1de0cdffa4b46627a1c3b9d7dd4ec17b97c1ae04f\",\"id\":\"s0429\"},{\"digest\":\"sha256:399a661105b48bf80f6ba2ac2e4843a830bb6c280bd0385f7a690af60dcccdac\",\"id\":\"s0430\"},{\"digest\":\"sha256:32f3e667f70cf843c84253649982b465a6991e13bf40e10fac227215b7ca03f1\",\"id\":\"s0431\"},{\"digest\":\"sha256:b5bc8717ecfa20edf42f600e73ed8f83bc9af5a20f71567eda88fb9f325f9704\",\"id\":\"s0432\"},{\"digest\":\"sha256:32e84292e77835a104330cf3b418a8f4f6318163351683ab3d27a780a1759001\",\"id\":\"s0433\"},{\"digest\":\"sha256:9b4ab396ddd0a60a3fd3b65d33e578016d408e69b0c6966cd2bcec371e6876de\",\"id\":\"s0434\"},{\"digest\":\"sha256:fbdff39aeb27261879f3ebf29b9392e693c84c5e835cb6f72b6b06cd3a39b156\",\"id\":\"s0435\"},{\"digest\":\"sha256:bac9401c41ef6d9e7f0b5cb6d178ad5d44d0c06f51fbc9ed9f9eae54cd44ee0c\",\"id\":\"s0436\"},{\"digest\":\"sha256:e8749027947a0f3918dbd5f50ef356dc1a8d1ab358c9fb9d32e5d4df3b846c5d\",\"id\":\"s0437\"},{\"digest\":\"sha256:4caf1a9b61b9730961b96cc51efc7ad3bd1a4e4a9c8ba2bfeb7c0382ee6929dc\",\"id\":\"s0438\"},{\"digest\":\"sha256:44693f625671176f0146c5667763a65e259d0b264b69642765c0f7fb28e1924e\",\"id\":\"s0439\"},{\"digest\":\"sha256:edd0548b9931bf40b3d328a5eee370412b919a258f74581d1a584b739e0f80b4\",\"id\":\"s0440\"},{\"digest\":\"sha256:cb60991194c5d3403ad83fdc4c6ccbfbfd4d3f698d6cab564765b1d26641a500\",\"id\":\"s0441\"},{\"digest\":\"sha256:e74a50002deee7ebec10869257c9542752a1f2f8627dbf206794acd66437f561\",\"id\":\"s0442\"},{\"digest\":\"sha256:ee0c1630e0d75a977d9257ead623fc331d13e3a094f8dba508b92b44d38a9b4d\",\"id\":\"s0443\"},{\"digest\":\"sha256:710870f6e50cbb7a35747d9b0be3be0da6cc07fee7e07a43e90df6e18ddd9c9d\",\"id\":\"s0444\"},{\"digest\":\"sha256:b591fae780054f0dc02f56aa504fe982b1765b76b67d324bf9e72fcef9a8a914\",\"id\":\"s0445\"},{\"digest\":\"sha256:e4ef030c941925a815f31a090e4c14f027e6e7172915fb0a537f2f23370831cb\",\"id\":\"s0446\"},{\"digest\":\"sha256:149a8faa64b027c7a4093f7736b6adffee743ea46b8049c9d2be06cad91159a5\",\"id\":\"s0447\"},{\"digest\":\"sha256:225913825732f0ed4b9226488ee098d0d8b1b280368d178ae93b4e8319e9ef5c\",\"id\":\"s0448\"},{\"digest\":\"sha256:0cf501a147ac682bc2c9f702832c501bd4826e02490095f58bcdd4761ed89072\",\"id\":\"s0449\"},{\"digest\":\"sha256:6d54c245a6fa54b89b73f6162fed22110f273d777953e7501b64989ae34c0001\",\"id\":\"s0450\"},{\"digest\":\"sha256:dbcb3b515e429b1f5d320e9e50bdc27069b2bc0d2ef4bbe877f5f2dee26634cb\",\"id\":\"s0451\"},{\"digest\":\"sha256:5ef16931596ca09d8a2e0ce14a20f6257722873c1114fe1cc59031fbfa307e5d\",\"id\":\"s0452\"},{\"digest\":\"sha256:f41dd18acec7e2b81a153d85f7d6da1a4225c484fa693148c3d2a0669e83e997\",\"id\":\"s0453\"},{\"digest\":\"sha256:9b95ee87373ab862cba98dec6643b249821f49daab42f3bc37a9875effb50a27\",\"id\":\"s0454\"},{\"digest\":\"sha256:dca78b41fe0f413cbc0ba394d6329e6a50db9d9a03d761ae3657942a50c0e01d\",\"id\":\"s0455\"},{\"digest\":\"sha256:8fa5835d711ca009d8112f5868c34359a3ffda99ca62b840bbd3e39bd3e47a6d\",\"id\":\"s0456\"},{\"digest\":\"sha256:6a7e446912a5077ea2570ab33196ef1ff5d56677a1b48d6a5da5441a0a8a6e68\",\"id\":\"s0457\"},{\"digest\":\"sha256:12937dff29d8d8a52a865f2e8d459ca8111aa42e41d8da4be7404b60779f693b\",\"id\":\"s0458\"},{\"digest\":\"sha256:7e4a91a091c8185619541cc693848befb10a914f08ca810840f81fafae19da28\",\"id\":\"s0459\"},{\"digest\":\"sha256:acaaa2443549cec82517d0b501cb0f0b7b47ba37e20d1de20664bedd3d1bd1ab\",\"id\":\"s0460\"},{\"digest\":\"sha256:12a54c56bebaa90208b737b9cf6335706456df5f8b919692e234dda9e4193907\",\"id\":\"s0461\"},{\"digest\":\"sha256:b72c37414e4b0b4643eb217511ec77969f15bf80078b03c306d2c7d56ae8f20f\",\"id\":\"s0462\"},{\"digest\":\"sha256:acb13a51ea209b517b8e47038cfc9046994a57eca144de663303e81b0ef5cc37\",\"id\":\"s0463\"},{\"digest\":\"sha256:e3b73ffb6994b640d0aa36de5d16433e4bc1b6e294e7f729108f3867bd177e53\",\"id\":\"s0464\"},{\"digest\":\"sha256:42d403641fd7df85ef1af7d851997a6b71a13908f907d0502489802b5c22e5d9\",\"id\":\"s0465\"},{\"digest\":\"sha256:2961cafd29a81d1dbad541e62dd1d016bb445dd117110772e351a468844825a8\",\"id\":\"s0466\"},{\"digest\":\"sha256:01b7ba905d40e4589c5e5b333b4d1c63e3d6270d67a83f3dfde53ae15cc43ad3\",\"id\":\"s0467\"},{\"digest\":\"sha256:25b8dbef226c2519810e85a99227d98321b5efd9e153096b113ccac7eb606fc0\",\"id\":\"s0468\"},{\"digest\":\"sha256:61ae46e1bb6db1ff9c586eddd7fb51e13d1dee8896a1ba76e1a098e567f2ad2b\",\"id\":\"s0469\"},{\"digest\":\"sha256:7ab93f4e420e26ab29d961deef402aaa877b2074e38eb682f4a62c413434a261\",\"id\":\"s0470\"},{\"digest\":\"sha256:e1e69599ecf47dcdc66a027e5687f0805c504c4801f9fccd7c1edcb18062f426\",\"id\":\"s0471\"},{\"digest\":\"sha256:1d457b1fe01a5fe3617107fb4780ca7591d2adcec9062e2b0e3a59ddb5676ad5\",\"id\":\"s0472\"},{\"digest\":\"sha256:5bb7d413f49aa296fbac14c693571dfe337bd8244cfb17bedf56f84a67df6026\",\"id\":\"s0473\"},{\"digest\":\"sha256:15cc3f6f11526b735b0ee139f1f8c50016e2ebcc0f7d10ef105a166fce1af07e\",\"id\":\"s0474\"},{\"digest\":\"sha256:f62fa7469d77752fd27a48210bd5e18204bcc5a4ddff053120e321b3a7c2eaa8\",\"id\":\"s0475\"},{\"digest\":\"sha256:b721b865de26da9ab82eeedf416fabedc2acba6820849526384a887890c17d49\",\"id\":\"s0476\"},{\"digest\":\"sha256:bfc38f6334275ac192786fe0375a2efa588971545e16b52a31997f06a0adda9f\",\"id\":\"s0477\"},{\"digest\":\"sha256:003cffe5797d991812bc4f130b3db2861d233b90c03f8fb2612f9d19738b8a82\",\"id\":\"s0478\"},{\"digest\":\"sha256:744a630299fa02f63613a5a40398b7f508973c3025e454f7c1836bbe22d95b6a\",\"id\":\"s0479\"},{\"digest\":\"sha256:4cd07ddbcc912f86eee7f13a368fbfa5da650214aee5196ae9ec2969805927a0\",\"id\":\"s0480\"},{\"digest\":\"sha256:1fc4c16bee00ac9336bd40c36e8013dc57b2a5930c67ac38ade0a5cb429d240d\",\"id\":\"s0481\"},{\"digest\":\"sha256:a06486bfed24afd5de0c6f09583fb0b5575d0482b1f285451eb3768f2b727096\",\"id\":\"s0482\"},{\"digest\":\"sha256:c74e7b89775580a4f267665c014ebf527457917a591ee1eec09c6ba21a7d9583\",\"id\":\"s0483\"},{\"digest\":\"sha256:e19ceea841bc36dcb6afa73d00451488e0d0da8a1e27b013c9cb5763144d1226\",\"id\":\"s0484\"},{\"digest\":\"sha256:e0e045179e06bb330de8c6ff36355f1df979d10867ef9d50e72006e84973d878\",\"id\":\"s0485\"},{\"digest\":\"sha256:4ea9820a6dfe69b162e701e191386dc083e9756aac5c6bd4633d73de6c952c10\",\"id\":\"s0486\"},{\"digest\":\"sha256:7472a0e49279477b23ef9a31c9a9857cd57fbc5e654eab0916f599c7a1609a59\",\"id\":\"s0487\"},{\"digest\":\"sha256:d2a4c72fdf096aa2803471332cb99dddf6d9188075a78a41e8662b5f3d915c65\",\"id\":\"s0488\"},{\"digest\":\"sha256:811e1186084e914529eca0c46b6f6fd9c49f15b8bc7ece8372926bd854c82723\",\"id\":\"s0489\"},{\"digest\":\"sha256:8161dcaaacf56c5d2d6d65e715c2e068c5c66a96fa36b3b51bb971947993df61\",\"id\":\"s0490\"},{\"digest\":\"sha256:10bea9e5528c1ac7c60b37441011a60943a666448270668aae09e2ce5a6ab92e\",\"id\":\"s0491\"},{\"digest\":\"sha256:401b8047637db98e3b0adeded455a5fe11a8bec67693fc0cb79803a722ff64ec\",\"id\":\"s0492\"},{\"digest\":\"sha256:f649ff3654229c1038757b087d3576433c84daca9cf390a45ac65f010bf84f92\",\"id\":\"s0493\"},{\"digest\":\"sha256:0538feab21a46eefefaf2a1037c448aa827e9339bef0d1966d17a32dd59073ea\",\"id\":\"s0494\"},{\"digest\":\"sha256:025fde2c2754419270e3c3293c16e71f96b06d67d6b4dacc8e944bf90e2de0c8\",\"id\":\"s0495\"},{\"digest\":\"sha256:0d9d32df09eeedde5bc5c5ee3af9441dffcc5eb6994490c0988bcb596890dc24\",\"id\":\"s0496\"},{\"digest\":\"sha256:bb662235ca31f1181a03d5d6d511b2b5ad146d90ef1d24c3b63a3dee2933af6d\",\"id\":\"s0497\"},{\"digest\":\"sha256:59e8008c971abd47cbb13265c9e3fcd6f29257730d82fd723b7e27c52787a02c\",\"id\":\"s0498\"},{\"digest\":\"sha256:50ff262d5c173c4f841c9769086be626ff0ed4150b3b24984478ac3e19e1c025\",\"id\":\"s0499\"},{\"digest\":\"sha256:2e72260a738f54dcc8e76533dc4c923b3d0bd7e66af7c564726ab6c76caac3d3\",\"id\":\"s0500\"},{\"digest\":\"sha256:b3c6597d7f7967972dda3f4d6688e08f6b20a49bab6513820ad6705e5ad00865\",\"id\":\"s0501\"},{\"digest\":\"sha256:8dc3e1c19d654c45b564154c2aeca7119d2f600a146a2fcc00eef0d3d2a52a87\",\"id\":\"s0502\"},{\"digest\":\"sha256:9e9c6a3c399f140aca39182bd77467b71455e0357bd70873e3c1db0d9ad143cd\",\"id\":\"s0503\"},{\"digest\":\"sha256:c9d3e2fff3b7db08d667563224a6e59e6aae39414f596757dc665570844aa5c3\",\"id\":\"s0504\"},{\"digest\":\"sha256:371aacdf1a8a3d88554f99c1e6fd38beacdc99fa47b02fed98b3f8ba43b58693\",\"id\":\"s0505\"},{\"digest\":\"sha256:8b50645caa306f54b163ad2434aec4a79e100fbc879b99f2c8de0eefa96feb88\",\"id\":\"s0506\"},{\"digest\":\"sha256:bab3ce2817b38b7e90e99ea2dee33d3238ca12a0f144acab68b279f6fd2ad8e1\",\"id\":\"s0507\"},{\"digest\":\"sha256:872c504cbbd202eb3bc4f617b6723f7a3901a78c065235eb31daf642d5115971\",\"id\":\"s0508\"},{\"digest\":\"sha256:7ba9f9f5e85af151f3f7d31009a5ee1d2701663762d62baab120e85c04873421\",\"id\":\"s0509\"},{\"digest\":\"sha256:4b3d9d29fa670c69af4c5438600532b114911e760ae1f3223b15d582fd8db6c5\",\"id\":\"s0510\"},{\"digest\":\"sha256:abb1e124fa95903de36754757cd8677ef5e4fdf762ff329452174f214900d639\",\"id\":\"s0511\"},{\"digest\":\"sha256:aaeca60e1d75de5b38d3d9928d00cf3c8b32ffe6b8d7c46cf2a437e77a952167\",\"id\":\"s0512\"},{\"digest\":\"sha256:f0c4003f55eba800ef03bda8554bc1f249abcd8c73db4dc38f399cef82df3bad\",\"id\":\"s0513\"},{\"digest\":\"sha256:c40ee675fce4839464e3bdd647b8d83fe8171c10312c5848658767c06806765a\",\"id\":\"s0514\"},{\"digest\":\"sha256:1e03e5bc374025bb17a0d74a80291482402549a94f91c5becd66eb55a426dfee\",\"id\":\"s0515\"},{\"digest\":\"sha256:2a1bb19d4da44397f2c20967c08510d895f886c213f7fe1bacea9871e1621e35\",\"id\":\"s0516\"},{\"digest\":\"sha256:bf9759478a193868764fc43a700dd7c3179f4656d1258aab3b385c07e35f004d\",\"id\":\"s0517\"},{\"digest\":\"sha256:3dba200f0cb421d3af9f2ff5a3810f72deace09d537881990eeaad0438d7edd2\",\"id\":\"s0518\"},{\"digest\":\"sha256:b832a69f5e0dff0f313e22bd5e790ddb1b2df24adad6ad4a24089fbd480f06c2\",\"id\":\"s0519\"},{\"digest\":\"sha256:11ad1404419fb38f8a8710d8e93c6b17a53ec5fb4da93f507946784298930cee\",\"id\":\"s0520\"},{\"digest\":\"sha256:915331f7036741298009ee55c4b99809af314f5bac5c6235e6e54a1962cadad8\",\"id\":\"s0521\"},{\"digest\":\"sha256:27206f23e4ae53aeab73f44f56916166c4fa1e379072a1f845b38791836d2807\",\"id\":\"s0522\"},{\"digest\":\"sha256:47dbf5ef6223beede4d9ad111757103df548a975b1dd2d21375bed9898c3900f\",\"id\":\"s0523\"},{\"digest\":\"sha256:f938c4a372802f4e999e215b9bdbb652d73ff4690cdd67255d1d6131567e05e2\",\"id\":\"s0524\"},{\"digest\":\"sha256:d868488398878186a1c25277822ff580a7c503cf48818518c3164551971f3903\",\"id\":\"s0525\"},{\"digest\":\"sha256:006ad4bfba56e440faeb36041ae025bd96edfe5f0d92260272be9e14b51cd83f\",\"id\":\"s0526\"},{\"digest\":\"sha256:fd68df481a47cc27cc52b4fdac6a34daf34e2b7d38e0c0579b44f9a43bc5bb21\",\"id\":\"s0527\"},{\"digest\":\"sha256:ada296bdc01b6f857a93cb038a61cf97802ec0388aee3cb6022824fda12c714a\",\"id\":\"s0528\"},{\"digest\":\"sha256:03b30a095c06e0d5dcb9a3700d70475521ddbab9fe172b81cbc8aa529f60bd42\",\"id\":\"s0529\"},{\"digest\":\"sha256:ed2edf77b25f8d23828f4662267439eacd9fc1491ff1bd15a37fa9361591fa5a\",\"id\":\"s0530\"},{\"digest\":\"sha256:a63da795b1ddf6ab5015acb7304d166d3ca2c762650cf5035b7f5a082bc86c94\",\"id\":\"s0531\"},{\"digest\":\"sha256:b806831be8f9ed6e03dad46b06524f02c753b16d846354607e2b12c7ef1a2a26\",\"id\":\"s0532\"},{\"digest\":\"sha256:cd2eab864add9e7844c21fdedc3930f32fdf969079a3da76f28c251abf261594\",\"id\":\"s0533\"},{\"digest\":\"sha256:d93ad8b8161690b89ced69d50ca79eb7f4334be15a006c9d2c8a57be1337b07b\",\"id\":\"s0534\"},{\"digest\":\"sha256:66c9f96d7d0b134612770d010396c7c64bee67beac1feb0c8a17e59de697f26a\",\"id\":\"s0535\"},{\"digest\":\"sha256:0929452bbd597620b82b67b72473e0a1bfe81277b0b5dac17d370de8990e4f17\",\"id\":\"s0536\"},{\"digest\":\"sha256:b1c8b5cc1ae628b6ef1fd4939eb9092d0937370fcfb1338d5604d25641871e9a\",\"id\":\"s0537\"},{\"digest\":\"sha256:c4b54538ec17406cfb1a4bf2fdef5f47fd1c935c0df67f1fd0cb49d5f0b783b1\",\"id\":\"s0538\"},{\"digest\":\"sha256:1814d50e9d41938d15578b534584b6ee8f997a389a7078eafed7553789f2df69\",\"id\":\"s0539\"},{\"digest\":\"sha256:2dfea8f715d52b9b879004145bfe0db33dd4e28b4efdff52114a0094a59c3c90\",\"id\":\"s0540\"},{\"digest\":\"sha256:a38cb1fefd2ff89174a90baeacd1aad4cd09fa1d00bdc06e42fd51f4d467b47e\",\"id\":\"s0541\"},{\"digest\":\"sha256:0bf7358a08f0f5cc8a0eea63ee51d26210fb7d00dce40fe782702ff823339b23\",\"id\":\"s0542\"},{\"digest\":\"sha256:80592ba57251907a4f01d081aa50ef8eadb6cea6b55ddb1203a97bd9ff4a3fa9\",\"id\":\"s0543\"},{\"digest\":\"sha256:9817b66cf4e6188970ae81e03f0d1cb0c058d730e8513bddade94f7a3610aac9\",\"id\":\"s0544\"},{\"digest\":\"sha256:83c99ef88f2945c8c4e2a39ab834a059712ddf34a70f70a0a8d88a2fc955857d\",\"id\":\"s0545\"},{\"digest\":\"sha256:f9e96de7ea9878b96031f596f199dd173a823e23bc7b6ad8aef3911c16c93dc3\",\"id\":\"s0546\"},{\"digest\":\"sha256:f1d0fa7251cd55faa65579658f1513b8d0ca9b702a06ac24c5dd192a9ef36d27\",\"id\":\"s0547\"},{\"digest\":\"sha256:9364330401af7cf26197550d9fe15f22c8adb83543e9542503734c68d68b2aae\",\"id\":\"s0548\"},{\"digest\":\"sha256:c35af4173666bc12d0b00725fc5c3127499108db6871124478ad0415bc824b03\",\"id\":\"s0549\"},{\"digest\":\"sha256:cd7c52673021e594a4041344cce9bcee2c8f3be7cce55aa9f9be9cfe8f156995\",\"id\":\"s0550\"},{\"digest\":\"sha256:9894ea18045bb9aed50b463ef60a402e52d22ac614dc15b90d5ce29c7ea4328f\",\"id\":\"s0551\"},{\"digest\":\"sha256:ed4c7dfd682f254854939bd0fb882a6a60727034647a1d4b4b84dcc86589ecae\",\"id\":\"s0552\"},{\"digest\":\"sha256:6c7b1e8c05df5bdbf1516574ebc99e03ec55d2b8d25a90e38d1de4f93b12912d\",\"id\":\"s0553\"},{\"digest\":\"sha256:7b0c6d67227f62001c11d9f145069832d1f2975fadf84fd2a760bd2b12f8b734\",\"id\":\"s0554\"},{\"digest\":\"sha256:7e50189f1c1d46add4b98ece09beea78bf421f62843e25ff4a83ebee22e91601\",\"id\":\"s0555\"},{\"digest\":\"sha256:0492ebeb8b8b2b96a32c871fec8e967368ce94470cab631ef513b8877d859f53\",\"id\":\"s0556\"},{\"digest\":\"sha256:0822490cb9874e5c67cd3ba5ed711aee2d553812925d4169e1fb47134551d687\",\"id\":\"s0557\"},{\"digest\":\"sha256:cc2875154b9d0d06bb39edc2a5b899cab1880cbbeb5852109194b237c45b411b\",\"id\":\"s0558\"},{\"digest\":\"sha256:a008cd8d42f64679319cb1cd5e9fd3d46b6e7e8f3d2de9513ba7698aeac96d4c\",\"id\":\"s0559\"},{\"digest\":\"sha256:f9713ba40abbcffb2e6f39346ad38caefc13becbc33bdfa6cde7463b0ac41e00\",\"id\":\"s0560\"},{\"digest\":\"sha256:915e7b9ec02338ccfd719a3fedda1d8c4186dc305c50f49e31dbcfee41546d96\",\"id\":\"s0561\"},{\"digest\":\"sha256:dfb9de10ef75947dd7dad2e825cd631b1a9b6f4fe88673fbc10be868a3129308\",\"id\":\"s0562\"},{\"digest\":\"sha256:fdff8c2db6c87819890708dfadb43e99d1989df01ad191c545836b1f14d18f21\",\"id\":\"s0563\"},{\"digest\":\"sha256:05dc6cf5cf51e257f71022d024b61db4b609862572c5301646e1aebcc7800502\",\"id\":\"s0564\"},{\"digest\":\"sha256:dec1cef6cdc2e0cb668eb9107c535e7cfb1e3c733136a440e21409a6e9b15888\",\"id\":\"s0565\"},{\"digest\":\"sha256:0039b32fc2fddbf8701bd0a099393bb37a71d7484dbb097b487458887ebdaefa\",\"id\":\"s0566\"},{\"digest\":\"sha256:f83d4dcdeba14e1db0a90a74e074dbe236d6d6192763cf20c3e27e3eb90cb504\",\"id\":\"s0567\"},{\"digest\":\"sha256:bfa1422b598a6940ceb016c472519c40893b7be778eede5493237b274fd11c36\",\"id\":\"s0568\"},{\"digest\":\"sha256:22c6eae11514f179b5bbf664d81853d0c56de172ce70a48e3f7f0a94def91fc5\",\"id\":\"s0569\"},{\"digest\":\"sha256:b2522d3b5f26fb1a5d88c868c797ce44779050dcb8b82ae755b45d6f90e92344\",\"id\":\"s0570\"},{\"digest\":\"sha256:c25daf2e54c0f79cb1c743d4b876ea0b5c7919dba886698a6634d2b4dd79939b\",\"id\":\"s0571\"},{\"digest\":\"sha256:034d62888e1786db2a5c3a58c16519e9fe28c91a015d327cc3dad1c79867a255\",\"id\":\"s0572\"},{\"digest\":\"sha256:e3a81c834acf67c9dbb9cca373a80853e500292ccaa6d905a6287946329278f2\",\"id\":\"s0573\"},{\"digest\":\"sha256:73c69feb6a5e8ab03107166962937319f302d39cf86e19eea4f85064c2eb749a\",\"id\":\"s0574\"},{\"digest\":\"sha256:c049029bd829a740c92a3389d2c9dad1d7c40c186259872b4633ec1d97fa7e5b\",\"id\":\"s0575\"},{\"digest\":\"sha256:67329ac6e89abc557fed6714aa58b9dcd0c6e0ab19d3c5ce343d7867a2b44f37\",\"id\":\"s0576\"},{\"digest\":\"sha256:8200f865fa07312ee6887971a79fc78e26f3bdaa76997cc2df851029486ca789\",\"id\":\"s0577\"},{\"digest\":\"sha256:6ff8bb28e3cfce799a5bac2982b286d21bf64dac96b3c75e9632d55f1d0b4867\",\"id\":\"s0578\"},{\"digest\":\"sha256:cbc60a3b852ce3251ceae904e1523f3f08b7dd5f3fc740b8c3621bd4f72b2063\",\"id\":\"s0579\"},{\"digest\":\"sha256:2c6e1dfc333e673f9de7d760a06f66d653cecb0c4e2939cb62173f1bf0818f46\",\"id\":\"s0580\"},{\"digest\":\"sha256:778072b78d638550774b76c975e2aa90465f3f8a9559b90c5d90f44d14eefa1e\",\"id\":\"s0581\"},{\"digest\":\"sha256:9795cebc76bb5c662ff4697e6b9461ea7c48d42c0c4287dd86e427f33bd9609e\",\"id\":\"s0582\"},{\"digest\":\"sha256:fe9b28d0a086c174dd9c36b8bb01935f6cc92bdb8892a4728cd5af6993c0e244\",\"id\":\"s0583\"},{\"digest\":\"sha256:dcb6e411f78a797768dbd4b9a83ed0eb95346f3b65a9fb1c735c49985cc258ad\",\"id\":\"s0584\"},{\"digest\":\"sha256:0dc0d8e0d03d997a6d794a2ce5d95b1f2d574419cefd2d8a7ab21c1821970160\",\"id\":\"s0585\"},{\"digest\":\"sha256:bcb3f0b40e774506ded33b3e666fde8bd5d49fc32ab2af9b69a1766ba5b5b6f2\",\"id\":\"s0586\"},{\"digest\":\"sha256:058701dcf4a3e09cf15c2b4e0e81556d274a2c42f68f989fdfe14e57c1a3b0b5\",\"id\":\"s0587\"},{\"digest\":\"sha256:0f520a22a1e39045033a8d5ed22ee8827ea8845213e5461890a45f1d783f956e\",\"id\":\"s0588\"},{\"digest\":\"sha256:933f3374b85ff4b235a3e490e45a6db07ba66a553a46a3a340fb92c36715dedc\",\"id\":\"s0589\"},{\"digest\":\"sha256:b093f7f023d7ca576cd2126a5ac34564962b88c962dcd611d0525c3bdb5c3c68\",\"id\":\"s0590\"},{\"digest\":\"sha256:42cda060ff7b141abb816c76c07ba57f4190d2f67d00ed7a25d2bd54a75a210d\",\"id\":\"s0591\"},{\"digest\":\"sha256:611f21a6a853504194b4fddbdb167f0a72a7081da6c97ac402b98e786f466911\",\"id\":\"s0592\"},{\"digest\":\"sha256:0a2fd6dfb1dc5ab61b7a591a1db2fa5a8f158d72b4803158f0ad1f9503752f2b\",\"id\":\"s0593\"},{\"digest\":\"sha256:a5e10050c972f728bc04fd3a30aa5d4ae73f38bf37ad08493cdef692de3f623a\",\"id\":\"s0594\"},{\"digest\":\"sha256:60e914d19688e3657851653ca6800a53794e018b6f7ac1d4d992496e2e670a13\",\"id\":\"s0595\"},{\"digest\":\"sha256:944f8bf3ffc8ddcc4cb137e8bebf3b68f0e53ffaf29e1a082b3f1ebf37915790\",\"id\":\"s0596\"},{\"digest\":\"sha256:fbc8de90db842e322edec650a3b7504a70ce5d68be7071da6f4c641586b2e791\",\"id\":\"s0597\"},{\"digest\":\"sha256:be4ef79aa9fa7684d6f2bd48542cc78f6d1092c45e31848f697bd98ac1766c63\",\"id\":\"s0598\"},{\"digest\":\"sha256:e0d32499302bb8dfed4786e7026dc2543af87a6a11a480e7e533d1ed987616e6\",\"id\":\"s0599\"},{\"digest\":\"sha256:38543fbfcbc58cddb6e5d919e4b0bb6925432055d1c57c45a50f34dc57176bbd\",\"id\":\"s0600\"},{\"digest\":\"sha256:b37a40d92177d363261f118600ba6bde3fac37f3e9791a6dcfc187f5475a2f66\",\"id\":\"s0601\"},{\"digest\":\"sha256:673a8cb82554f1ca94960b194b4f257fdd0e3923733049257060d37178646631\",\"id\":\"s0602\"},{\"digest\":\"sha256:a79c222070a306434b05be08eca6fa98f69147e2b066cfd463a9e0245a936a10\",\"id\":\"s0603\"},{\"digest\":\"sha256:4e6e2f754f1f8ef1953693f3861b5174804a3b2248191f139221b94c636827cd\",\"id\":\"s0604\"},{\"digest\":\"sha256:deb279883d184992194890c519ff14673bfabb57e6adfe990404ec77f41ae541\",\"id\":\"s0605\"},{\"digest\":\"sha256:abe4ed859ac3a998c649cf41bc6c75d01d44f72874092ba1787c0ad8acde782d\",\"id\":\"s0606\"},{\"digest\":\"sha256:5a5a882b566587d84b23502e93f64d38e52557f6d11cb4449479918b830336d8\",\"id\":\"s0607\"},{\"digest\":\"sha256:9bc71036e73ac11893de044d0fc992a3313242a058c4f0a5f8d7d307465c61f0\",\"id\":\"s0608\"},{\"digest\":\"sha256:52036a23e73977ffacffd95a6b361ff759bb8669a6f7f2152f6e6fff2de45e80\",\"id\":\"s0609\"},{\"digest\":\"sha256:58256c8f75caca48d51bb5d4144d86320c698b8722e5a5185b10c0d451d8088d\",\"id\":\"s0610\"},{\"digest\":\"sha256:a5ff663bfa0eb201f2c13d512f7bad8f957208c60bdea1f9a958816ee0453eab\",\"id\":\"s0611\"},{\"digest\":\"sha256:fdcc74f6f6e8b058048247271855a8301b2a2484f977cccb8cae0fdd8dda92a6\",\"id\":\"s0612\"},{\"digest\":\"sha256:206cf125aa79259273a1241f591351746354402d363253dbbafafc01ba39265f\",\"id\":\"s0613\"},{\"digest\":\"sha256:5c87547fa0ff8272fefb5f773f518cc162d2c47c49b2616fd1d936b25437454f\",\"id\":\"s0614\"},{\"digest\":\"sha256:a70a637664fc4fd9338b06ee2b23634aa617e5f330b7cd328aace2561d7ab369\",\"id\":\"s0615\"},{\"digest\":\"sha256:3ca3964fdc976070e55568dc7d16058c97218156faa188465e3581447bed404b\",\"id\":\"s0616\"},{\"digest\":\"sha256:6239eb8a43939933758d400f132bbb1a4b69082062897d01eac52c38d9bdf120\",\"id\":\"s0617\"},{\"digest\":\"sha256:a52b7fdb1fe30b164c2678a8d76e0c65d385b45ea3d6548da8775f5fb3cb85cb\",\"id\":\"s0618\"},{\"digest\":\"sha256:2eba56a62c36a128193728bbcdc4a62828f2014aae5996bfbe657e7a3ddf7d76\",\"id\":\"s0619\"},{\"digest\":\"sha256:4f4111b4c6f13f52294781970b0bd63d34637dfd9255199be6b6af638af89de0\",\"id\":\"s0620\"},{\"digest\":\"sha256:8b8c9c78871328ee351f6a981c9e59b897666f8d5f26ae3c4f167227a03ae637\",\"id\":\"s0621\"},{\"digest\":\"sha256:1cf134539b27a6dc206315914913a85cde01bcf975a739d17028062c26041196\",\"id\":\"s0622\"},{\"digest\":\"sha256:3e14e4ffe95b43fca98fe2c3f5443a84dde75aa746004f51269d0b7edb8f1e3d\",\"id\":\"s0623\"},{\"digest\":\"sha256:1d1c6d3e37d96c39c396f054e54664a0dfa8144e92db9780db094937d995cd99\",\"id\":\"s0624\"},{\"digest\":\"sha256:1c5e9727087b328259c4017f46967c4f19fa40ce18580d988e38c7be2e1c1bc4\",\"id\":\"s0625\"},{\"digest\":\"sha256:35f0cb725c9533b80761c13dbb02cc8866dd11a10070322e50687cc94a178bf1\",\"id\":\"s0626\"},{\"digest\":\"sha256:32e0553c04c5c54eb9968ecca5ee3895803e3338d79133eacdb9892ba3e23322\",\"id\":\"s0627\"},{\"digest\":\"sha256:8db00138012600ef58561bd3b8b07899c611c5b9d1e72ceacd590972669a4cee\",\"id\":\"s0628\"},{\"digest\":\"sha256:492d9b395fe523be82fba56738e3922210115cc1f9e94eb4c5eca452912370d2\",\"id\":\"s0629\"},{\"digest\":\"sha256:de0101490833150ef3e89096be61f48ae6848a6268b1a4219589e849a6a909bf\",\"id\":\"s0630\"},{\"digest\":\"sha256:db240d53f2abc8469e404b8c96c23b24db77c85249742f966e15b5db6b43539f\",\"id\":\"s0631\"},{\"digest\":\"sha256:37521ae478a6c6b002d08245f6051388ca0f4a29ed0fd925f6debf6ad0561238\",\"id\":\"s0632\"},{\"digest\":\"sha256:dfbc465c8b117f4d0ffd19ea9f9c5e2d447f9e8c039a9c3869f6424705b5dd25\",\"id\":\"s0633\"},{\"digest\":\"sha256:4a50fa1363349a5fa1db46e133fcb02434dd71708e22a26f0b6aea9966f28b91\",\"id\":\"s0634\"},{\"digest\":\"sha256:893523285566c97e5075039a64ad61733cbbb21e765baaedd735e9d1adad1b23\",\"id\":\"s0635\"},{\"digest\":\"sha256:e36985184d2d1d922fc254e9ffd94b0d9ccc70737accabf53cc80c40b7acab9e\",\"id\":\"s0636\"},{\"digest\":\"sha256:0285712fcfcbb928b5c8e469d325f5aa11f5797b6b8945c804eba70666e92e4c\",\"id\":\"s0637\"},{\"digest\":\"sha256:ff67e0db3c5afed80ba9332453c7c61d768f2dbac29bb6b9eeeb30c5c25cdd89\",\"id\":\"s0638\"},{\"digest\":\"sha256:74806dec353c7559d275d786d7d9bde4cdb8a5daa4e646228f85d0bc92936a10\",\"id\":\"s0639\"},{\"digest\":\"sha256:d455970d216376232a1378ce8757676f169c252d37e5acbc53cb538c42646d71\",\"id\":\"s0640\"},{\"digest\":\"sha256:a2e99e40dc1137853a9e4cacfd27e2f4d29fb49927a908b40e6fd756577290ee\",\"id\":\"s0641\"},{\"digest\":\"sha256:7390e1428202c0507244dd03f574f84d9ad252d7f682881fef9d19f25efb7b97\",\"id\":\"s0642\"},{\"digest\":\"sha256:6c1ba8ccfcb5f94a261bbdc4402559d9e59886e1dc0ddb77d5905ae70d8d01ad\",\"id\":\"s0643\"},{\"digest\":\"sha256:37ad735dc920d5fa5facef01b54f56f293ff5c54c072a92e9464af76dc993db5\",\"id\":\"s0644\"},{\"digest\":\"sha256:68db75d05dccdccfc11fda9906f43f158441cbc9645afe0979f7f360c978cd6f\",\"id\":\"s0645\"},{\"digest\":\"sha256:b3109d2fe18a96c629afbc6122c68cb9209f9ad3098887435c0798047a5b5d79\",\"id\":\"s0646\"},{\"digest\":\"sha256:06a04f995a7c3510555329625dba16ead0c31edeac463df91d47bc11b8ff1945\",\"id\":\"s0647\"},{\"digest\":\"sha256:650c12bd99146b7556ea5266c76319379e6cb83b7912a23b2e6505df63ded609\",\"id\":\"s0648\"},{\"digest\":\"sha256:f2b3860fbb536521cb338cbed6cff54c95f0b4dab3ac5896b4d13486b2422525\",\"id\":\"s0649\"},{\"digest\":\"sha256:f66c1b0041ce152f2208c593b1ef38b94377dd3ed9a7340a7034a716a7c5d9c7\",\"id\":\"s0650\"},{\"digest\":\"sha256:666b607e342e959d226f420ea542fcff0fcd1ec504d319a3e3311f1fbe445df2\",\"id\":\"s0651\"},{\"digest\":\"sha256:c083ec58455bfc2158e9c8e14c47a67b8ae3907a6324d8f45cc4cacf15cb6b53\",\"id\":\"s0652\"},{\"digest\":\"sha256:1c3aa3edef3dff795d7c6400a7d412a1067353493e05f62c35077071dbaaf808\",\"id\":\"s0653\"},{\"digest\":\"sha256:f1c7f50f58c641fff78b35ae28c006a8f1d7e15456a596da6713c2ba764622d6\",\"id\":\"s0654\"},{\"digest\":\"sha256:3abbb1b8af5aeed65ad3ad1261f5006317535ff166bb85896defecd096bba618\",\"id\":\"s0655\"},{\"digest\":\"sha256:b02763f3c28f0bdedd05e2867937906ed3cb81c3323b3ab64018508dfd7249dd\",\"id\":\"s0656\"},{\"digest\":\"sha256:79f13cc1428ab6d16a603dee76a7c32dd2d74a3cb0f84a3550428691dd490351\",\"id\":\"s0657\"},{\"digest\":\"sha256:8d012cbc7ec4705a32bdbd124c4012405d59fa015a0dbe521de3e1f719b5fede\",\"id\":\"s0658\"},{\"digest\":\"sha256:e25b83fd519c67a10776b94ce38c2e57e0e34fd76c21ecb30b2fb316cfa4536c\",\"id\":\"s0659\"},{\"digest\":\"sha256:b71483b380f42feb41cf4d449e4bea42c134cc89775d9b1565931c98c51a44dc\",\"id\":\"s0660\"},{\"digest\":\"sha256:745ac55f6d34cfa5ea2d4db911c65d6b64ee564a20d0d6df951bd305b997b00b\",\"id\":\"s0661\"},{\"digest\":\"sha256:1151678cd601a0cc4a25b7ca28976bb290a9d09a47c27092fe4057a6f66e0249\",\"id\":\"s0662\"},{\"digest\":\"sha256:93fb9bb4be4cff63eaa0e96c7c319797d899a0d8056a47de95bf7b233d84d894\",\"id\":\"s0663\"},{\"digest\":\"sha256:a77f47dea393b1ec7c8de95d8be010b88859fa37a84e4ab21170ccc588be9d3a\",\"id\":\"s0664\"},{\"digest\":\"sha256:b6be3dc3be94ba3a06a8fb5acd19c553acd71f7bc1017da8429901ca2b392de2\",\"id\":\"s0665\"},{\"digest\":\"sha256:a8e51818e528e044be67775ddcae98068e2c74ed384490b8f99ce8c148edf7eb\",\"id\":\"s0666\"},{\"digest\":\"sha256:2201108f302dc614eb80e2267d5bb13af50c11fb3dc8cf1832a9d2a7d9e3ab67\",\"id\":\"s0667\"},{\"digest\":\"sha256:ab2b02f330e7b5df12f8acadcb74f03752bfeee35b5ad301ee03ee963b3eed0e\",\"id\":\"s0668\"},{\"digest\":\"sha256:f62be033212fc78a3b2aabf16e7e3a74abd8a4000ae000c07c1d047452c82cae\",\"id\":\"s0669\"},{\"digest\":\"sha256:c0cbc3eb24be5165934e235cff7416f065d1bcc06eea3751f8311ef39bb0ea2f\",\"id\":\"s0670\"},{\"digest\":\"sha256:7c46d5011d22c2f511920cac2d2b3c5208538000625e32e527d241bfb96aac8b\",\"id\":\"s0671\"},{\"digest\":\"sha256:77a1d41b55df051d167dfb741f7a62ad0ce9cca7291d341dab3b08398a13fc41\",\"id\":\"s0672\"},{\"digest\":\"sha256:2688882994e3b7dd46443b80562e5593523519659a5e91bedbe338b4ffd54397\",\"id\":\"s0673\"},{\"digest\":\"sha256:7d1501a5ae75db0f23c8be2f4629806a81fdf72e81e661c29807c4bf5f9b3d26\",\"id\":\"s0674\"},{\"digest\":\"sha256:e37934805ce9458f884657475890fad2a846ff70ea4157d9ce5719e978844935\",\"id\":\"s0675\"},{\"digest\":\"sha256:e981ba8727d8f405b9878fd8b863dbeaf34f469a22c3d63813da658e41ebd42c\",\"id\":\"s0676\"},{\"digest\":\"sha256:0a8b99d0402e1e1a6d8eca22be575d051ebfeee0e7387980c667b87ec4fc039d\",\"id\":\"s0677\"},{\"digest\":\"sha256:de0ccc084fb643da5e6bbffefc8ecac716f216c795e409c9ec7862e43c83bfd6\",\"id\":\"s0678\"},{\"digest\":\"sha256:cb010aa139fc3a964e36a39d7982da580d1373ab69e0879e8fb0bff87aedc168\",\"id\":\"s0679\"},{\"digest\":\"sha256:ec3542fc58c43fd25c2b5dbbe5cdb6c14584853e923880c2fd88dd1514439a4c\",\"id\":\"s0680\"},{\"digest\":\"sha256:4528bf9d8ce2f5bc5284e6528c95c6d45cbeb902b1f7eea061bc45d161525ef8\",\"id\":\"s0681\"},{\"digest\":\"sha256:6fb7df6b2d3fba24a193c7aee1cf2fd6bb2a0784d5ef57141acfbcf8c5cf6e22\",\"id\":\"s0682\"},{\"digest\":\"sha256:253af3d214e2ef49cf12bfc4c8d13028b582279a03bf3902ae756315e4519df6\",\"id\":\"s0683\"},{\"digest\":\"sha256:7df2ce3279c7fce905dd76b75ab0112d2412fbd3f1947391851a577355890149\",\"id\":\"s0684\"},{\"digest\":\"sha256:f306bb63869bb89b1ca0421aee4901da9e7fc77fabe19885a630f9b42b195692\",\"id\":\"s0685\"},{\"digest\":\"sha256:18909f27626a9fb8417b3658d2f0c663aeaa5b2e59395edbf99e16e3a294db48\",\"id\":\"s0686\"},{\"digest\":\"sha256:380683aa94db71c72167b9cabf6440858127b1664cd058c2ab062d7199394a3b\",\"id\":\"s0687\"},{\"digest\":\"sha256:cc8ef4a531a8425e0d7a05481a64944c4ebc59ffa64055e94a6fce4c8a647f00\",\"id\":\"s0688\"},{\"digest\":\"sha256:5b861a4f9d77cf5d9bd6d2c37d73b4a70dbfe903edc7426a8f4026f6e0acd990\",\"id\":\"s0689\"},{\"digest\":\"sha256:f7f02937cc372794cb4f900a5a6b4835defa0dfc88d756ce586fdb7c5a14b23c\",\"id\":\"s0690\"},{\"digest\":\"sha256:0b5b1925118773c8ed95d2e49589ef54c1ba8a4454ad5b9348e1e37bc1773d3d\",\"id\":\"s0691\"},{\"digest\":\"sha256:b432cae05cc2c339ab787e0c0c8c66b81f18eddbd81008962398ea06b249a682\",\"id\":\"s0692\"},{\"digest\":\"sha256:2ade12e77415aaa6ac513086b3d944929450ba7123f4cf54ccc5a5c3d33a0df7\",\"id\":\"s0693\"},{\"digest\":\"sha256:278a2b22cc63daac94833685e435fcb15ce2e0c0f481438ee64d949c58322fa1\",\"id\":\"s0694\"},{\"digest\":\"sha256:72278e23e1615830923530e19d7a758031a23f70a3f5f73e85882839af17264f\",\"id\":\"s0695\"},{\"digest\":\"sha256:6071f9c22769dc96428f3f5475070d3bb1c269dd10cdd23429ceb189959e7b18\",\"id\":\"s0696\"},{\"digest\":\"sha256:52c43a2bd5d2b36df8ed8cc9753efe7bd01fb1f1a6509bd1d05540506aad38dc\",\"id\":\"s0697\"},{\"digest\":\"sha256:0c3f358db2a12b6c200124c06e1b59d9a0ccd126a13bab1013e5a54753b06586\",\"id\":\"s0698\"},{\"digest\":\"sha256:8dca36cbd8b986b39a270c32b7421b00ef2835de6f666c1c39bb058d18d328e5\",\"id\":\"s0699\"},{\"digest\":\"sha256:07551bc119677c594275778cabf282bd07aee544f00aba85d8f069160ff4fb78\",\"id\":\"s0700\"},{\"digest\":\"sha256:861bf547c9c9f421714905ba0d0c92182f6883842678d471af7e46e053732ec5\",\"id\":\"s0701\"},{\"digest\":\"sha256:f544e8388adeac1aa7e540a638b33abb40218eea76b9505628972989b2125cc5\",\"id\":\"s0702\"},{\"digest\":\"sha256:f5412507becb2d61aa97c198b90b3c14b8241dadfc2e0d2f21baf85f558e4b26\",\"id\":\"s0703\"},{\"digest\":\"sha256:a2448e29bfc8fe3a7609a7562aa4a8b19f99856503506f85858df88811f09616\",\"id\":\"s0704\"},{\"digest\":\"sha256:0d7bcf64e42519df8498d292b338955f4a813f9f494dc3c5dced99406affb074\",\"id\":\"s0705\"},{\"digest\":\"sha256:f7aef0b20fcf30d30fc5f84e6c148bed27d58530e09e13f4cd34ab8f0edd208e\",\"id\":\"s0706\"},{\"digest\":\"sha256:593fe295f34cdd1fcb8238ceaa416ce4edde3951e3ccc75f708023acd27909e9\",\"id\":\"s0707\"},{\"digest\":\"sha256:d211a7d99195cb8026dbb339ed12ebbe78085032920abead3f0b255dd1212488\",\"id\":\"s0708\"},{\"digest\":\"sha256:36dc742ccaa24e871494f45266e405136b70365e18dbc5c25e92702721304ee4\",\"id\":\"s0709\"},{\"digest\":\"sha256:aea16a6d63ebd1ce4f13ca8da8d29b6c785328ee353eb5f2851efdb3e5630844\",\"id\":\"s0710\"},{\"digest\":\"sha256:97e7ff0197f3b3c6fa198691afd25200c1212b7ad0a44e40fb030b49e92e0859\",\"id\":\"s0711\"},{\"digest\":\"sha256:008233724810b97695de389f58cc8dabf343a5c233505f0484a0b2e9e2003b29\",\"id\":\"s0712\"},{\"digest\":\"sha256:a01ac61331e3509abdedc6afefb8ed661e71b215b2093c6fcfbf149aa44e0a8a\",\"id\":\"s0713\"},{\"digest\":\"sha256:4cab9492011155b6119adc10f2305d050d0b0892b1e1b8953f434681df2358cb\",\"id\":\"s0714\"},{\"digest\":\"sha256:c41a6100823a5cc40291fe2fd44224f36a340ed8ded62b63eec6ccb4288b6bca\",\"id\":\"s0715\"},{\"digest\":\"sha256:2805bcb7be2a5ed476fb0e3b96d2a18cb77e095ef7d8c2adf6190c76e13fea21\",\"id\":\"s0716\"},{\"digest\":\"sha256:f7a3749c04a25584743d4e52cb3f7a5cc26840431ef2504646d1d2a647382497\",\"id\":\"s0717\"},{\"digest\":\"sha256:1639bb7218e7120071d3e5bd2cf07c82547b1ad455a73f34e7b68fcff249a232\",\"id\":\"s0718\"},{\"digest\":\"sha256:fa3336314e4e6138f9862b2c49ef11b858ec81f3bcc78fa27aeceb76f9a1c479\",\"id\":\"s0719\"},{\"digest\":\"sha256:e7f36f995f13d76dfe3061c0175d94fa9fd62a563a09c6a7c8627da7cf11b4df\",\"id\":\"s0720\"},{\"digest\":\"sha256:5113688e84fcd84aee7e05a48984e21d07fe44384cdc5050adcb1c3ee4e13dd7\",\"id\":\"s0721\"},{\"digest\":\"sha256:073f890572dd7bc6bff7c57e7fa477ee1db2bf7f19940a12c5f8f69175e94007\",\"id\":\"s0722\"},{\"digest\":\"sha256:ece22e927f761cdc8f91d1d47f99a353a4efe7e0a11c910b6ca991b7ce286016\",\"id\":\"s0723\"},{\"digest\":\"sha256:18223eda0cf890ade501fab662ac8f4371d1cf43ae87c87dced975d193445bb4\",\"id\":\"s0724\"},{\"digest\":\"sha256:33d48776b339eb9756d608f55330bc30e69f9b66f9f8f8f645cc9a9aeec7a2ae\",\"id\":\"s0725\"},{\"digest\":\"sha256:3bbf014a23ce895e0a63de7ec807caf256868abb6200e838d1988f3ff3ab7d9d\",\"id\":\"s0726\"},{\"digest\":\"sha256:f074003a90d36f46749f7ad8c47ee125a8a7895dc2a1997d2260eceac6dcba37\",\"id\":\"s0727\"},{\"digest\":\"sha256:3453531cfe6ed0ca4d67762088f329b45f0506fe00dbf0817b828ed32a106990\",\"id\":\"s0728\"},{\"digest\":\"sha256:0924903c7f25aed063326c0a38f1b639a1dda29a5215c953830eb8b5a9d51c1e\",\"id\":\"s0729\"},{\"digest\":\"sha256:bdf6a4a554aca6187ffe731528eacd3075748f28ab36ea7d508284a7aa903e85\",\"id\":\"s0730\"},{\"digest\":\"sha256:54d17ff7a8ae4ba15760219ee9aa57d1f133c77b201ef43efbdf34db2ab27c74\",\"id\":\"s0731\"},{\"digest\":\"sha256:e99ed0e86fdd204e5b4614b1b285ac0eb37367b07ee83c6b9e7fb17f5f7f3f15\",\"id\":\"s0732\"},{\"digest\":\"sha256:ef4b86ee5094f1ad5c1e8b737ad597f42b6353b9003ff1ee07d56c86976712ef\",\"id\":\"s0733\"},{\"digest\":\"sha256:441baae8f50bc79e0e7d04e826f192798bd5e268b023ed08d313aef760cfb118\",\"id\":\"s0734\"},{\"digest\":\"sha256:6ecfd41f9d59cbf33035e8923a449289ca58a67a2d1f59011b86f3a7d71b56f2\",\"id\":\"s0735\"},{\"digest\":\"sha256:185088ccbffc14e3401686fce7426bd60f765415e8aab96904241f1322de78a4\",\"id\":\"s0736\"},{\"digest\":\"sha256:0921ac750b442cc59e2c7c2dfc05f7e981b953d8c6430c39672ea7eb68f7b936\",\"id\":\"s0737\"},{\"digest\":\"sha256:7301a5ab24c087ffc506133af301d79208c6833404aaa22171be33c4bc5a5bfe\",\"id\":\"s0738\"},{\"digest\":\"sha256:eda84b10eeb5e757b7d4a03eeb3870d7cf5de81ab9175a455dba289ba8e072b6\",\"id\":\"s0739\"},{\"digest\":\"sha256:1a2d04422ddc59ad79cd156fc730ac66a121b6d9ada33af28449cef36623c4c1\",\"id\":\"s0740\"},{\"digest\":\"sha256:29377bbe64360f99e45ab84e0a6d764c027bf9080f0428fbd591cd3d791be0a4\",\"id\":\"s0741\"},{\"digest\":\"sha256:dcc073d5d84f52b32b270aac1e38be52a4c8ec97a8de6f745586b79a2b43bf8a\",\"id\":\"s0742\"},{\"digest\":\"sha256:0b10f7a9da23588bb49f5d2c01e5f3294a300bb5a4f4cada55096076334a92af\",\"id\":\"s0743\"},{\"digest\":\"sha256:c3e9fd28bcb7fdc986c083495bd6beb45f7f0160d2685b4bd3f4b700b484a432\",\"id\":\"s0744\"},{\"digest\":\"sha256:d107b5a89be32cd14aa773c4bd49e85107d9a39e7a7adae4f4bf6d1dbceec16e\",\"id\":\"s0745\"},{\"digest\":\"sha256:15af8a28e8277ce769b6817722857e6895d1580ac20c524aec7d1d953db4db96\",\"id\":\"s0746\"},{\"digest\":\"sha256:7ff7f1790018c02095a01490c88f124f4016f9b2f512c2976d4ede7dbf9e2e93\",\"id\":\"s0747\"},{\"digest\":\"sha256:dd0035b7d1b98eb1684fba7e978328adf9eef96504eacee8d424f020fbce7f2d\",\"id\":\"s0748\"},{\"digest\":\"sha256:167bf5bcc52c7fc01f146f7afef3062bfe92942b1add1eb00698c511e1266673\",\"id\":\"s0749\"},{\"digest\":\"sha256:b7d76ff4480a711684982a4791f02ffe17be873de09c4ee8699643e9a24c2f05\",\"id\":\"s0750\"},{\"digest\":\"sha256:f26d79142a4fb2d4d7a30a926a92f00ea4bc1f4925cb256e8bd28bfb1ac0e9d2\",\"id\":\"s0751\"},{\"digest\":\"sha256:97459334fa3a5fb590d267ce0b8097d1982117df672e50cbc07a721bd6ed07ff\",\"id\":\"s0752\"},{\"digest\":\"sha256:cfc539ef022e45394717c57ca198911ec95c8741555fe177b9aba8c47306816a\",\"id\":\"s0753\"},{\"digest\":\"sha256:028a888c625c83b0d9b9dd712c6de7fc2acff351e797a42ca5ec12418047d0b6\",\"id\":\"s0754\"},{\"digest\":\"sha256:899b05ad2d35b05c5fc0a0f35f6265b0db551d920da8e5b988fb2d5a1b1635c1\",\"id\":\"s0755\"},{\"digest\":\"sha256:11069469546c43c81ebd23b6932f223160ed9b83f70f3c406efce0d4c1e97ae2\",\"id\":\"s0756\"},{\"digest\":\"sha256:a5097e312af55e1589749843e1283865f1f1e6849a2e0542cd05e684288f0571\",\"id\":\"s0757\"},{\"digest\":\"sha256:91d057f868e45b4ec5275e79df368ad16af417959c4ebe067193a3b47b6bbfc4\",\"id\":\"s0758\"},{\"digest\":\"sha256:cc5203467b5dcc79b0a3705a4bebfcc73ecf5a231332f8307669246b37a8e4eb\",\"id\":\"s0759\"}],\"source\":\"tickets/live\",\"tool\":\"query\",\"version\":\"sha256:e36b74acc9fcf3a4bdf222f12eb1e68662aae5026e8fa289459140f12f51e327\"},\"chain\":[\"sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429\"],\"host\":\"desk\",\"readVersion\":\"2\"}",
+   "answer": "{\"refusal\":\"read-malformed\"}",
+   "expect": {
+    "verdict": "read-malformed",
+    "sender": "read-malformed",
+    "counted": false,
+    "reads": 1
+   }
+  },
+  {
+   "name": "skill-load-admit",
+   "table": 5,
+   "kind": "P",
+   "applies": {
+    "issuing-host": "admits; no counter moves",
+    "sender": "sends body byte for byte, makes one read, and loads only on admit"
+   },
+   "senders": [
+    "library"
+   ],
+   "readVersion": "2",
+   "hostReads": [
+    "1",
+    "2"
+   ],
+   "inputs": {
+    "chain": "a valid root",
+    "host": "desk",
+    "at": "2026-10-30T01:00:00.000Z",
+    "audience": {
+     "kind": "agent-host",
+     "name": "agent-host-1"
+    },
+    "load": {
+     "skill": {
+      "id": "issue-style",
+      "digest": "sha256:54c58da035256c83611efb3bf1d4568f14bb07f0d90b0dc5a78b7c5771e53299"
+     },
+     "skills": [
+      {
+       "id": "expense-policy",
+       "digest": "sha256:0db9962ec1788a72f134587be9a2738c5f3db7bf53d57c0c2a28bdde20960ade"
+      }
+     ]
+    }
+   },
+   "body": "{\"at\":\"2026-10-30T01:00:00.000Z\",\"audience\":{\"kind\":\"agent-host\",\"name\":\"agent-host-1\"},\"chain\":[\"sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429\"],\"host\":\"desk\",\"load\":{\"skill\":{\"digest\":\"sha256:54c58da035256c83611efb3bf1d4568f14bb07f0d90b0dc5a78b7c5771e53299\",\"id\":\"issue-style\"},\"skills\":[{\"digest\":\"sha256:0db9962ec1788a72f134587be9a2738c5f3db7bf53d57c0c2a28bdde20960ade\",\"id\":\"expense-policy\"}]},\"readVersion\":\"2\"}",
+   "answer": "{\"load\":\"admit\"}",
+   "expect": {
+    "verdict": "admit",
+    "sender": "admit",
+    "counted": false,
+    "reads": 1,
+    "loaded": true
+   }
+  },
+  {
+   "name": "skill-load-first",
+   "table": 5,
+   "kind": "B",
+   "applies": {
+    "issuing-host": "admits",
+    "sender": "sends body byte for byte, makes one read, and loads only on admit"
+   },
+   "senders": [
+    "library"
+   ],
+   "readVersion": "2",
+   "hostReads": [
+    "1",
+    "2"
+   ],
+   "inputs": {
+    "chain": "a valid root",
+    "host": "desk",
+    "at": "2026-10-30T01:00:00.000Z",
+    "audience": {
+     "kind": "agent-host",
+     "name": "agent-host-1"
+    },
+    "load": {
+     "skill": {
+      "id": "expense-policy",
+      "digest": "sha256:0db9962ec1788a72f134587be9a2738c5f3db7bf53d57c0c2a28bdde20960ade"
+     },
+     "skills": []
+    }
+   },
+   "body": "{\"at\":\"2026-10-30T01:00:00.000Z\",\"audience\":{\"kind\":\"agent-host\",\"name\":\"agent-host-1\"},\"chain\":[\"sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429\"],\"host\":\"desk\",\"load\":{\"skill\":{\"digest\":\"sha256:0db9962ec1788a72f134587be9a2738c5f3db7bf53d57c0c2a28bdde20960ade\",\"id\":\"expense-policy\"},\"skills\":[]},\"readVersion\":\"2\"}",
+   "answer": "{\"load\":\"admit\"}",
+   "expect": {
+    "verdict": "admit",
+    "sender": "admit",
+    "counted": false,
+    "reads": 1,
+    "loaded": true
+   }
+  },
+  {
+   "name": "skill-load-refused",
+   "table": 5,
+   "kind": "N",
+   "applies": {
+    "issuing-host": "refuses skill-refused under its policy",
+    "sender": "sends body byte for byte, makes one read, and loads only on admit; writes neither the checkpoint's skills nor skill_loaded"
+   },
+   "senders": [
+    "library"
+   ],
+   "readVersion": "2",
+   "hostReads": [
+    "1",
+    "2"
+   ],
+   "inputs": {
+    "chain": "a valid root",
+    "host": "desk",
+    "at": "2026-10-30T01:00:00.000Z",
+    "audience": {
+     "kind": "agent-host",
+     "name": "agent-host-1"
+    },
+    "load": {
+     "skill": {
+      "id": "issue-style",
+      "digest": "sha256:54c58da035256c83611efb3bf1d4568f14bb07f0d90b0dc5a78b7c5771e53299"
+     },
+     "skills": [
+      {
+       "id": "expense-policy",
+       "digest": "sha256:0db9962ec1788a72f134587be9a2738c5f3db7bf53d57c0c2a28bdde20960ade"
+      }
+     ]
+    },
+    "policy": {
+     "skillsRefused": [
+      "issue-style"
+     ]
+    }
+   },
+   "body": "{\"at\":\"2026-10-30T01:00:00.000Z\",\"audience\":{\"kind\":\"agent-host\",\"name\":\"agent-host-1\"},\"chain\":[\"sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429\"],\"host\":\"desk\",\"load\":{\"skill\":{\"digest\":\"sha256:54c58da035256c83611efb3bf1d4568f14bb07f0d90b0dc5a78b7c5771e53299\",\"id\":\"issue-style\"},\"skills\":[{\"digest\":\"sha256:0db9962ec1788a72f134587be9a2738c5f3db7bf53d57c0c2a28bdde20960ade\",\"id\":\"expense-policy\"}]},\"readVersion\":\"2\"}",
+   "answer": "{\"load\":\"refuse\",\"refusal\":\"skill-refused\"}",
+   "expect": {
+    "verdict": "skill-refused",
+    "sender": "skill-refused",
+    "counted": false,
+    "reads": 1,
+    "loaded": false
+   }
+  },
+  {
+   "name": "skill-load-revoked",
+   "table": 5,
+   "kind": "N",
+   "applies": {
+    "issuing-host": "refuses revoked",
+    "sender": "sends body byte for byte, makes one read, and loads only on admit"
+   },
+   "senders": [
+    "library"
+   ],
+   "readVersion": "2",
+   "hostReads": [
+    "1",
+    "2"
+   ],
+   "inputs": {
+    "chain": "a valid root",
+    "host": "desk",
+    "at": "2026-10-30T01:00:00.000Z",
+    "audience": {
+     "kind": "agent-host",
+     "name": "agent-host-1"
+    },
+    "load": {
+     "skill": {
+      "id": "issue-style",
+      "digest": "sha256:54c58da035256c83611efb3bf1d4568f14bb07f0d90b0dc5a78b7c5771e53299"
+     },
+     "skills": [
+      {
+       "id": "expense-policy",
+       "digest": "sha256:0db9962ec1788a72f134587be9a2738c5f3db7bf53d57c0c2a28bdde20960ade"
+      }
+     ]
+    }
+   },
+   "body": "{\"at\":\"2026-10-30T01:00:00.000Z\",\"audience\":{\"kind\":\"agent-host\",\"name\":\"agent-host-1\"},\"chain\":[\"sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429\"],\"host\":\"desk\",\"load\":{\"skill\":{\"digest\":\"sha256:54c58da035256c83611efb3bf1d4568f14bb07f0d90b0dc5a78b7c5771e53299\",\"id\":\"issue-style\"},\"skills\":[{\"digest\":\"sha256:0db9962ec1788a72f134587be9a2738c5f3db7bf53d57c0c2a28bdde20960ade\",\"id\":\"expense-policy\"}]},\"readVersion\":\"2\"}",
+   "answer": "{\"load\":\"refuse\",\"refusal\":\"revoked\"}",
+   "expect": {
+    "verdict": "revoked",
+    "sender": "revoked",
+    "counted": false,
+    "reads": 1,
+    "loaded": false
+   }
+  },
+  {
+   "name": "skill-load-expired",
+   "table": 5,
+   "kind": "N",
+   "applies": {
+    "issuing-host": "refuses expired",
+    "sender": "sends body byte for byte, makes one read, and loads only on admit"
+   },
+   "senders": [
+    "library"
+   ],
+   "readVersion": "2",
+   "hostReads": [
+    "1",
+    "2"
+   ],
+   "inputs": {
+    "chain": "a valid root",
+    "host": "desk",
+    "at": "2026-10-30T01:00:00.000Z",
+    "audience": {
+     "kind": "agent-host",
+     "name": "agent-host-1"
+    },
+    "load": {
+     "skill": {
+      "id": "issue-style",
+      "digest": "sha256:54c58da035256c83611efb3bf1d4568f14bb07f0d90b0dc5a78b7c5771e53299"
+     },
+     "skills": [
+      {
+       "id": "expense-policy",
+       "digest": "sha256:0db9962ec1788a72f134587be9a2738c5f3db7bf53d57c0c2a28bdde20960ade"
+      }
+     ]
+    }
+   },
+   "body": "{\"at\":\"2026-10-30T01:00:00.000Z\",\"audience\":{\"kind\":\"agent-host\",\"name\":\"agent-host-1\"},\"chain\":[\"sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429\"],\"host\":\"desk\",\"load\":{\"skill\":{\"digest\":\"sha256:54c58da035256c83611efb3bf1d4568f14bb07f0d90b0dc5a78b7c5771e53299\",\"id\":\"issue-style\"},\"skills\":[{\"digest\":\"sha256:0db9962ec1788a72f134587be9a2738c5f3db7bf53d57c0c2a28bdde20960ade\",\"id\":\"expense-policy\"}]},\"readVersion\":\"2\"}",
+   "answer": "{\"load\":\"refuse\",\"refusal\":\"expired\"}",
+   "expect": {
+    "verdict": "expired",
+    "sender": "expired",
+    "counted": false,
+    "reads": 1,
+    "loaded": false
+   }
+  },
+  {
+   "name": "skill-load-not-issued",
+   "table": 5,
+   "kind": "N",
+   "applies": {
+    "issuing-host": "refuses not-issued",
+    "sender": "sends body byte for byte, makes one read, and loads only on admit"
+   },
+   "senders": [
+    "library"
+   ],
+   "readVersion": "2",
+   "hostReads": [
+    "1",
+    "2"
+   ],
+   "inputs": {
+    "chain": "a valid root",
+    "host": "desk",
+    "at": "2026-10-30T01:00:00.000Z",
+    "audience": {
+     "kind": "agent-host",
+     "name": "agent-host-1"
+    },
+    "load": {
+     "skill": {
+      "id": "issue-style",
+      "digest": "sha256:54c58da035256c83611efb3bf1d4568f14bb07f0d90b0dc5a78b7c5771e53299"
+     },
+     "skills": [
+      {
+       "id": "expense-policy",
+       "digest": "sha256:0db9962ec1788a72f134587be9a2738c5f3db7bf53d57c0c2a28bdde20960ade"
+      }
+     ]
+    }
+   },
+   "body": "{\"at\":\"2026-10-30T01:00:00.000Z\",\"audience\":{\"kind\":\"agent-host\",\"name\":\"agent-host-1\"},\"chain\":[\"sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429\"],\"host\":\"desk\",\"load\":{\"skill\":{\"digest\":\"sha256:54c58da035256c83611efb3bf1d4568f14bb07f0d90b0dc5a78b7c5771e53299\",\"id\":\"issue-style\"},\"skills\":[{\"digest\":\"sha256:0db9962ec1788a72f134587be9a2738c5f3db7bf53d57c0c2a28bdde20960ade\",\"id\":\"expense-policy\"}]},\"readVersion\":\"2\"}",
+   "answer": "{\"load\":\"refuse\",\"refusal\":\"not-issued\"}",
+   "expect": {
+    "verdict": "not-issued",
+    "sender": "not-issued",
+    "counted": false,
+    "reads": 1,
+    "loaded": false
+   }
+  },
+  {
+   "name": "skill-load-at-expiry",
+   "table": 5,
+   "kind": "B",
+   "applies": {
+    "issuing-host": "refuses expired: at is not before the leaf's expiresAt",
+    "sender": "refuses expired at its own step 8 and makes no read; body is what a host so asked judges"
+   },
+   "senders": [
+    "library"
+   ],
+   "readVersion": "2",
+   "hostReads": [
+    "1",
+    "2"
+   ],
+   "inputs": {
+    "chain": "a valid root",
+    "host": "desk",
+    "at": "2026-10-30T08:00:00.000Z",
+    "audience": {
+     "kind": "agent-host",
+     "name": "agent-host-1"
+    },
+    "load": {
+     "skill": {
+      "id": "issue-style",
+      "digest": "sha256:54c58da035256c83611efb3bf1d4568f14bb07f0d90b0dc5a78b7c5771e53299"
+     },
+     "skills": [
+      {
+       "id": "expense-policy",
+       "digest": "sha256:0db9962ec1788a72f134587be9a2738c5f3db7bf53d57c0c2a28bdde20960ade"
+      }
+     ]
+    }
+   },
+   "body": "{\"at\":\"2026-10-30T08:00:00.000Z\",\"audience\":{\"kind\":\"agent-host\",\"name\":\"agent-host-1\"},\"chain\":[\"sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429\"],\"host\":\"desk\",\"load\":{\"skill\":{\"digest\":\"sha256:54c58da035256c83611efb3bf1d4568f14bb07f0d90b0dc5a78b7c5771e53299\",\"id\":\"issue-style\"},\"skills\":[{\"digest\":\"sha256:0db9962ec1788a72f134587be9a2738c5f3db7bf53d57c0c2a28bdde20960ade\",\"id\":\"expense-policy\"}]},\"readVersion\":\"2\"}",
+   "answer": "{\"load\":\"refuse\",\"refusal\":\"expired\"}",
+   "expect": {
+    "verdict": "expired",
+    "sender": "expired",
+    "counted": false,
+    "reads": 0,
+    "loaded": false
+   }
+  },
+  {
+   "name": "skill-load-answer-lost",
+   "table": 5,
+   "kind": "N",
+   "applies": {
+    "sender": "sends body byte for byte, gets no answer within five seconds, refuses admission-unknown and loads nothing"
+   },
+   "senders": [
+    "library"
+   ],
+   "readVersion": "2",
+   "hostReads": [
+    "1",
+    "2"
+   ],
+   "inputs": {
+    "chain": "a valid root",
+    "host": "desk",
+    "at": "2026-10-30T01:00:00.000Z",
+    "audience": {
+     "kind": "agent-host",
+     "name": "agent-host-1"
+    },
+    "load": {
+     "skill": {
+      "id": "issue-style",
+      "digest": "sha256:54c58da035256c83611efb3bf1d4568f14bb07f0d90b0dc5a78b7c5771e53299"
+     },
+     "skills": [
+      {
+       "id": "expense-policy",
+       "digest": "sha256:0db9962ec1788a72f134587be9a2738c5f3db7bf53d57c0c2a28bdde20960ade"
+      }
+     ]
+    }
+   },
+   "body": "{\"at\":\"2026-10-30T01:00:00.000Z\",\"audience\":{\"kind\":\"agent-host\",\"name\":\"agent-host-1\"},\"chain\":[\"sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429\"],\"host\":\"desk\",\"load\":{\"skill\":{\"digest\":\"sha256:54c58da035256c83611efb3bf1d4568f14bb07f0d90b0dc5a78b7c5771e53299\",\"id\":\"issue-style\"},\"skills\":[{\"digest\":\"sha256:0db9962ec1788a72f134587be9a2738c5f3db7bf53d57c0c2a28bdde20960ade\",\"id\":\"expense-policy\"}]},\"readVersion\":\"2\"}",
+   "answer": null,
+   "expect": {
+    "verdict": "admission-unknown",
+    "sender": "admission-unknown",
+    "counted": false,
+    "reads": 1,
+    "loaded": false
+   }
+  },
+  {
+   "name": "skill-load-with-count",
+   "table": 5,
+   "kind": "N",
+   "applies": {
+    "issuing-host": "answers read-malformed",
+    "sender": "never emits; refuses on read-malformed"
+   },
+   "senders": [
+    "library"
+   ],
+   "readVersion": "2",
+   "hostReads": [
+    "1",
+    "2"
+   ],
+   "inputs": {
+    "chain": "a valid root",
+    "host": "desk",
+    "at": "2026-10-30T01:00:00.000Z",
+    "audience": {
+     "kind": "agent-host",
+     "name": "agent-host-1"
+    },
+    "load": {
+     "skill": {
+      "id": "issue-style",
+      "digest": "sha256:54c58da035256c83611efb3bf1d4568f14bb07f0d90b0dc5a78b7c5771e53299"
+     },
+     "skills": [
+      {
+       "id": "expense-policy",
+       "digest": "sha256:0db9962ec1788a72f134587be9a2738c5f3db7bf53d57c0c2a28bdde20960ade"
+      }
+     ]
+    }
+   },
+   "body": "{\"at\":\"2026-10-30T01:00:00.000Z\",\"audience\":{\"kind\":\"agent-host\",\"name\":\"agent-host-1\"},\"chain\":[\"sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429\"],\"host\":\"desk\",\"load\":{\"count\":false,\"skill\":{\"digest\":\"sha256:54c58da035256c83611efb3bf1d4568f14bb07f0d90b0dc5a78b7c5771e53299\",\"id\":\"issue-style\"},\"skills\":[{\"digest\":\"sha256:0db9962ec1788a72f134587be9a2738c5f3db7bf53d57c0c2a28bdde20960ade\",\"id\":\"expense-policy\"}]},\"readVersion\":\"2\"}",
+   "answer": "{\"refusal\":\"read-malformed\"}",
+   "expect": {
+    "verdict": "read-malformed",
+    "sender": "read-malformed",
+    "counted": false,
+    "reads": 1,
+    "loaded": false
+   }
+  },
+  {
+   "name": "skill-load-names-itself",
+   "table": 5,
+   "kind": "N",
+   "applies": {
+    "issuing-host": "answers read-malformed",
+    "sender": "never emits; refuses on read-malformed"
+   },
+   "senders": [
+    "library"
+   ],
+   "readVersion": "2",
+   "hostReads": [
+    "1",
+    "2"
+   ],
+   "inputs": {
+    "chain": "a valid root",
+    "host": "desk",
+    "at": "2026-10-30T01:00:00.000Z",
+    "audience": {
+     "kind": "agent-host",
+     "name": "agent-host-1"
+    },
+    "load": {
+     "skill": {
+      "id": "issue-style",
+      "digest": "sha256:54c58da035256c83611efb3bf1d4568f14bb07f0d90b0dc5a78b7c5771e53299"
+     },
+     "skills": [
+      {
+       "id": "expense-policy",
+       "digest": "sha256:0db9962ec1788a72f134587be9a2738c5f3db7bf53d57c0c2a28bdde20960ade"
+      }
+     ]
+    }
+   },
+   "body": "{\"at\":\"2026-10-30T01:00:00.000Z\",\"audience\":{\"kind\":\"agent-host\",\"name\":\"agent-host-1\"},\"chain\":[\"sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429\"],\"host\":\"desk\",\"load\":{\"skill\":{\"digest\":\"sha256:54c58da035256c83611efb3bf1d4568f14bb07f0d90b0dc5a78b7c5771e53299\",\"id\":\"issue-style\"},\"skills\":[{\"digest\":\"sha256:0db9962ec1788a72f134587be9a2738c5f3db7bf53d57c0c2a28bdde20960ade\",\"id\":\"expense-policy\"},{\"digest\":\"sha256:54c58da035256c83611efb3bf1d4568f14bb07f0d90b0dc5a78b7c5771e53299\",\"id\":\"issue-style\"}]},\"readVersion\":\"2\"}",
+   "answer": "{\"refusal\":\"read-malformed\"}",
+   "expect": {
+    "verdict": "read-malformed",
+    "sender": "read-malformed",
+    "counted": false,
+    "reads": 1,
+    "loaded": false
+   }
+  },
+  {
+   "name": "skill-load-at-v1",
+   "table": 5,
+   "kind": "N",
+   "applies": {
+    "issuing-host": "answers read-malformed",
+    "sender": "never emits; refuses on read-malformed; a version \"1\" sender makes no skill-load read"
+   },
+   "senders": [
+    "library"
+   ],
+   "readVersion": "2",
+   "hostReads": [
+    "1",
+    "2"
+   ],
+   "inputs": {
+    "chain": "a valid root",
+    "host": "desk",
+    "at": "2026-10-30T01:00:00.000Z",
+    "audience": {
+     "kind": "agent-host",
+     "name": "agent-host-1"
+    },
+    "load": {
+     "skill": {
+      "id": "issue-style",
+      "digest": "sha256:54c58da035256c83611efb3bf1d4568f14bb07f0d90b0dc5a78b7c5771e53299"
+     },
+     "skills": [
+      {
+       "id": "expense-policy",
+       "digest": "sha256:0db9962ec1788a72f134587be9a2738c5f3db7bf53d57c0c2a28bdde20960ade"
+      }
+     ]
+    }
+   },
+   "body": "{\"at\":\"2026-10-30T01:00:00.000Z\",\"audience\":{\"kind\":\"agent-host\",\"name\":\"agent-host-1\"},\"chain\":[\"sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429\"],\"host\":\"desk\",\"load\":{\"skill\":{\"digest\":\"sha256:54c58da035256c83611efb3bf1d4568f14bb07f0d90b0dc5a78b7c5771e53299\",\"id\":\"issue-style\"},\"skills\":[{\"digest\":\"sha256:0db9962ec1788a72f134587be9a2738c5f3db7bf53d57c0c2a28bdde20960ade\",\"id\":\"expense-policy\"}]},\"readVersion\":\"1\"}",
+   "answer": "{\"refusal\":\"read-malformed\"}",
+   "expect": {
+    "verdict": "read-malformed",
+    "sender": "read-malformed",
+    "counted": false,
+    "reads": 1,
+    "loaded": false
+   }
+  },
+  {
+   "name": "skill-load-resume",
+   "table": 5,
+   "kind": "P",
+   "applies": {
+    "issuing-host": "admits the first restore read and refuses the second skill-refused",
+    "sender": "restores in the checkpoint's load order, sends each body byte for byte, keeps the first and drops the second"
+   },
+   "senders": [
+    "library"
+   ],
+   "readVersion": "2",
+   "hostReads": [
+    "1",
+    "2"
+   ],
+   "inputs": {
+    "chain": "a valid root",
+    "host": "desk",
+    "at": "2026-10-30T01:00:00.000Z",
+    "audience": {
+     "kind": "agent-host",
+     "name": "agent-host-1"
+    },
+    "restore": [
+     {
+      "id": "expense-policy",
+      "digest": "sha256:0db9962ec1788a72f134587be9a2738c5f3db7bf53d57c0c2a28bdde20960ade"
+     },
+     {
+      "id": "issue-style",
+      "digest": "sha256:54c58da035256c83611efb3bf1d4568f14bb07f0d90b0dc5a78b7c5771e53299"
+     }
+    ],
+    "policy": {
+     "skillsRefused": [
+      "issue-style"
+     ]
+    }
+   },
+   "body": [
+    "{\"at\":\"2026-10-30T01:00:00.000Z\",\"audience\":{\"kind\":\"agent-host\",\"name\":\"agent-host-1\"},\"chain\":[\"sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429\"],\"host\":\"desk\",\"load\":{\"skill\":{\"digest\":\"sha256:0db9962ec1788a72f134587be9a2738c5f3db7bf53d57c0c2a28bdde20960ade\",\"id\":\"expense-policy\"},\"skills\":[]},\"readVersion\":\"2\"}",
+    "{\"at\":\"2026-10-30T01:00:00.000Z\",\"audience\":{\"kind\":\"agent-host\",\"name\":\"agent-host-1\"},\"chain\":[\"sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429\"],\"host\":\"desk\",\"load\":{\"skill\":{\"digest\":\"sha256:54c58da035256c83611efb3bf1d4568f14bb07f0d90b0dc5a78b7c5771e53299\",\"id\":\"issue-style\"},\"skills\":[{\"digest\":\"sha256:0db9962ec1788a72f134587be9a2738c5f3db7bf53d57c0c2a28bdde20960ade\",\"id\":\"expense-policy\"}]},\"readVersion\":\"2\"}"
+   ],
+   "answer": [
+    "{\"load\":\"admit\"}",
+    "{\"load\":\"refuse\",\"refusal\":\"skill-refused\"}"
+   ],
+   "expect": {
+    "verdict": "skill-refused",
+    "sender": "skill-refused",
+    "counted": false,
+    "reads": 2,
+    "loaded": [
+     "expense-policy"
+    ],
+    "dropped": [
+     "issue-style"
+    ]
+   }
+  },
+  {
+   "name": "skill-load-undelegated",
+   "table": 5,
+   "kind": "P",
+   "applies": {
+    "sender": "loads the skill in a run with no chain and makes no read"
+   },
+   "senders": [
+    "library"
+   ],
+   "readVersion": "2",
+   "hostReads": [
+    "1",
+    "2"
+   ],
+   "inputs": {
+    "chain": null,
+    "host": "desk",
+    "at": "2026-10-30T01:00:00.000Z",
+    "audience": {
+     "kind": "agent-host",
+     "name": "agent-host-1"
+    },
+    "load": {
+     "skill": {
+      "id": "expense-policy",
+      "digest": "sha256:0db9962ec1788a72f134587be9a2738c5f3db7bf53d57c0c2a28bdde20960ade"
+     },
+     "skills": []
+    }
+   },
+   "body": null,
+   "answer": null,
+   "expect": {
+    "verdict": "admit",
+    "sender": "admit",
+    "counted": false,
+    "reads": 0,
+    "loaded": true
+   }
+  }
+ ]
+}
