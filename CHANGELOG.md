@@ -10,6 +10,10 @@ here.
 - **RFC 0030's ES256 statement cases** (`conformance/delegation/`, staged in no corpus): 55 cases of
   the amendment's tables 1 and 2, made once by an independent signer and frozen, and the reference
   gateway's 39 Ed25519 cases, byte for byte.
+- **RFC 0030's scope-binding cases** (`conformance/delegation/scope-binding.json`, staged in no
+  corpus): table 3, as 9 statement cases and 10 request cases, made once by the same independent
+  signer and frozen. `es256-statements.json` names the link of its two chained `chain-broken`
+  cases, and its SHA-256 in the README is the revised file's.
 - **The terraform-file companion's first release, `terraform-file-v1.0.0`** (reading `1.0.0`,
   status `released`, and not stable; release notes `releases/terraform-file-v1.0.0.md`). The
   text's status sentence and §§11 and 12, the code list, the format table and the vectors' manifest
