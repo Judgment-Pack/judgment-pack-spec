@@ -7,6 +7,9 @@ here.
 
 ### Added
 
+- **RFC 0030's ES256 statement cases** (`conformance/delegation/`, staged in no corpus): 55 cases of
+  the amendment's tables 1 and 2, made once by an independent signer and frozen, and the reference
+  gateway's 39 Ed25519 cases, byte for byte.
 - **The terraform-file companion's first release, `terraform-file-v1.0.0`** (reading `1.0.0`,
   status `released`, and not stable; release notes `releases/terraform-file-v1.0.0.md`). The
   text's status sentence and §§11 and 12, the code list, the format table and the vectors' manifest
@@ -179,6 +182,21 @@ here.
 
 ### Changed
 
+- [RFC 0030](rfcs/0030-agent-principals-and-delegated-authority.md) is amended (2026-11-22), still
+  Draft. In its standards-track part, an issuing host may sign a delegation statement with a P-256
+  key. The statement then holds `alg: "ES256"` inside what is signed, with gateway §1.5's key form,
+  key identifier and low-S `r||s` signature, and an Ed25519 statement is unchanged in its bytes. A
+  chain may mix algorithms, link by link. A chain may be bound to one scope identifier
+  (`scope.scopeId`, the same on every link), and a delegated request names it or is refused
+  `scope-id-mismatch`. The admission read's wire form is stated (§2a): version `"1"` as built, and
+  version `"2"`, whose call adds the tool's descriptor digest and the skills loaded at it, with a
+  skill-load read asked before a skill loads. A sender's version is configured and never
+  negotiated, and an unknown version is refused `read-version-unsupported`. In its exploratory
+  part, a first dispatch that leaves its key uncertain is answered with its uncertain record
+  (#293). A new section plans acceptance: the gateway and the agent library each build the part
+  from the text and pass every case it lists, ES256 first, and the record states that evidence,
+  same vendor, not a cross-vendor claim. It is proposed for release `v0.6.1`. Nothing in Core, its
+  schema or any released conformance case changes.
 - **The terraform-file reading has a release route of its own** (`spec/terraform-file.md` §10,
   reading `1.0.0`; VERSIONING.md, "Independently versioned terraform-file companion").
   Its first release is the scoped tag `terraform-file-v1.0.0`, at status `released`, which is not

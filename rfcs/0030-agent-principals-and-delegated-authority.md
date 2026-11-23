@@ -9,9 +9,18 @@
   pending actions behind a removed owner, and the subject's standing read; then the narrow
   review's six LOW findings, issue
   [#291](https://github.com/Judgment-Pack/judgment-pack-spec/issues/291): the read-back's own
-  source and tool on the actor row, the owner read's cost, and the vectors they need); still Draft
-- Target: proposed for Spec `0.5.0`. This Draft is carried in release `v0.4.0`, is normative for nothing, and pre-commits nothing for `0.5.0`.
-- Issue: [#280](https://github.com/Judgment-Pack/judgment-pack-spec/issues/280)
+  source and tool on the actor row, the owner read's cost, and the vectors they need);
+  2026-11-22 (ES256 delegation statements, a chain bound to one scope identifier, and the
+  admission reads on the wire, version 2 and a skill-load read among them, in the standards-track
+  part; a first dispatch outside the read-back's scope, issue
+  [#293](https://github.com/Judgment-Pack/judgment-pack-spec/issues/293); and the acceptance plan;
+  see [Amendment of 2026-11-22](#amendment-of-2026-11-22)); still Draft
+- Target: first proposed for Spec `0.5.0` and carried as a Draft in release `v0.4.0`. The amendment
+  of 2026-11-22 is proposed for release `v0.6.1`, which carries `specVersion` `0.6.0` unchanged
+  (*Release*, under [Acceptance plan](#acceptance-plan)). The Draft is normative for
+  nothing and pre-commits nothing for any `specVersion`.
+- Issues: [#280](https://github.com/Judgment-Pack/judgment-pack-spec/issues/280) (the record),
+  [#293](https://github.com/Judgment-Pack/judgment-pack-spec/issues/293) (the first-dispatch answer)
 
 > This is an open proposal, not part of the specification. See
 > [RFC 0000](0000-rfc-process.md) for the process and evidence bar.
@@ -20,10 +29,15 @@
 >
 > *The standards-track part* is the delegation statement of §§2–3: its members, its canonical form
 > and signing, the narrowing check and the verification steps. Independent parties must agree on
-> it byte for byte, so it is proposed for a companion document beside Core. It owes RFC 0000's
-> standards-track bar, including two independent implementations and conformance cases. Neither
-> exists yet (see Implementation), so it can reach no status beyond Draft until they do. It
-> changes nothing in Core.
+> it byte for byte, so it is proposed for a companion document beside Core. Since the amendment of
+> 2026-11-22 it also holds the admission reads of §2a, whose bodies and answers an enforcing host
+> and an issuing host must agree on in the same way. It owes RFC 0000's standards-track bar,
+> including two independent implementations and conformance cases. The amendment of 2026-11-22
+> sets out how that bar is to be met and recorded: the gateway and the agent library each build
+> the standards-track part from this text alone and pass every conformance case it lists, and the
+> acceptance record states that evidence as it is, two separately written implementations, same
+> vendor, not a cross-vendor claim ([Acceptance plan](#acceptance-plan)). Until that record is
+> made, the record is a Draft. It changes nothing in Core.
 >
 > *The exploratory part* is everything else, and every piece of it lands in another repository of
 > the project, under RFC 0000's cross-project exploratory provision:
@@ -40,6 +54,32 @@
 > A disposition here confers no authority over those repositories; each decides its own adoption.
 > The implementation rows that build against this Draft are agent #260, gateway #356 and #357, and
 > desk #679. Where they build against it, they build against a Draft, and the text may change.
+
+## Amendment of 2026-11-22
+
+This amendment changes the standards-track part in four places and the exploratory part in one,
+and plans how the record meets RFC 0000's bar. Nothing else changes.
+
+1. **ES256 delegation statements** (§2, *Signing with a P-256 key*; steps 3 to 5). An issuing host
+   may sign with a P-256 key. Such a statement holds `alg: "ES256"` inside the signed bytes, and an
+   Ed25519 statement is byte for byte what it was. The rule is per link, so a chain may mix the two.
+2. **A chain bound to one scope identifier** (§2, *Binding a chain to one scope identifier*; §3,
+   clause 9). `scope.scopeId` is the same on every link, and a request under a bound chain names
+   that scope identifier or is refused `scope-id-mismatch`.
+3. **The admission reads on the wire** (§2a). Version `"1"` is stated as both implementations send
+   it. In version `"2"`, a call read adds `version`, the tool's descriptor digest, and `skills`,
+   the skills loaded at the call, and a skill-load read is asked before a skill loads. Version
+   `"1"` stays readable, a sender's version is configured and never negotiated, and an unknown
+   version is refused by name.
+4. **Step 12** gains `tool-version-refused` and `skill-refused`, on a version `"2"` read only.
+5. **§4, rule 4** (exploratory part). The first dispatch that leaves its key uncertain under a link
+   that excludes the read-back's source or tool is answered with its uncertain record, not refused
+   (#293).
+6. **[Acceptance plan](#acceptance-plan)**: the two implementations and what they are, the
+   conformance cases both must pass, the build order (ES256 first), and the release, `v0.6.1`.
+
+The ES256 text and the scope binding of §2 each stand alone. Neither needs §2a or the other, and
+they are built and verified first, ES256 before the binding.
 
 ## Summary
 
@@ -166,18 +206,23 @@ normative for nothing. Where it says "must" or "refuses", read "is proposed to".
   names ordered by Unicode code point, compact, raw UTF-8. It is not RFC 8785, whose name order
   differs outside the Basic Multilingual Plane. An implementation that reaches for an RFC 8785
   package gets that case wrong.
-- **Signature.** An Ed25519 signature (RFC 8032): 64 bytes, written as exactly 128 lowercase
-  hexadecimal characters. It is made over a context prefix followed by `canon` of the object, with
-  the object's top-level `signature` member removed and every other member retained, as gateway
-  §1.2a signs a receipt. Keys and signatures are held to gateway §8.4 by reference:
+- **Signature.** An Ed25519 signature (RFC 8032), or, on a delegation statement that holds `alg`
+  (§2, *Signing with a P-256 key*), an ES256 signature. Either is 64 bytes, written as exactly 128
+  lowercase hexadecimal characters. It is made over a context prefix followed by `canon` of the
+  object, with the object's top-level `signature` member removed and every other member retained,
+  as gateway §1.2a signs a receipt. Ed25519 keys and signatures are held to gateway §8.4 by
+  reference:
   - a pinned key is refused when it is not canonical, of small order, or not on the curve;
   - a signature verifies by the cofactorless equation with `S` below the group order;
   - the cofactored check is not used.
 
-  Since a statement's digest covers its signature, two implementations that disagree on an edge
-  signature also disagree on every chain digest that includes it.
-- **Key identifier.** `keyId` is derived as gateway §1.2 derives one: the first 32 characters of the
-  lowercase hexadecimal SHA-256 of the 32-byte public key.
+  ES256 keys and signatures are held to gateway §1.5 by reference, as §2 restates. Since a
+  statement's digest covers its signature, two implementations that disagree on an edge signature
+  also disagree on every chain digest that includes it.
+- **Key identifier.** `keyId` is derived as gateway §1.2 derives one for an Ed25519 key: the first
+  32 characters of the lowercase hexadecimal SHA-256 of the 32-byte public key. For a P-256 key it
+  is derived as gateway §1.5 derives one: the first 32 characters of the lowercase hexadecimal
+  SHA-256 of the key's 33-byte compressed point.
 - **Digest.** `"sha256:"` followed by exactly 64 lowercase hexadecimal characters, as gateway §1.2a.
 - **Time.** An RFC 3339 UTC timestamp with exactly millisecond precision,
   `YYYY-MM-DDTHH:MM:SS.sssZ`, the form ADR-0025's lease amendment fixes for a lease expiry. Two
@@ -247,8 +292,8 @@ RFC 8693 issued token, and this record does not require one.
 admits a call on statement bytes a caller supplies. It resolves the chain from the credential it
 bound (step 0), and it binds a credential only at the issuing host's authenticated request.
 
-**Members** (delegation version 1). Every member is required; a nullable member is present as
-`null`, never absent.
+**Members** (delegation version 1). Every member is required, except `alg`, which a statement holds
+exactly when a P-256 key signs it; a nullable member is present as `null`, never absent.
 
 | Member | Form | Meaning |
 | --- | --- | --- |
@@ -256,9 +301,10 @@ bound (step 0), and it binds a credential only at the issuing host's authenticat
 | `id` | opaque identifier | assigned by the issuing host; never reused |
 | `host` | flat token | the issuing host |
 | `keyId` | key identifier | the issuing host's signing key |
+| `alg` | the string `"ES256"`; **absent** on a statement an Ed25519 key signs | the signature algorithm, inside the signing input and the digest (*Signing with a P-256 key*, below) |
 | `sub` | principal reference | the subject |
 | `act` | `{"agent": opaque identifier, "software": as in §1}` | the actor and its bound software identity |
-| `scope` | object, below | what the actor may do |
+| `scope` | object, below | what the actor may do, and, where it holds `scopeId`, the one scope identifier the chain is bound to |
 | `mayDelegate` | `true` or `false` | whether a child link may be issued below this one (§3) |
 | `issuedAt` | time | |
 | `expiresAt` | time | strictly later than `issuedAt` |
@@ -266,9 +312,10 @@ bound (step 0), and it binds a credential only at the issuing host's authenticat
 | `depth` | integer | `0` for a root; the parent's `depth` plus one otherwise |
 | `signature` | signature | |
 
-**Scope.** `scope` is `{"sources": [entry, ...]}`, at least one entry. Entries are ordered by
-`audience.kind`, then `audience.name`, then `source`, each by code point, and no pair of `audience`
-and `source` repeats. An entry is:
+**Scope.** `scope` is `{"sources": [entry, ...]}`, at least one entry, and on a chain bound to one
+scope identifier also `"scopeId"` (*Binding a chain to one scope identifier*, below). Entries are
+ordered by `audience.kind`, then `audience.name`, then `source`, each by code point, and no pair of
+`audience` and `source` repeats. An entry is:
 
 | Member | Form | Meaning |
 | --- | --- | --- |
@@ -336,7 +383,8 @@ host's `audience` and the call's `source`, and four conditions hold:
   source-declared limit, the request is bounded within it before dispatch, as the source declares.
 
 **Canonical form and signing.** The statement is serialized by `canon`. Its signature is Ed25519
-under the issuing host's key. It is made over the prefix `"judgment-pack/delegation/1:"` followed by
+under the issuing host's key, or ES256 under a P-256 key of that host where the statement holds
+`alg` (below). It is made over the prefix `"judgment-pack/delegation/1:"` followed by
 `canon` of the statement, with the top-level `signature` removed and every other member retained.
 - Appending a member anywhere invalidates the signature.
 - The prefix carries the version. It domain-separates a delegation from a receipt, a seal, a
@@ -345,6 +393,158 @@ under the issuing host's key. It is made over the prefix `"judgment-pack/delegat
   `signature` included. A child, a receipt and a run record name the statement by its digest.
 - The statement is at most 65536 bytes in `canon`, with at most 256 entries, at most 256 tools
   per entry and at most 16 limits per entry (open question 21).
+
+**Signing with a P-256 key** (amendment of 2026-11-22). An issuing host may sign a statement with
+an ECDSA P-256 key, by the algorithm the reference gateway states once for its own records (gateway
+`SPEC.md` §1.5, as built in gateway v0.38.0;
+[ADR-0053](https://github.com/Judgment-Pack/judgment-pack-gateway/blob/12b0f43de0aa4b9e43e3fadca3cb9697e50f1087/docs/adr/0053-an-ecdsa-p256-signer-at-a-key-services-hsm-protection-level.md)).
+The rules below restate it for a delegation statement completely: an implementation builds from
+this subsection, the common forms and steps 1 to 7, and needs nothing of §2a.
+
+- **The algorithm.** `ES256` is ECDSA over the curve P-256 with SHA-256 (FIPS 186-5; SEC 2's
+  secp256r1), whose cofactor is 1:
+  - `p` = `ffffffff00000001000000000000000000000000ffffffffffffffffffffffff`
+    (2²⁵⁶ − 2²²⁴ + 2¹⁹² + 2⁹⁶ − 1);
+  - the curve y² = x³ − 3x + b over it, with `b` =
+    `5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604b`;
+  - `n`, the order of the base point, =
+    `ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551`, so that (n − 1)/2 =
+    `7fffffff800000007fffffffffffffffde737d56d38bcf4279dce5617e3192a8`.
+- **The member.** A statement that a P-256 key signs holds the top-level member `alg`, the string
+  `"ES256"`. A statement that an Ed25519 key signs holds no `alg` and no other member this
+  amendment adds. It is byte for byte the statement it was before, under the same
+  `delegationVersion` `"1"`, the same prefix and the same digest. No statement names Ed25519 by a
+  member. An `alg` that is not a string, or is a string other than `"ES256"` (`"EdDSA"`,
+  `"Ed25519"` and `"es256"` among them), is refused at step 3 (`malformed`).
+- **Inside what is signed.** `alg` is a top-level member like any other, so the signing input (the
+  prefix `"judgment-pack/delegation/1:"` and `canon` of the statement without `signature`) and the
+  digest both cover it. Removing, adding or changing it changes the signed bytes.
+- **The key.** A P-256 public key is its compressed point (SEC 1 §2.3.3): the byte `02` where y is
+  even or `03` where it is odd, then the 32 bytes of x, big-endian. That is 33 bytes, written as 66
+  lowercase hexadecimal characters. A verifier pins it only when its first byte is `02` or `03`,
+  x < p, and x³ − 3x + b is a square modulo p. The uncompressed form (`04` and 64 bytes) and every
+  other length are refused when the key is pinned. The cofactor is 1, so no point that exists is
+  refused for its order.
+- **The key identifier** is the first 32 lowercase hexadecimal characters of SHA-256 over the 33
+  bytes. With gateway §1.5's synthetic scalar (32 bytes of `01`, a key no host holds), the point is
+  `026ff03b949241ce1dadd43519e6960e0a85b41a69a05c328103aa2bce1594ca16` and the key identifier
+  `dbdb99c64b3d511f72c88fb6c054da73`.
+- **The signature** is `r||s`, each a 32-byte unsigned big-endian integer: 64 bytes, 128 lowercase
+  hexadecimal characters, written as an Ed25519 signature is. It verifies under the pinned key
+  exactly when 1 ≤ r ≤ n − 1, 1 ≤ s ≤ (n − 1)/2 (the low-S rule), and ECDSA verification (FIPS
+  186-5 §6.4.2) holds with SHA-256 over the signing input as the message digest. A high-S
+  signature, one with s > (n − 1)/2, does not verify, although plain ECDSA would accept it. A
+  DER-encoded signature is not of the form: at its usual 70 to 72 bytes it is refused at step 3
+  (`malformed`), and one that happened to be 64 bytes long would be read as `r||s` and fail step 5.
+- **Why low-S.** For any valid `(r, s)`, `(r, n − s)` also passes plain ECDSA. Without the rule, any
+  holder of a link could make a second signature over the same members, and so a second digest for
+  one issued link, the digest a child, a receipt and a record name it by. The rule leaves one
+  encoding per signature, and one digest per signing.
+- **Signatures are not reproducible.** Two ES256 signings of one statement differ, so their digests
+  differ. The issuing host signs a link once and keeps its bytes. It records the link it issued by
+  that digest, and its `not-issued` check (*Authoritative state*) is of that digest. No verifier
+  signs again in order to compare.
+- **Choosing the algorithm and the key.** A verifier verifies a link by the algorithm its `alg`
+  names, Ed25519 where it holds none, under the key its `keyId` names among the keys pinned for its
+  `host` **of that algorithm**. A key is pinned with its algorithm: its length or form is held to
+  that algorithm and never read as one. A key of the other algorithm is not the key the link names,
+  so a link whose `keyId` names only a pinned key of the other algorithm is refused at step 4
+  (`key-mismatch`). That is the refusal of an Ed25519-signed statement that has been given
+  `alg: "ES256"`, and of an ES256 statement whose `alg` has been removed.
+- **A chain may mix algorithms.** The rule is per link. Every link of a chain has one `host`
+  (clause 3), and that host may hold pinned keys of both algorithms, while it moves from one to the
+  other or for good. Each link is verified at steps 4 and 5 by its own `alg` and `keyId`, root
+  first. The narrowing check of §3 compares neither: a child may be signed by the other algorithm
+  than its parent, in either direction, and its `parent.digest` covers the parent's `alg` and
+  signature. A verifier that will not accept one of the algorithms pins no key of it.
+- **The proof-of-possession key is separate.** The algorithm of the run's RFC 9449 key (gateway
+  §11.4 accepts `EdDSA` and `ES256` proofs) is independent of the statements' algorithm.
+- **What the signer writes.** An issuing host writes only signatures that verify as above. A key
+  service commonly returns an ECDSA signature DER-encoded, and with either value of s. The host
+  then decodes it to r and s, replaces s with n − s where s > (n − 1)/2 (both verify under plain
+  ECDSA, and only the low one here), and writes `r||s`, each padded to 32 bytes. It takes the key's
+  33-byte compressed point from the public key the service exports, which is commonly an
+  uncompressed point inside a key structure, and pins and publishes that point. The `keyId` it
+  writes is the compressed point's.
+
+**Verifying one ES256 link.** For a link that holds `alg`, steps 3 to 5 are, in this order, and the
+first that fails is the refusal:
+1. step 3: `alg` is the string `"ES256"`, and `signature` is exactly 128 lowercase hexadecimal
+   characters; otherwise `malformed`;
+2. step 4: among the keys pinned for the link's `host` with the algorithm ES256, one has the
+   link's `keyId`; otherwise `key-mismatch`, a pinned Ed25519 key of that `keyId` included;
+3. step 5: with r the first 32 bytes and s the last 32 of the signature, 1 ≤ r ≤ n − 1 and
+   1 ≤ s ≤ (n − 1)/2, and ECDSA verification (FIPS 186-5 §6.4.2) holds under that key, the message
+   digest being SHA-256 over the prefix `"judgment-pack/delegation/1:"` followed by `canon` of the
+   link without `signature`; otherwise `signature-mismatch`.
+
+A link that holds no `alg` is verified as before, by Ed25519 under a pinned Ed25519 key. Steps 1
+and 2 and steps 6 and 7 are the same for both algorithms. Every refusal the amendment introduces
+for a statement is one of the existing names `malformed`, `key-mismatch` and
+`signature-mismatch`: no new refusal name is added at steps 1 to 7.
+
+**Binding a chain to one scope identifier** (amendment of 2026-11-22). A *scope identifier* names
+the party a gateway's sources serve, as the reference gateway defines it (gateway `SPEC.md` §1.2a,
+the receipt's `scope`; §6, *Caller scope identifiers*). It is never a delegation's `scope`, which
+names sources, tools and effects. A chain may be bound to exactly one scope identifier, so that its
+calls reach that party's sources and no other's (agent issue #373).
+
+- **The member.** `scope.scopeId` is a scope identifier in gateway §1.2a's form, never the marker
+  `"unscoped"`. It sits inside `scope`, so the signing input and the digest cover it as they cover
+  every member. A link that holds it is *bound*, and one that does not is *unbound*. A statement
+  without it is byte for byte the statement it was before, whatever its algorithm.
+- **Why inside `scope`.** A verifier written before the amendment refuses, at step 3
+  (`malformed`), a member inside `scope` that version 1 does not name: every object within a link
+  holds exactly the members version 1 names (gateway §11.1, which the agent library reads as the
+  gateway does, agent ADR-0029). So it never admits a bound chain while ignoring its binding. A
+  top-level member would be tolerated and ignored, and that verifier would then let a bound chain
+  reach its sources of no scope identifier.
+- **Its form.** A `scopeId` that is not a string of that form, or is `"unscoped"`, is refused at
+  step 3 (`malformed`).
+- **Along a chain** (§3, clause 9). Every link of a chain has the same binding: all are unbound, or
+  all are bound to the same scope identifier. The binding is the root's, and each child repeats it.
+  - A child cannot change it: another `scopeId` is `widened`.
+  - **An unbound link under a bound one** is `widened`. It does not inherit the binding. Each link
+    states its whole authority, as clause 6 makes it state its sources, so a reader of the leaf
+    alone sees the binding.
+  - A bound link under an unbound one is refused too, with clause 9's finding, although a binding
+    narrows: a binding starts at the root, because the issuing host's root signature is what lets a
+    chain name a scope identifier at all, and a child cannot grant its chain a reach the root never
+    named. An unbound chain reaches what the enforcing host lets an unbound delegation reach: at the
+    reference gateway, the sources of no scope identifier, and never a scope identifier (gateway §6).
+- **What it admits.** Under a bound chain, every entry of a `gateway` audience admits only a call to
+  a source of that scope identifier, and every request names it. An `agent-host` entry is
+  unaffected, since a host source has no scope identifier.
+- **The request check, `scope-id-mismatch`.** Once step 0 has resolved the chain, and before step 8
+  and any admission read, an enforcing host refuses a request:
+  1. under a bound chain, that names no scope identifier, or one other than `scopeId`;
+  2. under an unbound chain, that names a scope identifier;
+  3. under a bound chain whose `scopeId` the enforcing host's own configuration does not let that
+     issuing host's delegations reach (open question 27). A statement never grants a scope
+     identifier that the enforcing host has not granted: scope isolation stays the enforcing
+     host's.
+
+  The refusal reads no issuing host, counts nothing and dispatches nothing. Case 3 is also refused
+  when a credential is bound to the chain (§2, *The credential*), so no credential is bound to a
+  chain that every call would be refused under.
+- **At the gateway.** A delegated `/act` and a delegated `/acquire` may name `scope` only under a
+  chain bound to that exact scope identifier, and then reach only that scope identifier's sources.
+  Both routes follow the one rule, since a delegation bounds acquisitions and actions alike. A
+  request that fails the check is refused `400` with `/acquire`'s sentence of a wrong scope,
+  `scope: the request's scope does not match the source's` (gateway §6), which names no scope
+  identifier: on `/acquire` where §6 refuses a wrong scope, and on `/act` at the scope step of
+  gateway ADR-0054's order (its step 8, `"refusedAt": "scope-identifier"`). For a bound chain this
+  replaces gateway §6's rule that a request under a delegation never reaches a scope identifier;
+  an unbound chain keeps it. A source whose scope identifier is not the request's is refused by
+  that step as today.
+- **At the agent library.** It applies the same check before a call leaves the harness. Under a
+  bound chain it sends `scopeId` as the scope of every acquisition and tool call to a gateway
+  source, and refuses a gateway source whose mapping names another scope identifier, or none, as
+  `scope-id-mismatch`. It checks the gateway's answer: a receipt whose `scope` is not `scopeId`
+  withholds the result, as an unverified receipt does (agent ADR-0027).
+
+The binding is independent of the algorithm and of §2a. An Ed25519 or an ES256 link may be bound,
+and no read changes for it.
 
 **Issuance.** The host issues a root only on the subject's authenticated grant. It refuses one whose
 scope exceeds what the subject itself may do on that host when it is issued
@@ -386,7 +586,7 @@ noticed.
 - the `calls` counters.
 
 The enforcing host gets this state by an **admission read**: an authenticated, synchronous request
-to the issuing host. It names:
+to the issuing host, whose wire form is §2a. It names:
 - the chain's digests;
 - the call's audience, source, tool and effect;
 - whether this dispatch is to be counted;
@@ -426,16 +626,16 @@ taken in the order the step lists them.
 | 0 | `credential-mismatch` | the presented credential is not live at this enforcing host, is expired, does not prove possession of its bound key where one is bound, or, if the caller also presents a chain, its bound chain is not byte-identical to the chain the caller presents |
 | 1 | `malformed` | a link is not a JSON object, has a duplicate member name, holds a value outside the `canon` domain, or lacks a string `delegationVersion` |
 | 2 | `unsupported-version` | a link's `delegationVersion` is a string other than `"1"` |
-| 3 | `malformed` | a link violates any structural constraint of version 1 above: a member missing, of another type or form, an array out of order or with a repeat, `expiresAt` not after `issuedAt`, `parent` and `depth` inconsistent, or over a size cap |
-| 4 | `key-mismatch` | a link's `keyId` is not a key the verifier pinned for its `host`, or reached by a rotation it followed (open question 1) |
-| 5 | `signature-mismatch` | a link's signature does not verify over the input above, under gateway §8.4's rules |
+| 3 | `malformed` | a link violates any structural constraint of version 1 above: a member missing, of another type or form, an array out of order or with a repeat, `expiresAt` not after `issuedAt`, `parent` and `depth` inconsistent, or over a size cap; or it holds an `alg` that is not the string `"ES256"`, or a `scope.scopeId` that is not a scope identifier |
+| 4 | `key-mismatch` | a link's `keyId` is not a key the verifier pinned for its `host` with the link's algorithm (ES256 where it holds `alg`, Ed25519 where it holds none), or reached by a rotation it followed (open question 1) |
+| 5 | `signature-mismatch` | a link's signature does not verify over the input above: under gateway §8.4's rules for Ed25519, and under gateway §1.5's for ES256, the low-S rule included |
 | 6 | `chain-broken` | §3's clauses 0 to 3 fail |
-| 7 | `widened` | §3's clauses 4 to 8 fail |
+| 7 | `widened` | §3's clauses 4 to 9 fail |
 | 8 | `not-yet-valid`, then `expired` | at the enforcing host's authoritative time t, some link has t < `issuedAt` minus the skew allowance (open question 17), or t ≥ `expiresAt` |
 | 9 | `agent-unregistered`, then `software-mismatch` | some link's `act.agent` is not `active` in the inventory of `host`; or some link's `act.software` differs from its own actor's current inventory entry; or the **leaf's** `act.software` differs from the software bound to the credential |
 | 10 | `not-issued`, then `revoked` | the issuing host has no record of issuing some link; or some link is revoked, some link's actor is revoked, or the subject has been removed from the host (§4) |
 | 11 | `out-of-scope` | the call is not within the scope of some link. The refusal names the first failing reason, in the order `source`, `tool`, `effect`, `limit-unknown`, `limit` |
-| 12 | `subject-mismatch`, then `subject-unauthorized` | the source's declared identity is a person other than `sub` (§7, rule 1), or the call is outside what the subject itself may do on the issuing host now, the subject's standing on a service's or a connection's credential included |
+| 12 | `subject-mismatch`, then `subject-unauthorized`, then `tool-version-refused`, then `skill-refused` | the source's declared identity is a person other than `sub` (§7, rule 1), or the call is outside what the subject itself may do on the issuing host now, the subject's standing on a service's or a connection's credential included; on a read of version `"2"` only (§2a), the issuing host does not admit the call at the descriptor digest the read names, or with the skills it names as loaded |
 
 Steps 1 to 7 depend only on the bytes and a pinned key, so any party can repeat them later. Steps 0
 and 8 to 12 depend on the enforcing host's credential bindings and time, and on the issuing host's
@@ -456,7 +656,170 @@ Some refusals are not verification steps, and they sit outside this table:
   the enforcing host makes §5's separate owner read instead, it makes it after the admission read
   answers `admit`. A call it then refuses is not dispatched, and its counted budget stays
   consumed, which fails closed, as a lost answer does;
-- `not-parent-actor` and `delegation-not-permitted` are issuance refusals (§3).
+- `scope-id-mismatch` is a request check (§2, *Binding a chain to one scope identifier*), made
+  once step 0 has resolved the chain and before step 8;
+- `not-parent-actor` and `delegation-not-permitted` are issuance refusals (§3);
+- `admission-unknown`, `read-version-unsupported` and `read-malformed` concern the read itself
+  (§2a), not the chain. The enforcing host refuses the call under them where the issuing host's
+  answer to steps 8 to 10 would be reported, and nothing is counted.
+
+### 2a. The admission reads on the wire
+
+*Added by the amendment of 2026-11-22, in the standards-track part.* §2 says what an admission read
+names and what it answers. Two enforcing hosts make it today and send the same body: the reference
+gateway for its sources (gateway `SPEC.md` §11.5) and the agent library for its host sources (agent
+[ADR-0029](https://github.com/Judgment-Pack/judgment-pack-agent/blob/main/docs/adr/0029-agent-principals.md)). An issuing host built by another
+party must read that body byte for byte, so its form is stated here. Version `"1"` is the form as
+built; version `"2"` adds two members to a call read and a third kind of read.
+
+**Transport.** A read is a `POST` of `canon` bytes to the issuing host's admission URL, over HTTPS,
+authenticated by a credential the enforcing host holds for that host (gateway §11.2's
+`admission.url` and `admission.credential`). It follows no redirect and waits at most 5 seconds. It
+takes only a `200` answer of at most 4096 bytes that the `canon` parser reads as one of the answers
+below. An enforcing host that reaches the issuing host in process, as the agent library does through
+the host's admission port, hands the port the same body and reads the same answers. Anything else,
+no answer included, refuses as `admission-unknown`, so the read fails closed. A body is at most
+65536 bytes in `canon`.
+
+**The kinds of read, version `"1"`.** Every body holds `readVersion`, `host` (the issuing host, a
+flat token) and `audience` (the enforcing host's own, §2), and is one of:
+
+| Read | Body, beside those three | Answers |
+| --- | --- | --- |
+| call | `"chain": [digest, ...]` (root first), `"call": {"source", "tool", "effect", "count"}` or `null`, `"at": time` (the enforcing host's *t*) | `{"admission": "admit"}`; `{"admission": "refuse", "refusal": R}` with R one of `expired`, `agent-unregistered`, `software-mismatch`, `not-issued`, `revoked`, `subject-mismatch`, `subject-unauthorized`; or, for a read that names a call, `{"admission": "refuse", "refusal": "out-of-scope", "reason": X}` with X one of step 11's reasons |
+| standing | `"standing": principal reference` (§4, rule 4) | `{"standing": "current"}` or `{"standing": "removed"}` |
+
+A call read whose `call` is `null` is the one made when a credential is bound (§2, *The
+credential*). It names no call and counts nothing.
+
+**Version `"2"`.** A call read of version `"2"` is version `"1"`'s, with `readVersion` `"2"` and two
+more members in `call`, both required:
+
+| Member | Form | Meaning |
+| --- | --- | --- |
+| `version` | digest, or `null` | the descriptor digest of the tool called, from the approval the enforcing host dispatches under (below); `null` where that approval records none |
+| `skills` | array of `{"id": skill id, "digest": digest}`, or `null` | the skills loaded in the run at the call, ordered by `id` by code point, no `id` repeated; `[]` when none is loaded; `null` from an enforcing host that does not observe the run's skills |
+
+Every other member, and its form and meaning, is version `"1"`'s. A binding read of version `"2"`
+has `call` `null`, as in version `"1"`, and a standing read of version `"2"` is version `"1"`'s with
+`readVersion` `"2"`. A call read of version `"2"` may also be answered with R `tool-version-refused`
+or `skill-refused` (step 12). Version `"2"` adds the skill-load read (below).
+
+**Which digest `version` is.** The reference gateway defines one descriptor digest per tool. A
+customer binding's snapshot of version 3 or 4 holds, on every allowed tool's entry,
+`descriptorDigest`: `"sha256:"` and the SHA-256 of the exact JSON bytes of that tool's descriptor
+object as the server's `tools/list` reported it, before any display filtering and with every member
+the display omits (gateway
+[`docs/design/tool-descriptors.md`](https://github.com/Judgment-Pack/judgment-pack-gateway/blob/12b0f43de0aa4b9e43e3fadca3cb9697e50f1087/docs/design/tool-descriptors.md),
+*Customer snapshot version 3*; also `adapters/README.md`). It is a digest of exact bytes, not of
+`canon`: a change of formatting within the descriptor changes it, and needs the operator's
+recapture. The snapshot that holds it is pinned per operation by its own digest (gateway ADR-0021,
+`operationDescriptors`), and its signed provenance is gateway `SPEC.md` §9. Immediately before a
+call under such a snapshot, the gateway refuses a tool whose current descriptor differs from the
+approved one (`mcp-descriptor-drift`), so the approved digest is the descriptor of the tool called.
+
+`version` is that digest:
+- **from the gateway,** the `descriptorDigest` of the called tool's entry in the snapshot the call's
+  operation pins (the live operation for `/acquire`, the write operation for `/act`), and `null`
+  where that snapshot is of a version that holds no `descriptorDigest`;
+- **from the agent library,** the digest its own approval of the tool records, by the same
+  definition, and `null` where its approval records none (open question 24).
+
+It is taken from the approval the enforcing host holds, never from the request, the model or the
+tool's answer, as the effect is (§2, *Within the scope*).
+
+**Which skills `skills` names.** A skill is the agent library's named, versioned bundle (agent
+[ADR-0009](https://github.com/Judgment-Pack/judgment-pack-agent/blob/main/docs/adr/0009-skills.md)). An entry names it by its `id` (a letter, then
+letters, digits and hyphens, at most 24 in all) and its bundle digest (`skill.json#/$defs/digest`:
+`"sha256:"` and the SHA-256 of the canonical JSON of its bundle, as ADR-0009 defines it), which is
+the digest the person approved and the run loaded it at. The set is the one the run's checkpoint
+records as loaded (`checkpoint.skills`) at the instant of the read, after every load and unload
+before it.
+- **Library reads only.** Only the agent library loads skills, so only its reads carry them, as an
+  array that may be empty. The library makes its read for every call of a tool with a source,
+  gateway sources included, without counting for those (§2, *Counting `calls`*). So the issuing
+  host judges a gateway call's skills on the library's read.
+- **What a gateway read carries instead: `null`.** The gateway does not observe what a run has
+  loaded, and it never takes a list from the caller: a list a request carried would be the caller's
+  assertion, and an enforcing host admits nothing on one (§2, *The statement is not a credential*).
+  `null` says "not observed", never "none loaded".
+- **What it proves.** The library reports what it loaded, as the issuing host states the run's
+  software (§1, rule 3). It is attested by the harness, not proved, and it does not show which
+  instructions the model followed.
+
+**What the issuing host does with them.** It may admit or refuse by them, as its policy and the
+subject's approvals say. A call it would admit but for the tool's version is refused
+`tool-version-refused`; one it would admit but for a loaded skill is refused `skill-refused`. Both
+are step 12, after `subject-mismatch` and `subject-unauthorized`, in that order, and like every
+refusal they count nothing. A `null` means "not known", and the issuing host's policy decides; this
+text sets no default either way. A host whose policy requires a tool's version or a set of skills
+should refuse a call whose read gives `null` for it. A policy that refused every call for skills it
+cannot see would refuse every gateway read, whose `skills` is always `null` (open question 25). A version `"1"`
+read carries neither member, and is judged as a version `"2"` read carrying `null` for both.
+
+**The skill-load read** (version `"2"` only). The agent library asks it immediately before a skill
+loads into a delegated run, after its own checks (the skill is catalogued and admitted, and its
+digest is the pinned one, ADR-0009) and after step 8 at its own time. Its body is
+`{"readVersion": "2", "host", "audience", "chain": [digest, ...], "load": {"skill": {"id",
+"digest"}, "skills": [{"id", "digest"}, ...]}, "at"}`, where:
+- `load.skill` is the skill to load;
+- `load.skills` is the set already loaded, in the form of a call read's `skills`, never `null`, and
+  never holding `load.skill.id`;
+- `audience` is the library's agent-host audience, `chain` the run's chain and `at` its time.
+
+It is answered `{"load": "admit"}`, or `{"load": "refuse", "refusal": R}`, with R the first that
+holds of `expired`, `agent-unregistered`, `software-mismatch`, `not-issued` and `revoked` (steps 8
+to 10, as for a call read), then `skill-refused`: the issuing host does not admit that skill, at
+that digest and beside the skills already loaded, for this chain now.
+
+How it differs from a call read:
+- it names no source, tool, effect or version, so step 11 does not apply, and it carries no
+  `count`: it dispatches nothing, and no counter moves, whatever it answers;
+- it makes no action-key lookup and uses no connection grant, so no owner read follows it;
+- it is made once per load, immediately before the load. A refused or unanswered read loads
+  nothing: `load_skill` answers with the refusal (`admission-unknown` where the read fails), the
+  checkpoint's `skills` and `skill_loaded` are not written, and the run goes on. An unload makes no
+  read;
+- an earlier answer never carries past a revocation. A resumed run asks again for each skill it
+  restores, in the checkpoint's load order, each read naming those restored before it, and it drops
+  a skill that is refused;
+- an `admit` grants nothing: a skill grants no tool (ADR-0009), and every call that follows makes
+  its own call read, which names the skill in `skills`.
+
+An undelegated run makes no skill-load read. A library configured for version `"1"` makes none
+either, and its call reads carry no skills.
+
+**Which version a sender sends.** An enforcing host sends every read to one issuing host at one
+version: the version its configuration names for that host, `"1"` where it names none. That
+configuration is how the sender knows. Its operator sets `"2"` only once the issuing host has said,
+in the contract it publishes, that it reads version `"2"`. A sender never negotiates and never falls
+back. A version `"2"` read that is refused is not sent again as version `"1"`, which would drop the
+version and the skills from the host's judgment, and a version `"1"` sender never tries `"2"`. A
+sender configured for a version its host does not read fails closed (below).
+
+**The upgrade order.**
+1. The issuing host reads `"1"` and `"2"`, the skill-load read included, and says so.
+2. Each enforcing host's operator moves that host to `"2"`. The agent library and the gateway may
+   move in either order: neither's read depends on the other's version.
+3. The issuing host keeps reading `"1"` for as long as any enforcing host it serves may send it.
+   Version `"1"` stays readable, and nothing in this amendment retires it.
+
+**An unknown version, and a read of another form.** Once it has authenticated the sender as the
+audience (§2, *Authoritative state*), the issuing host reads the body in this order and answers the
+first check that fails:
+1. the body is not a `canon` object of at most 65536 bytes, or holds no string `readVersion`:
+   `{"refusal": "read-malformed"}`;
+2. `readVersion` is a string the host does not read: `{"refusal": "read-version-unsupported"}`;
+3. the body is not exactly one kind of read its version defines, or a member is missing, of another
+   form, or not defined at that version (a `version` or `skills` in a version `"1"` call, or a
+   `load` at version `"1"`), or a `skills` array is out of order or repeats an `id`:
+   `{"refusal": "read-malformed"}`.
+
+Neither answer admits, counts or records anything. An enforcing host that sends version `"2"`
+refuses the call or the load under that name, and a standing read so answered as
+`standing-unknown`, as any other answer to a standing read (§4, rule 4). An enforcing host that
+sends only version `"1"` reads neither answer form, and refuses as `admission-unknown`. Either way
+the read fails closed, and it is not retried at another version.
 
 ### 3. Chained delegation
 
@@ -480,7 +843,7 @@ question 6). A request from a third registered agent, or from a party that holds
 bytes, obtains nothing.
 
 **The narrowing check.** A chain `L0, …, Ln` (root first) is valid exactly when clause 0 holds and,
-for each child `C = Lk` and its parent `P = L(k−1)`, `k ≥ 1`, clauses 1 to 8 hold:
+for each child `C = Lk` and its parent `P = L(k−1)`, `k ≥ 1`, clauses 1 to 9 hold:
 
 0. `L0.parent` is `null` and `L0.depth` is `0`; a chain that starts below its root is broken;
 1. `C.parent.id` equals `P.id`, and `C.parent.digest` equals the digest of `P`;
@@ -493,10 +856,14 @@ for each child `C = Lk` and its parent `P = L(k−1)`, `k ≥ 1`, clauses 1 to 8
 7. for that same pair, every limit name of `p.limits` is a limit name of `e.limits`, and
    `e.limits[name]` ≤ `p.limits[name]`. `e.limits` may add names `p.limits` does not have, which
    is sound because every limit is an upper bound;
-8. `P.mayDelegate` is `true`: a child exists only below a link that permits one.
+8. `P.mayDelegate` is `true`: a child exists only below a link that permits one;
+9. `C.scope.scopeId` and `P.scope.scopeId` are both absent, or both present and equal (amendment
+   of 2026-11-22).
 
-Clauses 0 to 3 failing is `chain-broken`; clauses 4 to 8 failing is `widened`. Equality is of
-`canon` bytes. The check is pairwise, and by transitivity a link is never wider than any ancestor.
+Clauses 0 to 3 failing is `chain-broken`; clauses 4 to 9 failing is `widened`. Equality is of
+`canon` bytes. No clause compares `alg` or `keyId`: a child signed by the other algorithm than its
+parent is valid when the clauses hold (§2, *Signing with a P-256 key*). The check is pairwise,
+and by transitivity a link is never wider than any ancestor.
 The host refuses to issue a child that would fail it, and every verifier checks it again, because
 issuance is not evidence that the check was made.
 
@@ -577,6 +944,13 @@ Who may revoke:
      the limits checked:
      they bound what is dispatched, and a freed attempt is a dispatch that makes the full admission
      read of §2.
+   - **The first dispatch that leaves the key uncertain** (amendment of 2026-11-22, #293). The check
+     above refuses a *later* request on an uncertain key. It does not refuse the request whose own
+     dispatch left the key uncertain: that request's write may already have been sent, and a refusal
+     could lead the client to send it again under a new key. Where a link excludes the read-back's
+     source or tool, no read-back runs, and that request is answered with its uncertain record
+     (gateway `SPEC.md` §11.8: `409`, `action-reconciliation-unavailable`). Every later request on
+     the key is held to the check above.
    - **How the gateway learns that the subject was removed.** The subject row makes no admission
      read, so the gateway makes a **standing read**: an authenticated, synchronous request to the
      reservation's issuing host, naming the subject and asking whether it is a current principal.
@@ -896,6 +1270,17 @@ registration, entry change, delegation, revocation and connection action with wh
   statement here could later be carried in such a token without changing the check.
 - **Put it in Core.** Core is a pack format, and authorization of an agent at an enforcing host is
   not a property of a pack. A companion beside Core is the proposed home of the shared statement.
+- **A new `delegationVersion` for ES256** (amendment of 2026-11-22). A version `"2"` statement would
+  change the prefix and make the version of every statement a choice between algorithms. The
+  gateway's precedent (§1.5) puts `alg` inside the signed bytes and keeps the record's version. An
+  Ed25519 statement then stays byte for byte, and an older verifier refuses an ES256 one at step 4.
+- **Negotiating the read version per read.** A sender that tried `"2"` and fell back to `"1"` on a
+  refusal would let any failure drop the version and the skills from the host's judgment. A
+  configured version fails closed instead.
+- **Skills in the statement's scope.** A scope that listed admitted skills would bind them at
+  issuance, and a new skill, or a new digest of one, would need a new statement. The skill-load read
+  asks for the issuing host's current judgment at the load, as standing is asked at the call, and
+  leaves the statement as it is.
 
 ## Compatibility
 
@@ -918,6 +1303,23 @@ registration, entry change, delegation, revocation and connection action with wh
   kind of principal (desk #612, #452).
 - **Spec.** Nothing in Core `0.3.0`, its schema, corpus or released artifacts changes. Release `v0.4.0`
   carries this Draft and no normative text.
+- **Statements, after the amendment of 2026-11-22.** An Ed25519 statement is unchanged in its
+  bytes, its version, its prefix and its digest, and every verifier reads it as before. A verifier
+  written before the amendment reads an ES256 statement as an Ed25519 one carrying an unknown signed
+  member. Its `keyId` names no Ed25519 key that verifier pinned, so it refuses the link at step 4
+  (`key-mismatch`) and never admits it. An issuing host signs with a P-256 key only once every
+  enforcing host it issues to pins that key with its algorithm.
+- **Scope binding, after the amendment.** An unbound statement is unchanged. A verifier written
+  before the amendment refuses a bound one at step 3 (`malformed`), so it never admits a bound
+  chain as an unbound one. A delegated request that names no scope identifier, under an unbound
+  chain, is answered as before.
+- **Reads, after the amendment.** Version `"1"` is unchanged and stays readable. A sender moves to
+  `"2"` only by its configuration, after the issuing host says it reads it (§2a). A version `"1"`
+  sender that receives one of the new answer forms reads it as `admission-unknown`, which fails
+  closed.
+- **Spec, for the amendment.** Release `v0.6.1` carries `specVersion` `0.6.0` unchanged: no Core
+  text, schema or released conformance case changes (*Release*, under [Acceptance
+  plan](#acceptance-plan)).
 
 ## Security and privacy
 
@@ -958,6 +1360,23 @@ registration, entry change, delegation, revocation and connection action with wh
     which servers an operator uses. The schedule is the operator's.
 - **Resource exhaustion.** Depth, lifetime and statement size are bounded (open questions 3 and 21).
 - **Name lookalikes.** The flag is a heuristic. It reports, and refuses only by operator policy.
+- **Algorithm confusion** (amendment of 2026-11-22). The algorithm is named inside the signed bytes,
+  and keys are pinned with theirs. Neither a key's length nor a member a party adds after signing
+  chooses how a link is verified, and removing or adding `alg` is refused at step 4.
+- **Signature malleability.** The low-S rule leaves one ES256 encoding per signature, so no holder
+  of a link can make a second digest for it.
+- **Scope isolation.** A binding narrows and never grants. The enforcing host admits a bound chain
+  only for a scope identifier its own configuration lets that issuing host's delegations reach, so
+  an issuing host cannot move an agent into another party's scope by signing a statement.
+- **The descriptor digest and the skills are the enforcing host's.** `version` comes from the
+  enforcing host's approval and `skills` from the library's own record, never from the request. A
+  gateway read says `null` rather than repeat what a caller claims. Skills are attested by the
+  harness, as software is (§1, rule 3).
+- **No downgrade of the read.** A sender's read version is configured, never negotiated, and a
+  refused version `"2"` read is never sent again as `"1"`.
+- **Disclosure, version `"2"`.** A read discloses to the issuing host the tool's descriptor digest
+  and the ids and digests of the loaded skills. It never carries a skill's instructions or a
+  descriptor's text.
 
 ## Conformance
 
@@ -1048,7 +1467,11 @@ readers.
   - the subject's request with the standing read answering `removed`
     (`action-key-unauthenticated`), and unanswered (`standing-unknown`);
   - a request answered from retained evidence, and one refused at the key lookup, neither counted;
-    a check before an approval pause not counted, and the dispatch after it counted once.
+    a check before an approval pause not counted, and the dispatch after it counted once;
+  - a first dispatch that leaves its key uncertain under a link that excludes the read-back's
+    source, and one under a link that excludes its read tool: each answered `409`
+    `action-reconciliation-unavailable` with its uncertain record and no read-back run, and a later
+    request on that key with the same credential refused `action-key-unauthenticated` (#293).
 - **Connection grants:**
   - excess scope, refused and, where the provider cannot narrow, reported;
   - drift, and unused scopes listed;
@@ -1080,6 +1503,113 @@ readers.
   - a child's narrowed chain recorded;
   - a refused attempt to widen.
 
+### Conformance cases the amendment of 2026-11-22 adds
+
+Both implementations must pass every case that applies to them; the `skills` and skill-load cases
+are the library's alone. The cases are hand-written, under `conformance/delegation/` in this
+repository, staged in no Core corpus as the witness and dialect vectors are, and each states its
+expected verdict. *Kind* is P (positive), N (negative) or B (boundary). The ES256 statements are
+signed once, by a signer independent of both implementations, and frozen, since ES256 signatures are
+not reproducible (gateway ADR-0053's corpus rule). They use gateway §1.5's synthetic key, a second
+synthetic P-256 key for the unpinned cases, and a synthetic Ed25519 key. The tables are in build
+order: ES256 first (*Acceptance plan*).
+
+*1. ES256 statements, steps 1 to 7.*
+
+| Case | Kind | Expected |
+| --- | --- | --- |
+| `es256-root`: a root signed by the synthetic P-256 key, holding `alg: "ES256"` | P | `ok` |
+| `es256-key-03`: a root under a P-256 key whose y is odd (prefix `03`) | B | `ok` |
+| `es256-chain-three`: three ES256 links | P | `ok` |
+| `es256-chain-five`: five ES256 links, the maximum depth | B | `ok` |
+| `mixed-ed-es-ed`: an Ed25519 root, an ES256 child and an Ed25519 grandchild, both keys pinned | P | `ok` |
+| `mixed-es-ed`: an ES256 root and an Ed25519 child | P | `ok` |
+| `mixed-p256-unpinned`: `mixed-ed-es-ed` with the P-256 key not pinned | N | `key-mismatch`, at the child |
+| `es256-high-s`: a valid signature with s replaced by n − s | N | `signature-mismatch` |
+| `es256-s-half-plus-one`: s = (n − 1)/2 + 1 | B | `signature-mismatch` |
+| `es256-r-zero`, `es256-s-zero`, `es256-r-n`, `es256-s-n` | B | `signature-mismatch` |
+| `es256-der`: the valid signature DER-encoded, 72 bytes | N | `malformed` |
+| `es256-sig-126-hex`, `es256-sig-uppercase` | B | `malformed` |
+| `es256-alg-stripped`: an ES256 statement with `alg` removed and its signature kept | N | `key-mismatch` |
+| `alg-on-ed25519`: an Ed25519-signed statement holding `alg: "ES256"`, signed with it | N | `key-mismatch` |
+| `alg-eddsa`, `alg-ed25519`, `alg-lowercase`, `alg-number` | N | `malformed` |
+| `es256-appended`: a top-level member appended after signing | N | `signature-mismatch` |
+| `es256-changed`: a member changed after signing | N | `signature-mismatch` |
+| `es256-resigned-parent`: a child naming the digest of a second signing of its parent's members | N | `chain-broken` |
+| `ed25519-unchanged`: the gateway's 39 Ed25519 cases (`testdata/delegation/statements.json`), byte for byte | P, N, B | their recorded verdicts |
+| `p256-pin-04`, `p256-pin-05`, `p256-pin-x-is-p`, `p256-pin-no-point`, `p256-pin-64-hex` | N | the pin is refused, and a link under that key is `key-mismatch` |
+
+*2. The Draft's own missing cases, Ed25519.* `ed25519-s-not-below-order` and
+`ed25519-cofactored-only` (N, `signature-mismatch`); `ed25519-pin-non-canonical`,
+`ed25519-pin-small-order` and `ed25519-pin-off-curve` (N, the pin is refused); `scope-256-entries`,
+`tools-256` and `limits-16` (B, `ok`), beside `scope-257-entries`, `tools-257` and `limits-17` (B,
+`malformed`); `child-parent-id-differs` (N, `chain-broken`); and `member-missing-<name>`, one per
+member of version 1 (N, `malformed`).
+
+*3. The scope binding.* At the gateway, `scope-id-mismatch` is answered as §2's *At the gateway*
+states, with `/acquire`'s sentence of a wrong scope.
+
+| Case | Kind | Expected |
+| --- | --- | --- |
+| `bound-root`: a root bound to a synthetic scope identifier | P | `ok` |
+| `bound-chain`: three links bound to the same one | P | `ok` |
+| `bound-es256`: an ES256 chain, bound | P | `ok` |
+| `bound-unbound-child`: an unbound child under a bound parent | N | `widened` |
+| `bound-under-unbound`: a bound child under an unbound parent | N | `widened` |
+| `bound-changed`: a child bound to another scope identifier | N | `widened` |
+| `bound-unscoped-marker`: `scopeId: "unscoped"` | N | `malformed` |
+| `bound-not-a-string`, `bound-bad-form` | N | `malformed` |
+| `unbound-unchanged`: the cases of table 1, which hold no `scopeId` | P | unchanged |
+| `request-bound-names-it`: a delegated `/act`, and an `/acquire`, naming `scopeId`, to a source of it | P | admitted |
+| `request-bound-names-none` | N | `scope-id-mismatch`; no host read, nothing counted |
+| `request-bound-names-other` | N | `scope-id-mismatch`; no host read, nothing counted |
+| `request-unbound-names-one` | N | `scope-id-mismatch` |
+| `request-unbound-names-none`, as before the amendment | P | admitted, to a source of no scope identifier |
+| `request-bound-source-of-other`: naming `scopeId`, to a source of another scope identifier | N | the gateway's wrong-scope refusal |
+| `bound-not-configured`: a `scopeId` not configured for the issuing host | N | `scope-id-mismatch`, at binding and at a call |
+| `library-bound-mapping-other`: a gateway source mapped to another scope identifier | N | `scope-id-mismatch`, before the call leaves the harness |
+| `library-receipt-scope-differs`: a receipt whose `scope` is not `scopeId` | N | the result withheld |
+| `library-bound-host-source`: a host source under a bound chain | P | admitted, with no scope sent |
+
+*4. Reads (§2a).* Each case holds the exact body and the answer, and says what is counted.
+
+| Case | Kind | Expected |
+| --- | --- | --- |
+| `read-v1-call`: a version `"1"` call read, byte for byte as the gateway sends it | P | `admit`, counted when `count` is `true` |
+| `read-v2-library-no-skills`: `skills: []`, `version` a digest | B | `admit` |
+| `read-v2-library-two-skills`: two skills, ordered by `id` | P | `admit` |
+| `read-v2-skill-refused`: a loaded skill the host does not admit | N | `skill-refused`, nothing counted |
+| `read-v2-gateway`: `skills: null`, `version` the tool's `descriptorDigest` | P | `admit`, counted |
+| `read-v2-version-null`: `version: null`, under a host policy that requires a version | B | `tool-version-refused`, nothing counted |
+| `read-v2-version-null-not-required`: `version: null`, under a host policy that requires none | B | `admit` |
+| `read-v2-version-refused`: a digest other than the one the subject approved | N | `tool-version-refused`, nothing counted |
+| `read-v2-order`: the subject unauthorized and the version refused | N | `subject-unauthorized` |
+| `read-v2-binding`: `call: null` | P | `admit`, nothing counted |
+| `read-v2-standing`: a standing read at version `"2"` | P | `current` |
+| `read-version-unknown`: `readVersion: "3"` | N | `read-version-unsupported`; nothing counted; no version `"1"` read sent |
+| `read-version-not-a-string`: `readVersion: 2` | N | `read-malformed` |
+| `read-v2-to-v1-host`: a version `"2"` read to a host that reads only `"1"` | N | `read-version-unsupported`, not resent |
+| `read-v1-sender-new-answer`: a version `"1"` sender answered `{"refusal": "read-version-unsupported"}` | N | `admission-unknown` |
+| `read-v1-with-skills`: a version `"1"` call carrying `skills` | N | `read-malformed` |
+| `read-v2-skills-missing`, `read-v2-skills-unsorted`, `read-v2-skills-repeated`, `read-v2-call-and-load` | N | `read-malformed` |
+| `read-body-over-cap`: a body over 65536 bytes, by its `skills` | B | `read-malformed` |
+
+*5. The skill-load read.*
+
+| Case | Kind | Expected |
+| --- | --- | --- |
+| `skill-load-admit` | P | `admit`; no counter moves |
+| `skill-load-first`: `load.skills: []` | B | `admit` |
+| `skill-load-refused` | N | `skill-refused`; nothing loaded, no `skill_loaded` written |
+| `skill-load-revoked`, `skill-load-expired`, `skill-load-not-issued` | N | `revoked`, `expired`, `not-issued` |
+| `skill-load-at-expiry`: `at` equal to the leaf's `expiresAt` | B | `expired` |
+| `skill-load-answer-lost` | N | `admission-unknown`; nothing loaded |
+| `skill-load-with-count`: a `load` carrying `count` | N | `read-malformed` |
+| `skill-load-names-itself`: `load.skills` holding `load.skill.id` | N | `read-malformed` |
+| `skill-load-at-v1`: a `load` at version `"1"` | N | `read-malformed` |
+| `skill-load-resume`: two restored skills, the second refused | P | the first loaded, the second dropped |
+| `skill-load-undelegated`: a skill loaded in an undelegated run | P | no read made |
+
 ## Implementation
 
 - **The agent harness** carries the chain per run, checks it before each dispatch, and records
@@ -1093,9 +1623,103 @@ readers.
 - **A second statement verifier** could be written from §§2–3 alone, since the forms are those the
   gateway already specifies.
 
-All of these are plausible routes, written by one maintainer with same-vendor assistance. None is
-independent organizational interoperability evidence, and none is built. The standards-track part
-cannot leave Draft on them alone.
+*As built, at the amendment of 2026-11-22.* The gateway's row is built (gateway `SPEC.md` §11;
+`go/delegation_statement.go` and `go/delegation_admission.go`), and so is the agent library's
+(agent ADR-0029, accepted for agent v0.13.0, in Go and TypeScript). Both verify steps 1 to 7 for
+Ed25519 statements, and both send version `"1"` reads. The gateway signs and verifies its own
+records with ES256 since v0.38.0 (gateway §1.5), but it verifies only Ed25519 delegation statements:
+its issuing-host keys are Ed25519 (gateway §11.2), as the library's are. Neither verifies an ES256
+statement, holds a chain to a scope identifier, sends a version `"2"` read or asks a skill-load
+read: both refuse a bound statement at step 3 today, and at the gateway a delegated request
+reaches no scope identifier (gateway §6). The Desk's row (desk #679) is not assessed here.
+
+All of these are written by one maintainer with assistance from one vendor's models. None is
+independent organizational interoperability evidence ([Acceptance plan](#acceptance-plan)).
+Same vendor, not a cross-vendor claim.
+
+## Acceptance plan
+
+*Added by the amendment of 2026-11-22.* This record is to move to Accepted on the evidence below,
+built once the maintainer's reviewer has accepted this text. RFC 0000's bar is met by building
+that evidence, and the record states it as what it is.
+
+**The implementations.** Two separately written implementations build the standards-track part
+from this text alone, not from each other's code or reading, and each passes every case of
+*Conformance cases the amendment of 2026-11-22 adds* that applies to it:
+- the reference gateway, in Go, the enforcing host for its sources (gateway `SPEC.md` §11);
+- the agent library, in Go and, where it reads delegations, in TypeScript, the enforcing host for
+  its host sources (agent ADR-0029).
+
+Each implements ES256 statements and the scope binding (§2), and version `"2"` reads (§2a). The
+library alone carries skills and asks the skill-load read; the gateway's reads carry `null`.
+
+**What they are, and are not.** RFC 0000 asks for "at least two plausible independent
+implementations", and says that "a stable normative feature should not be accepted without evidence
+from two independent implementations". These are two separately written bodies of code, in separate
+repositories. They are not independent in authorship: one maintainer writes both, with assistance
+from one vendor's models, and the library's existing verifier was written from the gateway's
+reading and checks itself against the gateway's vectors. Their agreement on every case shows that
+the text can be implemented twice from itself. It does not show that independent parties
+interoperate, as [RFC 0017](0017-checkpoint-witness-statement.md) said of its own readers. Same
+vendor, not a cross-vendor claim. The standards-track part is proposed for acceptance on this record
+at draft maturity, as the Type says, and the stable bar is not claimed.
+
+**The cases that exist today.** None in this repository: the Draft ships no vectors. Outside it:
+- in the gateway, at commit `12b0f43de0aa4b9e43e3fadca3cb9697e50f1087`:
+  `testdata/delegation/statements.json`, 39 statement cases for steps 1 to 7 and the narrowing
+  check, all Ed25519; `testdata/delegation/receipt-members.json`; and nine receipt stores,
+  `corpus/v3/stores/v3-delegation-*.json`, which belong to the exploratory part (§6);
+- in the agent library: `contract/testdata/principal/gateway-statements.json` (the gateway's 39,
+  cited by repository, commit and digest) and `citation.json`; and `contract/vectors/principal/`,
+  whose `admission.json` holds 33 admission cases with the exact read each makes, beside
+  `answer.json`, `binding.json`, `chains.json`, `child.json`, `events.json`, `record.json`,
+  `refusal.json` and `report.json`.
+
+**The build order.** ES256 comes first, because a P-256 key is to sign delegation chains with no
+Ed25519 key beside it. Each step depends only on those before it.
+1. This text is accepted by the maintainer's reviewer and frozen.
+2. **ES256.** The statement cases of tables 1 and 2 are made once, by a signer independent of both
+   implementations, and frozen. Then the gateway's check: P-256 issuing-host keys pinned with their
+   algorithm, and steps 3 to 5 as §2 states them, with its 39 Ed25519 cases passing unchanged. Then
+   the library's check, in Go and TypeScript, against the same cases.
+3. **The scope binding.** Its statement cases, then the gateway's request check on `/act` and
+   `/acquire`, then the library's, with the request cases of table 3.
+4. **Version `"2"` reads** at both, then the skill-load read at the library, with tables 4 and 5,
+   against an issuing host, or a test double of one, that answers them.
+5. The record below, and the maintainer's decision.
+
+Steps 2 and 3 need nothing of step 4, and are not held for it.
+
+**The work list.** What the evidence still needs:
+- the conformance cases above, in this repository, where none exists today;
+- the Draft's own missing cases (table 2);
+- ES256 verification at the gateway, whose issuing-host keys are Ed25519 today (gateway §11.2), and
+  at the library, Ed25519 only today (ADR-0029), with each one's pin form for a P-256 key;
+- the scope binding at both: today both refuse a bound statement at step 3, and the gateway refuses
+  `scope` on every delegated request (gateway §6);
+- version `"2"` reads at both, and the skill-load read at the library;
+- an issuing host's signer that writes low-S `r||s` and the compressed key (§2, *What the signer
+  writes*): the chains a P-256 key signs come from it, and neither implementation is that signer;
+- the review of the amendment's pull request (*Review standing*);
+- `releases/v0.6.0.normative.json`, which a patch release needs (*Release*, below).
+
+**The record.** At acceptance this section gains the record: each implementation's repository and
+commit; the cases each passes, by name, and any it does not, with the reason; the review held or
+waived; and the words "same vendor, not a cross-vendor claim". The status then becomes Accepted, at
+draft maturity, by the maintainer's recorded decision. Until then the record is a Draft.
+
+**Release.** Under [`VERSIONING.md`](../VERSIONING.md#release-numbers-and-specversion), the release
+is **`v0.6.1`**, carrying `specVersion` `0.6.0` unchanged. This amendment changes no Core text, no
+Core schema and no released conformance case or row. The cases it plans are staged in no Core
+corpus, and a patch release "may change documentation, tooling, companion documents and staged
+drafts". It stays `v0.6.1` on two conditions:
+- the patch needs the normative record `releases/v0.6.0.normative.json`, which the release builder
+  requires for any patch tag and which does not exist yet;
+- if any other item of the release changes a Core schema or a released row, the release is `v0.7.0`
+  instead.
+
+Spec #391 (action receipts: an approval citation, a dry run and a scope), designed in a gateway
+decision record of its own, folds into the same release. *Placeholder: its text follows.*
 
 ## Unresolved questions
 
@@ -1108,6 +1732,8 @@ Each has a proposed default. A default is a proposal for review, not a decision 
      `"judgment-pack/delegation-rotation/1:"`.
    - The host publishes it in a registry file of its own, which verifiers read as §3b's reader
      reads the gateway's registry.
+   - A rotation to or from a P-256 key names the key's algorithm beside it, as gateway §3b's
+     `nextAlg` and `previousAlg` do (amendment of 2026-11-22).
 2. **`delegation` absent or `null` when no delegation applies?** Absent, so that a receipt made
    under no delegation is unchanged in its bytes. Its absence never proves the caller was not an
    agent; it proves only that no delegation was presented.
@@ -1203,6 +1829,21 @@ Each has a proposed default. A default is a proposal for review, not a decision 
       operator reassigns their `registeredBy`, or revokes them.
     - The proposal is that desk #679 adopt this reading. Until it does, the difference is recorded
       here.
+23. **ES256 for the issuing host** (amendment of 2026-11-22). As §2 proposes: `alg` inside the
+    signed bytes, `delegationVersion` `"1"` kept, and the algorithm chosen per link.
+24. **The library's descriptor digest.** The library's approval of a tool records the per-tool
+    descriptor digest by the gateway's definition (§2a). Until it does, its reads carry `version`
+    `null`.
+25. **A `null` in a version `"2"` read.** Settled: `null` means "not known", and the issuing host's
+    policy decides, with no default either way. A host that requires a version or a skill set
+    should refuse a `null` for it, and says so where it states its policy.
+26. **How a sender learns the host's read version.** By configuration, set by the operator from
+    the issuing host's published contract (§2a). A machine-readable statement of the versions a
+    host reads could replace it later. It would never be a per-read negotiation.
+27. **Which scope identifiers an issuing host's delegations may bind.** The enforcing host's
+    configuration names them for each issuing host, none by default, so a binding is opted into per
+    host and a scope identifier is never implied. At the reference gateway that is a member of the
+    host's entry in `delegation.hosts` (gateway §11.2), in a form the gateway states.
 
 **Review standing.** This Draft does not mark the public comment period complete. The maintainer
 authorized a departure from [RFC 0009](0009-interim-review-regime.md)'s cross-vendor review
@@ -1213,3 +1854,9 @@ for Spec 0.5.0 requires a cross-vendor review before adoption.
 The amendment of 2026-11-09 (#284) closes the confirmation review's five LOW findings; its review
 is same-vendor as well, is recorded on its pull request, and is not RFC 0009 cross-vendor
 compliance either.
+The amendment of 2026-11-22 is accepted under a waiver the maintainer recorded on 2026-11-22: RFC
+0009's different-vendor review is waived for it, so that it is built this week. Its review is by
+the drafting vendor's model, is recorded on its pull request with a written disposition for each
+finding, and is same vendor, not a cross-vendor claim. Its evidence is two separately written
+implementations, the gateway and the agent library, passing the shared cases. A different-vendor
+review remains open as a follow-up issue, and is not claimed.

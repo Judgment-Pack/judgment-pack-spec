@@ -1,0 +1,3709 @@
+{
+ "note": "Hand-written delegation chains (spec RFC 0030 §§2-3; SPEC.md §11.1), signed by an independent signer under the keys below, and the first refusal of steps 1 to 7 each must get, or ok.",
+ "keys": {
+  "desk": [
+   "00028d283e279178a6ce561e45f1b89f2a6ac45690fbb5ac48313ad61ab04584"
+  ],
+  "desk2": [
+   "00028d283e279178a6ce561e45f1b89f2a6ac45690fbb5ac48313ad61ab04584"
+  ]
+ },
+ "vectors": [
+  {
+   "name": "a valid root",
+   "chain": [
+    {
+     "delegationVersion": "1",
+     "id": "11111111111111111111111111111111",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read",
+         "read-external"
+        ],
+        "limits": {
+         "calls": 10
+        }
+       },
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/write",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "act"
+        ],
+        "limits": {}
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T08:00:00.000Z",
+     "parent": null,
+     "depth": 0,
+     "signature": "0c756976f03dca26fa31e60e53befc84c3c3a86ac3a5b82c321bb6845e4a318c4a8f4979e6c48bb56461339de773515751ec6817c85c7c439768cd275127d408"
+    }
+   ],
+   "expect": "ok"
+  },
+  {
+   "name": "a valid three-link chain",
+   "chain": [
+    {
+     "delegationVersion": "1",
+     "id": "11111111111111111111111111111111",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read",
+         "read-external"
+        ],
+        "limits": {
+         "calls": 10
+        }
+       },
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/write",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "act"
+        ],
+        "limits": {}
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T08:00:00.000Z",
+     "parent": null,
+     "depth": 0,
+     "signature": "0c756976f03dca26fa31e60e53befc84c3c3a86ac3a5b82c321bb6845e4a318c4a8f4979e6c48bb56461339de773515751ec6817c85c7c439768cd275127d408"
+    },
+    {
+     "delegationVersion": "1",
+     "id": "22222222222222222222222222222222",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read-external"
+        ],
+        "limits": {
+         "calls": 5
+        }
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T04:00:00.000Z",
+     "parent": {
+      "id": "11111111111111111111111111111111",
+      "digest": "sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429"
+     },
+     "depth": 1,
+     "signature": "850bcd77b2a591b9be71ca78a9d89901c8d39e82b9711928f392eccd361ed2e36ebe11c7fd430b9871301d55620c4bdc9e136714d73121aa1233b655452c800d"
+    },
+    {
+     "delegationVersion": "1",
+     "id": "33333333333333333333333333333333",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read-external"
+        ],
+        "limits": {
+         "calls": 5
+        }
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T02:00:00.000Z",
+     "parent": {
+      "id": "22222222222222222222222222222222",
+      "digest": "sha256:4ea91bcc03d18c65fe1b2b491f8128827480510716a6a66c88bc309eb5237af8"
+     },
+     "depth": 2,
+     "signature": "2e8045b167b721dc722f2713425f637462e0683f2ed7efa2decef64fba2a31eeb24b4ff958cd95a0a2636c29b89a3cd8f14d5fa9f4c3c7642d155e547eb86c0a"
+    }
+   ],
+   "expect": "ok"
+  },
+  {
+   "name": "a non-string delegationVersion",
+   "chain": [
+    {
+     "delegationVersion": 1,
+     "id": "11111111111111111111111111111111",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read",
+         "read-external"
+        ],
+        "limits": {
+         "calls": 10
+        }
+       },
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/write",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "act"
+        ],
+        "limits": {}
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T08:00:00.000Z",
+     "parent": null,
+     "depth": 0,
+     "signature": "0c756976f03dca26fa31e60e53befc84c3c3a86ac3a5b82c321bb6845e4a318c4a8f4979e6c48bb56461339de773515751ec6817c85c7c439768cd275127d408"
+    }
+   ],
+   "expect": "malformed"
+  },
+  {
+   "name": "the string delegationVersion 2",
+   "chain": [
+    {
+     "delegationVersion": "2",
+     "id": "11111111111111111111111111111111",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read",
+         "read-external"
+        ],
+        "limits": {
+         "calls": 10
+        }
+       },
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/write",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "act"
+        ],
+        "limits": {}
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T08:00:00.000Z",
+     "parent": null,
+     "depth": 0,
+     "signature": "7c29d27f609028af79317c5e3bb5247c1ee429204922197cc1179e3346c3c1bb17af24a218b037e039d9928e08c76fb7404bb1137811f4fc9e100e3480117f06"
+    }
+   ],
+   "expect": "unsupported-version"
+  },
+  {
+   "name": "a member missing",
+   "chain": [
+    {
+     "delegationVersion": "1",
+     "id": "11111111111111111111111111111111",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read",
+         "read-external"
+        ],
+        "limits": {
+         "calls": 10
+        }
+       },
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/write",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "act"
+        ],
+        "limits": {}
+       }
+      ]
+     },
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T08:00:00.000Z",
+     "parent": null,
+     "depth": 0,
+     "signature": "6b0abc26eac5afb6123d5cd107b3b8344829a166f5357b06ae65909291841d0b2eed072c21729e7db8a47f322b7ed96ddc752d66d35f434c5135004248781f0b"
+    }
+   ],
+   "expect": "malformed"
+  },
+  {
+   "name": "a link living more than 24 hours",
+   "chain": [
+    {
+     "delegationVersion": "1",
+     "id": "11111111111111111111111111111111",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read",
+         "read-external"
+        ],
+        "limits": {
+         "calls": 10
+        }
+       },
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/write",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "act"
+        ],
+        "limits": {}
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-31T01:00:00.000Z",
+     "parent": null,
+     "depth": 0,
+     "signature": "d283612cd995b703eae664e112a04cf8dc88852be8de504b780eebee2a7c9e514260ec6f871cee2ac018880ebb5cbb135a0f43af1fd02d79b499fd7323ce2305"
+    }
+   ],
+   "expect": "malformed"
+  },
+  {
+   "name": "expiresAt equal to issuedAt",
+   "chain": [
+    {
+     "delegationVersion": "1",
+     "id": "11111111111111111111111111111111",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read",
+         "read-external"
+        ],
+        "limits": {
+         "calls": 10
+        }
+       },
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/write",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "act"
+        ],
+        "limits": {}
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T00:00:00.000Z",
+     "parent": null,
+     "depth": 0,
+     "signature": "54187382c3dc5d7df11bd4b2d6a23f7553c4d87378df28cc181775e9287746b63897c9e0f91f446aa8c6a70a5d581bad2eb61e03d6ba78399097511c43cd4d01"
+    }
+   ],
+   "expect": "malformed"
+  },
+  {
+   "name": "a date that does not exist",
+   "chain": [
+    {
+     "delegationVersion": "1",
+     "id": "11111111111111111111111111111111",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read",
+         "read-external"
+        ],
+        "limits": {
+         "calls": 10
+        }
+       },
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/write",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "act"
+        ],
+        "limits": {}
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-02-30T00:00:00.000Z",
+     "expiresAt": "2026-03-01T00:00:00.000Z",
+     "parent": null,
+     "depth": 0,
+     "signature": "2106365494e285952a0104cf2be58437a632f432b894d3ba8432798a58a03cc4c535da515288c724ac3e08067c8b39c63a5702f1d225fc47dac07b34095c7305"
+    }
+   ],
+   "expect": "malformed"
+  },
+  {
+   "name": "a time without milliseconds",
+   "chain": [
+    {
+     "delegationVersion": "1",
+     "id": "11111111111111111111111111111111",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read",
+         "read-external"
+        ],
+        "limits": {
+         "calls": 10
+        }
+       },
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/write",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "act"
+        ],
+        "limits": {}
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00Z",
+     "expiresAt": "2026-10-30T08:00:00.000Z",
+     "parent": null,
+     "depth": 0,
+     "signature": "5551484787c1efca68fb4c50b7410a100b83ee6146f724f648cd71f213106a1131979481cf0f845626e2ca7bb75e953190fc3211219060e3050c3061e481ba02"
+    }
+   ],
+   "expect": "malformed"
+  },
+  {
+   "name": "tools out of code-point order",
+   "chain": [
+    {
+     "delegationVersion": "1",
+     "id": "11111111111111111111111111111111",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query",
+         "a-tool"
+        ],
+        "effects": [
+         "read"
+        ],
+        "limits": {}
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T08:00:00.000Z",
+     "parent": null,
+     "depth": 0,
+     "signature": "70c74d97ac5ab1f5c6ac5ee214e83f55963ded8e3f9b4b82a720fa8257d58d17dd22c47fe7da703357368ef374cb506b005e57034077dc0806a02cf9649ae40f"
+    }
+   ],
+   "expect": "malformed"
+  },
+  {
+   "name": "effects out of strength order",
+   "chain": [
+    {
+     "delegationVersion": "1",
+     "id": "11111111111111111111111111111111",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read-external",
+         "read"
+        ],
+        "limits": {}
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T08:00:00.000Z",
+     "parent": null,
+     "depth": 0,
+     "signature": "8ff66f5cb1efb99aa88f010dcf5b82113003a4fb23ad3f1cd4420b41ec1aeee31a6d9b4631d92023ea4c4a3456327d6b410b03e6b42f2fb0a4aaf2099caaab0f"
+    }
+   ],
+   "expect": "malformed"
+  },
+  {
+   "name": "an effect outside the five",
+   "chain": [
+    {
+     "delegationVersion": "1",
+     "id": "11111111111111111111111111111111",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "write"
+        ],
+        "limits": {}
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T08:00:00.000Z",
+     "parent": null,
+     "depth": 0,
+     "signature": "abeb9d1270a2282d200eb7d21074de97e6b48fe387add0db8eab1a60769add27d7aa117c8175adfc6cf040dd2d9c156ffda6c965d56e42e391836a4998f66c07"
+    }
+   ],
+   "expect": "malformed"
+  },
+  {
+   "name": "scope entries out of order",
+   "chain": [
+    {
+     "delegationVersion": "1",
+     "id": "11111111111111111111111111111111",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/write",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "act"
+        ],
+        "limits": {}
+       },
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read"
+        ],
+        "limits": {}
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T08:00:00.000Z",
+     "parent": null,
+     "depth": 0,
+     "signature": "2b00c7a4f5b3d7098d7799f183ca7f29a09c3d9d45c8c16066dfab76c5db61ef4e6ba4bcef7fbc82907cc40377610f825eb2c84bb670aa60233944aeeff3d80a"
+    }
+   ],
+   "expect": "malformed"
+  },
+  {
+   "name": "a limit name of neither kind",
+   "chain": [
+    {
+     "delegationVersion": "1",
+     "id": "11111111111111111111111111111111",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read"
+        ],
+        "limits": {
+         "rows": 5
+        }
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T08:00:00.000Z",
+     "parent": null,
+     "depth": 0,
+     "signature": "a309c2b80f005f1e3129a03c596dab49b33bb140aae52d33e5518933b89307169b855e4beb0a120aaa832653fb85e4aa121d8cedc6f2be12c167f26e880b6c0f"
+    }
+   ],
+   "expect": "malformed"
+  },
+  {
+   "name": "a negative limit",
+   "chain": [
+    {
+     "delegationVersion": "1",
+     "id": "11111111111111111111111111111111",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read"
+        ],
+        "limits": {
+         "calls": -1
+        }
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T08:00:00.000Z",
+     "parent": null,
+     "depth": 0,
+     "signature": "d16faab7a4e63cc27cae219e8e995bafd08abee377a48a2f386fb6b791483a18043cfbfc223531bfc7efa384f2e358cea776f56be36c0a098c3adac78b896c05"
+    }
+   ],
+   "expect": "malformed"
+  },
+  {
+   "name": "a statement over 65536 bytes",
+   "chain": [
+    {
+     "delegationVersion": "1",
+     "id": "11111111111111111111111111111111",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read"
+        ],
+        "limits": {}
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T08:00:00.000Z",
+     "parent": null,
+     "depth": 0,
+     "signature": "4bb7799d22da5892acddcd17e3f1ccda0dee03d95db4154f4f749f8797254e6a62dfe3a055bdc940dc2c85a9588bb91c9501702ebd281cfa6b8c7a4ab95fc80d"
+    }
+   ],
+   "expect": "malformed"
+  },
+  {
+   "name": "a signed member named outside the Basic Multilingual Plane, ordered by code point",
+   "chain": [
+    {
+     "delegationVersion": "1",
+     "id": "11111111111111111111111111111111",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read",
+         "read-external"
+        ],
+        "limits": {
+         "calls": 10
+        }
+       },
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/write",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "act"
+        ],
+        "limits": {}
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T08:00:00.000Z",
+     "parent": null,
+     "depth": 0,
+     "😀": "outside the BMP",
+     "￿": "inside the BMP",
+     "signature": "b58412c55e3b85045fcacb9b61c037f2592fba31004a0a3f8a08d648d5757e8c3c270dac75b6f2aebbf343ae0e69ac094b8ec2324c590bb5b4d336cdda49440c"
+    }
+   ],
+   "expect": "ok"
+  },
+  {
+   "name": "a member inside scope, even signed",
+   "chain": [
+    {
+     "delegationVersion": "1",
+     "id": "11111111111111111111111111111111",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read",
+         "read-external"
+        ],
+        "limits": {
+         "calls": 10
+        },
+        "note": "appended"
+       },
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/write",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "act"
+        ],
+        "limits": {}
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T08:00:00.000Z",
+     "parent": null,
+     "depth": 0,
+     "signature": "43ffc77608457971a82469bda8a1ddaf51492b98871e14cfe56e6a97211a9d7bc0a141308a9acdabf4c6c441c5698b7081eec3479a53972dc765481bd1020b0f"
+    }
+   ],
+   "expect": "malformed"
+  },
+  {
+   "name": "a member appended at the top level after signing",
+   "chain": [
+    {
+     "delegationVersion": "1",
+     "id": "11111111111111111111111111111111",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read",
+         "read-external"
+        ],
+        "limits": {
+         "calls": 10
+        }
+       },
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/write",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "act"
+        ],
+        "limits": {}
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T08:00:00.000Z",
+     "parent": null,
+     "depth": 0,
+     "signature": "0c756976f03dca26fa31e60e53befc84c3c3a86ac3a5b82c321bb6845e4a318c4a8f4979e6c48bb56461339de773515751ec6817c85c7c439768cd275127d408",
+     "note": "appended after signing"
+    }
+   ],
+   "expect": "signature-mismatch"
+  },
+  {
+   "name": "a signature over a changed member",
+   "chain": [
+    {
+     "delegationVersion": "1",
+     "id": "11111111111111111111111111111111",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read",
+         "read-external"
+        ],
+        "limits": {
+         "calls": 10
+        }
+       },
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/write",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "act"
+        ],
+        "limits": {}
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T09:00:00.000Z",
+     "parent": null,
+     "depth": 0,
+     "signature": "0c756976f03dca26fa31e60e53befc84c3c3a86ac3a5b82c321bb6845e4a318c4a8f4979e6c48bb56461339de773515751ec6817c85c7c439768cd275127d408"
+    }
+   ],
+   "expect": "signature-mismatch"
+  },
+  {
+   "name": "a key not pinned for the host",
+   "chain": [
+    {
+     "delegationVersion": "1",
+     "id": "11111111111111111111111111111111",
+     "host": "desk",
+     "keyId": "8109a98b60f3aef6eec6e627d49a1cb1",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read",
+         "read-external"
+        ],
+        "limits": {
+         "calls": 10
+        }
+       },
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/write",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "act"
+        ],
+        "limits": {}
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T08:00:00.000Z",
+     "parent": null,
+     "depth": 0,
+     "signature": "9315641f34818bef72935e76d40a98781c7979a8c5160b42dc535183ff123ecc8b6a5beafb037f6712f84c31bab34d2332e999edfd2a1456a74c7f04f7dd6604"
+    }
+   ],
+   "expect": "key-mismatch"
+  },
+  {
+   "name": "a chain that starts below its root",
+   "chain": [
+    {
+     "delegationVersion": "1",
+     "id": "22222222222222222222222222222222",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read-external"
+        ],
+        "limits": {
+         "calls": 5
+        }
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T04:00:00.000Z",
+     "parent": {
+      "id": "11111111111111111111111111111111",
+      "digest": "sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429"
+     },
+     "depth": 1,
+     "signature": "850bcd77b2a591b9be71ca78a9d89901c8d39e82b9711928f392eccd361ed2e36ebe11c7fd430b9871301d55620c4bdc9e136714d73121aa1233b655452c800d"
+    },
+    {
+     "delegationVersion": "1",
+     "id": "33333333333333333333333333333333",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read-external"
+        ],
+        "limits": {
+         "calls": 5
+        }
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T02:00:00.000Z",
+     "parent": {
+      "id": "22222222222222222222222222222222",
+      "digest": "sha256:4ea91bcc03d18c65fe1b2b491f8128827480510716a6a66c88bc309eb5237af8"
+     },
+     "depth": 2,
+     "signature": "2e8045b167b721dc722f2713425f637462e0683f2ed7efa2decef64fba2a31eeb24b4ff958cd95a0a2636c29b89a3cd8f14d5fa9f4c3c7642d155e547eb86c0a"
+    }
+   ],
+   "expect": "chain-broken"
+  },
+  {
+   "name": "a child naming another digest for its parent",
+   "chain": [
+    {
+     "delegationVersion": "1",
+     "id": "11111111111111111111111111111111",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read",
+         "read-external"
+        ],
+        "limits": {
+         "calls": 10
+        }
+       },
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/write",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "act"
+        ],
+        "limits": {}
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T08:00:00.000Z",
+     "parent": null,
+     "depth": 0,
+     "signature": "0c756976f03dca26fa31e60e53befc84c3c3a86ac3a5b82c321bb6845e4a318c4a8f4979e6c48bb56461339de773515751ec6817c85c7c439768cd275127d408"
+    },
+    {
+     "delegationVersion": "1",
+     "id": "22222222222222222222222222222222",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read-external"
+        ],
+        "limits": {
+         "calls": 5
+        }
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T04:00:00.000Z",
+     "parent": {
+      "id": "11111111111111111111111111111111",
+      "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+     },
+     "depth": 1,
+     "signature": "f4b1f2e565700bb20a4105c48ed529ebde4f80f8c7b1daf197455af8b7db6779910bbcdd3ad842125274575e5285109ea1942078365a6ad67932b63e0cf79204"
+    }
+   ],
+   "expect": "chain-broken"
+  },
+  {
+   "name": "a child of the wrong depth",
+   "chain": [
+    {
+     "delegationVersion": "1",
+     "id": "11111111111111111111111111111111",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read",
+         "read-external"
+        ],
+        "limits": {
+         "calls": 10
+        }
+       },
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/write",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "act"
+        ],
+        "limits": {}
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T08:00:00.000Z",
+     "parent": null,
+     "depth": 0,
+     "signature": "0c756976f03dca26fa31e60e53befc84c3c3a86ac3a5b82c321bb6845e4a318c4a8f4979e6c48bb56461339de773515751ec6817c85c7c439768cd275127d408"
+    },
+    {
+     "delegationVersion": "1",
+     "id": "44444444444444444444444444444444",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read-external"
+        ],
+        "limits": {
+         "calls": 5
+        }
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T04:00:00.000Z",
+     "parent": {
+      "id": "11111111111111111111111111111111",
+      "digest": "sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429"
+     },
+     "depth": 2,
+     "signature": "ca7f697e79afe18553bc61ef932834c582c60f28514787847207e7fce67e833bb321213dd52aca9337ce25681eef8b00b7f6fe8bef34ecca01650b0351f5600d"
+    }
+   ],
+   "expect": "chain-broken"
+  },
+  {
+   "name": "a child of another host",
+   "chain": [
+    {
+     "delegationVersion": "1",
+     "id": "11111111111111111111111111111111",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read",
+         "read-external"
+        ],
+        "limits": {
+         "calls": 10
+        }
+       },
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/write",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "act"
+        ],
+        "limits": {}
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T08:00:00.000Z",
+     "parent": null,
+     "depth": 0,
+     "signature": "0c756976f03dca26fa31e60e53befc84c3c3a86ac3a5b82c321bb6845e4a318c4a8f4979e6c48bb56461339de773515751ec6817c85c7c439768cd275127d408"
+    },
+    {
+     "delegationVersion": "1",
+     "id": "44444444444444444444444444444444",
+     "host": "desk2",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read-external"
+        ],
+        "limits": {
+         "calls": 5
+        }
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T04:00:00.000Z",
+     "parent": {
+      "id": "11111111111111111111111111111111",
+      "digest": "sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429"
+     },
+     "depth": 1,
+     "signature": "5355b609d953cfb6a2aa73e2b33541b27661453095f1aa522bbb448dbeae13e7a90e33a56e167a2c08ebd8099d39f1eb6d87c943ad226915ddf996cbe1d8b903"
+    }
+   ],
+   "expect": "chain-broken"
+  },
+  {
+   "name": "a child changing the subject",
+   "chain": [
+    {
+     "delegationVersion": "1",
+     "id": "11111111111111111111111111111111",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read",
+         "read-external"
+        ],
+        "limits": {
+         "calls": 10
+        }
+       },
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/write",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "act"
+        ],
+        "limits": {}
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T08:00:00.000Z",
+     "parent": null,
+     "depth": 0,
+     "signature": "0c756976f03dca26fa31e60e53befc84c3c3a86ac3a5b82c321bb6845e4a318c4a8f4979e6c48bb56461339de773515751ec6817c85c7c439768cd275127d408"
+    },
+    {
+     "delegationVersion": "1",
+     "id": "44444444444444444444444444444444",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "other@example.com"
+     },
+     "act": {
+      "agent": "a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read-external"
+        ],
+        "limits": {
+         "calls": 5
+        }
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T04:00:00.000Z",
+     "parent": {
+      "id": "11111111111111111111111111111111",
+      "digest": "sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429"
+     },
+     "depth": 1,
+     "signature": "efba7efce407ebca8a964a44f41b58c777ee38c7aa86d51f12cfd2cae7b1e79f09d0828771e880a37054be015f16d565ea841935d48eac809ebda82d7f965e09"
+    }
+   ],
+   "expect": "widened"
+  },
+  {
+   "name": "a child changing the subject's kind",
+   "chain": [
+    {
+     "delegationVersion": "1",
+     "id": "11111111111111111111111111111111",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read",
+         "read-external"
+        ],
+        "limits": {
+         "calls": 10
+        }
+       },
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/write",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "act"
+        ],
+        "limits": {}
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T08:00:00.000Z",
+     "parent": null,
+     "depth": 0,
+     "signature": "0c756976f03dca26fa31e60e53befc84c3c3a86ac3a5b82c321bb6845e4a318c4a8f4979e6c48bb56461339de773515751ec6817c85c7c439768cd275127d408"
+    },
+    {
+     "delegationVersion": "1",
+     "id": "44444444444444444444444444444444",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "service",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read-external"
+        ],
+        "limits": {
+         "calls": 5
+        }
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T04:00:00.000Z",
+     "parent": {
+      "id": "11111111111111111111111111111111",
+      "digest": "sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429"
+     },
+     "depth": 1,
+     "signature": "4c1183605aa9e203feb18397c473de779f61def0ad79883208357c0ec9bd7151a0395e810ee62d0d15e8c8fadf32f56386b3cd99dc2933ab6c46850bf745a90c"
+    }
+   ],
+   "expect": "widened"
+  },
+  {
+   "name": "a child expiring after its parent",
+   "chain": [
+    {
+     "delegationVersion": "1",
+     "id": "11111111111111111111111111111111",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read",
+         "read-external"
+        ],
+        "limits": {
+         "calls": 10
+        }
+       },
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/write",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "act"
+        ],
+        "limits": {}
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T08:00:00.000Z",
+     "parent": null,
+     "depth": 0,
+     "signature": "0c756976f03dca26fa31e60e53befc84c3c3a86ac3a5b82c321bb6845e4a318c4a8f4979e6c48bb56461339de773515751ec6817c85c7c439768cd275127d408"
+    },
+    {
+     "delegationVersion": "1",
+     "id": "44444444444444444444444444444444",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read-external"
+        ],
+        "limits": {
+         "calls": 5
+        }
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T09:00:00.000Z",
+     "parent": {
+      "id": "11111111111111111111111111111111",
+      "digest": "sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429"
+     },
+     "depth": 1,
+     "signature": "9aecce36d14270b18d2a1f570361068bff8a0cc375e36f79ed3bc8a1ee960b191ec91b5f5b1d31ea990cf14c03ee181d892b6ca86a1ab68dfcedfd41a520070e"
+    }
+   ],
+   "expect": "widened"
+  },
+  {
+   "name": "a child expiring with its parent",
+   "chain": [
+    {
+     "delegationVersion": "1",
+     "id": "11111111111111111111111111111111",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read",
+         "read-external"
+        ],
+        "limits": {
+         "calls": 10
+        }
+       },
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/write",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "act"
+        ],
+        "limits": {}
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T08:00:00.000Z",
+     "parent": null,
+     "depth": 0,
+     "signature": "0c756976f03dca26fa31e60e53befc84c3c3a86ac3a5b82c321bb6845e4a318c4a8f4979e6c48bb56461339de773515751ec6817c85c7c439768cd275127d408"
+    },
+    {
+     "delegationVersion": "1",
+     "id": "44444444444444444444444444444444",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read-external"
+        ],
+        "limits": {
+         "calls": 5
+        }
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T08:00:00.000Z",
+     "parent": {
+      "id": "11111111111111111111111111111111",
+      "digest": "sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429"
+     },
+     "depth": 1,
+     "signature": "a07cd9454a1672e082d502e2e3bd3f1f5d75d62a454a46331c768c45ab5b43e2579740c208af77494bb3f227d4bd5b5916a19a5ede80f0c96e7fbb20cf1d0207"
+    }
+   ],
+   "expect": "ok"
+  },
+  {
+   "name": "a child issued before its parent",
+   "chain": [
+    {
+     "delegationVersion": "1",
+     "id": "11111111111111111111111111111111",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read",
+         "read-external"
+        ],
+        "limits": {
+         "calls": 10
+        }
+       },
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/write",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "act"
+        ],
+        "limits": {}
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T08:00:00.000Z",
+     "parent": null,
+     "depth": 0,
+     "signature": "0c756976f03dca26fa31e60e53befc84c3c3a86ac3a5b82c321bb6845e4a318c4a8f4979e6c48bb56461339de773515751ec6817c85c7c439768cd275127d408"
+    },
+    {
+     "delegationVersion": "1",
+     "id": "44444444444444444444444444444444",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read-external"
+        ],
+        "limits": {
+         "calls": 5
+        }
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-29T23:00:00.000Z",
+     "expiresAt": "2026-10-30T04:00:00.000Z",
+     "parent": {
+      "id": "11111111111111111111111111111111",
+      "digest": "sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429"
+     },
+     "depth": 1,
+     "signature": "af0854c2c67360c5b1e8000f52b27625d59cf0685eb31524ae3faca7ae30a534ae825c4435fe2032ae738a311b8b19f672719f114f6b7e044da8769f8b1a2404"
+    }
+   ],
+   "expect": "widened"
+  },
+  {
+   "name": "a child adding a tool",
+   "chain": [
+    {
+     "delegationVersion": "1",
+     "id": "11111111111111111111111111111111",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read",
+         "read-external"
+        ],
+        "limits": {
+         "calls": 10
+        }
+       },
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/write",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "act"
+        ],
+        "limits": {}
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T08:00:00.000Z",
+     "parent": null,
+     "depth": 0,
+     "signature": "0c756976f03dca26fa31e60e53befc84c3c3a86ac3a5b82c321bb6845e4a318c4a8f4979e6c48bb56461339de773515751ec6817c85c7c439768cd275127d408"
+    },
+    {
+     "delegationVersion": "1",
+     "id": "44444444444444444444444444444444",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query",
+         "sibling"
+        ],
+        "effects": [
+         "read"
+        ],
+        "limits": {
+         "calls": 5
+        }
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T04:00:00.000Z",
+     "parent": {
+      "id": "11111111111111111111111111111111",
+      "digest": "sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429"
+     },
+     "depth": 1,
+     "signature": "23a100fff45b84c4e715cf790a6cc8b7607d3b577f74e4427b321c92242fe0b02031967fce4abe11152b3c7812799c2c5c623f7a681ff53664d5f0f3c932ef0d"
+    }
+   ],
+   "expect": "widened"
+  },
+  {
+   "name": "a child adding an effect",
+   "chain": [
+    {
+     "delegationVersion": "1",
+     "id": "11111111111111111111111111111111",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read",
+         "read-external"
+        ],
+        "limits": {
+         "calls": 10
+        }
+       },
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/write",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "act"
+        ],
+        "limits": {}
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T08:00:00.000Z",
+     "parent": null,
+     "depth": 0,
+     "signature": "0c756976f03dca26fa31e60e53befc84c3c3a86ac3a5b82c321bb6845e4a318c4a8f4979e6c48bb56461339de773515751ec6817c85c7c439768cd275127d408"
+    },
+    {
+     "delegationVersion": "1",
+     "id": "44444444444444444444444444444444",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "pure",
+         "read"
+        ],
+        "limits": {
+         "calls": 5
+        }
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T04:00:00.000Z",
+     "parent": {
+      "id": "11111111111111111111111111111111",
+      "digest": "sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429"
+     },
+     "depth": 1,
+     "signature": "de3629577facde395d42f6ca44b27cc5a2fa61443e121446e1821e86d6a045fa0c29414056dd99ec2634f76d8f307ca6591c1f85711429045a1b6e5fc519cd0e"
+    }
+   ],
+   "expect": "widened"
+  },
+  {
+   "name": "a child dropping a limit",
+   "chain": [
+    {
+     "delegationVersion": "1",
+     "id": "11111111111111111111111111111111",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read",
+         "read-external"
+        ],
+        "limits": {
+         "calls": 10
+        }
+       },
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/write",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "act"
+        ],
+        "limits": {}
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T08:00:00.000Z",
+     "parent": null,
+     "depth": 0,
+     "signature": "0c756976f03dca26fa31e60e53befc84c3c3a86ac3a5b82c321bb6845e4a318c4a8f4979e6c48bb56461339de773515751ec6817c85c7c439768cd275127d408"
+    },
+    {
+     "delegationVersion": "1",
+     "id": "44444444444444444444444444444444",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read"
+        ],
+        "limits": {}
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T04:00:00.000Z",
+     "parent": {
+      "id": "11111111111111111111111111111111",
+      "digest": "sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429"
+     },
+     "depth": 1,
+     "signature": "0a46cb9776842aeaab2be805d9be96f35e54370bf9f384e0ad5db88f160763720e04388acdbc8b8c957fde5cb462b5159444ae3e9ab744d20dab93b79a44d408"
+    }
+   ],
+   "expect": "widened"
+  },
+  {
+   "name": "a child raising a limit",
+   "chain": [
+    {
+     "delegationVersion": "1",
+     "id": "11111111111111111111111111111111",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read",
+         "read-external"
+        ],
+        "limits": {
+         "calls": 10
+        }
+       },
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/write",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "act"
+        ],
+        "limits": {}
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T08:00:00.000Z",
+     "parent": null,
+     "depth": 0,
+     "signature": "0c756976f03dca26fa31e60e53befc84c3c3a86ac3a5b82c321bb6845e4a318c4a8f4979e6c48bb56461339de773515751ec6817c85c7c439768cd275127d408"
+    },
+    {
+     "delegationVersion": "1",
+     "id": "44444444444444444444444444444444",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read"
+        ],
+        "limits": {
+         "calls": 11
+        }
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T04:00:00.000Z",
+     "parent": {
+      "id": "11111111111111111111111111111111",
+      "digest": "sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429"
+     },
+     "depth": 1,
+     "signature": "1a0136cc5eb829db7f047a7cd9d82c4c78819a079d47e9f99f4971c945c9a109129c307a961a27b9139841a742763cb324211d9d9920e058d9f0d366f1c0dd0a"
+    }
+   ],
+   "expect": "widened"
+  },
+  {
+   "name": "a child adding a limit its parent lacks",
+   "chain": [
+    {
+     "delegationVersion": "1",
+     "id": "11111111111111111111111111111111",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read",
+         "read-external"
+        ],
+        "limits": {
+         "calls": 10
+        }
+       },
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/write",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "act"
+        ],
+        "limits": {}
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T08:00:00.000Z",
+     "parent": null,
+     "depth": 0,
+     "signature": "0c756976f03dca26fa31e60e53befc84c3c3a86ac3a5b82c321bb6845e4a318c4a8f4979e6c48bb56461339de773515751ec6817c85c7c439768cd275127d408"
+    },
+    {
+     "delegationVersion": "1",
+     "id": "44444444444444444444444444444444",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/write",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "act"
+        ],
+        "limits": {
+         "calls": 1
+        }
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T04:00:00.000Z",
+     "parent": {
+      "id": "11111111111111111111111111111111",
+      "digest": "sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429"
+     },
+     "depth": 1,
+     "signature": "229d3a6ac1db8015eeabff5f00430a9d858ea75d97a032d4610b294fb71ccfc8697bdbcfcb5688ffa4405c301f11a6b6fde012a35dc49f4a408f50bc9ae90803"
+    }
+   ],
+   "expect": "ok"
+  },
+  {
+   "name": "a child of another audience with the same source",
+   "chain": [
+    {
+     "delegationVersion": "1",
+     "id": "11111111111111111111111111111111",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read",
+         "read-external"
+        ],
+        "limits": {
+         "calls": 10
+        }
+       },
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/write",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "act"
+        ],
+        "limits": {}
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T08:00:00.000Z",
+     "parent": null,
+     "depth": 0,
+     "signature": "0c756976f03dca26fa31e60e53befc84c3c3a86ac3a5b82c321bb6845e4a318c4a8f4979e6c48bb56461339de773515751ec6817c85c7c439768cd275127d408"
+    },
+    {
+     "delegationVersion": "1",
+     "id": "44444444444444444444444444444444",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:staging"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read"
+        ],
+        "limits": {
+         "calls": 5
+        }
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T04:00:00.000Z",
+     "parent": {
+      "id": "11111111111111111111111111111111",
+      "digest": "sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429"
+     },
+     "depth": 1,
+     "signature": "effab09dfd99966079909d74408d44d9449813160a0a793c094be9e5b7415738f61c0ac81bc944be6dcaadb3a5671ad65a9392c2e3cb7feb259ad98af2a5c907"
+    }
+   ],
+   "expect": "widened"
+  },
+  {
+   "name": "a child below a link that permits none",
+   "chain": [
+    {
+     "delegationVersion": "1",
+     "id": "11111111111111111111111111111111",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read",
+         "read-external"
+        ],
+        "limits": {
+         "calls": 10
+        }
+       },
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/write",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "act"
+        ],
+        "limits": {}
+       }
+      ]
+     },
+     "mayDelegate": false,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T08:00:00.000Z",
+     "parent": null,
+     "depth": 0,
+     "signature": "4406abd5b6c27edd176bce67bd56cbf7588cccb2ed17a4432a1e9d6a9cd2558385316e467ad5a655f11b5d9f3eff4b3c91bdaeadf65b0f4c31f103bf1b31d90d"
+    },
+    {
+     "delegationVersion": "1",
+     "id": "44444444444444444444444444444444",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read-external"
+        ],
+        "limits": {
+         "calls": 5
+        }
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T04:00:00.000Z",
+     "parent": {
+      "id": "11111111111111111111111111111111",
+      "digest": "sha256:4149d517d41911f9324c4f6bee6c17966777caf79113145723780f88c42bc4f8"
+     },
+     "depth": 1,
+     "signature": "4e59bf62b55c5bd33be259401707af5c312bf091d05427bf531bf815ce6cf99e091fabdf15c65874fc3a098fe1bf8fdfe26978a8aa1cbc020250e2c9d67cf606"
+    }
+   ],
+   "expect": "widened"
+  },
+  {
+   "name": "five links, the maximum depth",
+   "chain": [
+    {
+     "delegationVersion": "1",
+     "id": "11111111111111111111111111111111",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read",
+         "read-external"
+        ],
+        "limits": {
+         "calls": 10
+        }
+       },
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/write",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "act"
+        ],
+        "limits": {}
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T08:00:00.000Z",
+     "parent": null,
+     "depth": 0,
+     "signature": "0c756976f03dca26fa31e60e53befc84c3c3a86ac3a5b82c321bb6845e4a318c4a8f4979e6c48bb56461339de773515751ec6817c85c7c439768cd275127d408"
+    },
+    {
+     "delegationVersion": "1",
+     "id": "51515151515151515151515151515151",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read-external"
+        ],
+        "limits": {
+         "calls": 5
+        }
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T04:00:00.000Z",
+     "parent": {
+      "id": "11111111111111111111111111111111",
+      "digest": "sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429"
+     },
+     "depth": 1,
+     "signature": "704b7647a86c48f7df37fcec8e959fbb290ac31c5735343a743d7190fbfbaa63eb3e96ce23e12f53c4f16bae33bf068b0334cf132739dd6f56e55cbb0f777604"
+    },
+    {
+     "delegationVersion": "1",
+     "id": "52525252525252525252525252525252",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read-external"
+        ],
+        "limits": {
+         "calls": 5
+        }
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T04:00:00.000Z",
+     "parent": {
+      "id": "51515151515151515151515151515151",
+      "digest": "sha256:fa27cf40f63ed497e2b7da3c31c3bb48c745a4fc7bf292f6029b6dff0f2cccd1"
+     },
+     "depth": 2,
+     "signature": "ae6151a7a41fcb07b61faac48e57bf150f320fe105583e337fd9a47010634a6b2719b837444e1572f89497e5a5b36ab980723846aee148b84a24e189ac7dfa00"
+    },
+    {
+     "delegationVersion": "1",
+     "id": "53535353535353535353535353535353",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read-external"
+        ],
+        "limits": {
+         "calls": 5
+        }
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T04:00:00.000Z",
+     "parent": {
+      "id": "52525252525252525252525252525252",
+      "digest": "sha256:231bbc7099c849b60ef30eabd94bb66a2b8849e4d28846aac8c7324ad65e9000"
+     },
+     "depth": 3,
+     "signature": "69ba05127b504c7109698996ee6c4950b27ab05a302b769651702f13f61eed56578c44f8e353fe3084e5de0d2effc9a2351cae0d0c4759c96fa21911a7bd2c07"
+    },
+    {
+     "delegationVersion": "1",
+     "id": "54545454545454545454545454545454",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read-external"
+        ],
+        "limits": {
+         "calls": 5
+        }
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T04:00:00.000Z",
+     "parent": {
+      "id": "53535353535353535353535353535353",
+      "digest": "sha256:de5f92a421b26282791f56b496b1ccb77c2cc42d53010ee151b3a618f746fdb6"
+     },
+     "depth": 4,
+     "signature": "519ca8d0afef6426836cded2a8fc0f15232019fa58f220ec814598761e2e64fa37017342bf23804e8de574521f3cdee3217f68618fbdafe5677cc8b1fc963e0a"
+    }
+   ],
+   "expect": "ok"
+  },
+  {
+   "name": "six links, one past the maximum depth",
+   "chain": [
+    {
+     "delegationVersion": "1",
+     "id": "11111111111111111111111111111111",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read",
+         "read-external"
+        ],
+        "limits": {
+         "calls": 10
+        }
+       },
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/write",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "act"
+        ],
+        "limits": {}
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T08:00:00.000Z",
+     "parent": null,
+     "depth": 0,
+     "signature": "0c756976f03dca26fa31e60e53befc84c3c3a86ac3a5b82c321bb6845e4a318c4a8f4979e6c48bb56461339de773515751ec6817c85c7c439768cd275127d408"
+    },
+    {
+     "delegationVersion": "1",
+     "id": "51515151515151515151515151515151",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read-external"
+        ],
+        "limits": {
+         "calls": 5
+        }
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T04:00:00.000Z",
+     "parent": {
+      "id": "11111111111111111111111111111111",
+      "digest": "sha256:2da3f48b6ab326b9664ead97c1c777c63e059ea90ef78ee0fe391c1c4f88e429"
+     },
+     "depth": 1,
+     "signature": "704b7647a86c48f7df37fcec8e959fbb290ac31c5735343a743d7190fbfbaa63eb3e96ce23e12f53c4f16bae33bf068b0334cf132739dd6f56e55cbb0f777604"
+    },
+    {
+     "delegationVersion": "1",
+     "id": "52525252525252525252525252525252",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read-external"
+        ],
+        "limits": {
+         "calls": 5
+        }
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T04:00:00.000Z",
+     "parent": {
+      "id": "51515151515151515151515151515151",
+      "digest": "sha256:fa27cf40f63ed497e2b7da3c31c3bb48c745a4fc7bf292f6029b6dff0f2cccd1"
+     },
+     "depth": 2,
+     "signature": "ae6151a7a41fcb07b61faac48e57bf150f320fe105583e337fd9a47010634a6b2719b837444e1572f89497e5a5b36ab980723846aee148b84a24e189ac7dfa00"
+    },
+    {
+     "delegationVersion": "1",
+     "id": "53535353535353535353535353535353",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read-external"
+        ],
+        "limits": {
+         "calls": 5
+        }
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T04:00:00.000Z",
+     "parent": {
+      "id": "52525252525252525252525252525252",
+      "digest": "sha256:231bbc7099c849b60ef30eabd94bb66a2b8849e4d28846aac8c7324ad65e9000"
+     },
+     "depth": 3,
+     "signature": "69ba05127b504c7109698996ee6c4950b27ab05a302b769651702f13f61eed56578c44f8e353fe3084e5de0d2effc9a2351cae0d0c4759c96fa21911a7bd2c07"
+    },
+    {
+     "delegationVersion": "1",
+     "id": "54545454545454545454545454545454",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read-external"
+        ],
+        "limits": {
+         "calls": 5
+        }
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T04:00:00.000Z",
+     "parent": {
+      "id": "53535353535353535353535353535353",
+      "digest": "sha256:de5f92a421b26282791f56b496b1ccb77c2cc42d53010ee151b3a618f746fdb6"
+     },
+     "depth": 4,
+     "signature": "519ca8d0afef6426836cded2a8fc0f15232019fa58f220ec814598761e2e64fa37017342bf23804e8de574521f3cdee3217f68618fbdafe5677cc8b1fc963e0a"
+    },
+    {
+     "delegationVersion": "1",
+     "id": "99999999999999999999999999999999",
+     "host": "desk",
+     "keyId": "5c57cc9dc13bda735be87dc1de5db9a4",
+     "sub": {
+      "kind": "person",
+      "issuer": "https://login.example.com/",
+      "subject": "approver@example.com"
+     },
+     "act": {
+      "agent": "a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2",
+      "software": {
+       "package": "judgment-pack-agent",
+       "version": "0.13.0"
+      }
+     },
+     "scope": {
+      "sources": [
+       {
+        "audience": {
+         "kind": "gateway",
+         "name": "gateway:test"
+        },
+        "source": "tickets/live",
+        "tools": [
+         "query"
+        ],
+        "effects": [
+         "read-external"
+        ],
+        "limits": {
+         "calls": 5
+        }
+       }
+      ]
+     },
+     "mayDelegate": true,
+     "issuedAt": "2026-10-30T00:00:00.000Z",
+     "expiresAt": "2026-10-30T04:00:00.000Z",
+     "parent": {
+      "id": "54545454545454545454545454545454",
+      "digest": "sha256:920542dd0328e60dab20f475846a8ec1c76280b4dd9d6c65777e002317b5cced"
+     },
+     "depth": 5,
+     "signature": "f6dce13fbc3e2018373074f4e80c42899f27f4a669b0439bff3e62a919dcc8677c686ccac96576f6ec38cd012a4976484f857eb685e4245493af8f33f2640004"
+    }
+   ],
+   "expect": "malformed"
+  }
+ ]
+}
