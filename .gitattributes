@@ -18,6 +18,11 @@ conformance/witness/** export-ignore -text
 conformance/dialect export-ignore
 conformance/dialect/** export-ignore -text
 
+# The delegation statement cases of RFC 0030's amendment are held to the SHA-256 digests their
+# README records, and copies in the gateway and the agent library are checked against them, so no
+# checkout may convert a line ending in them.
+conformance/delegation/** -text
+
 # The companion document RFC 0020 proposes is normative for nothing while the RFC is a draft,
 # so no bundle carries it; acceptance removes this line, as for RFC 0018's Draft.
 spec/workflow.md export-ignore
