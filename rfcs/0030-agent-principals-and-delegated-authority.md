@@ -1585,6 +1585,7 @@ states, with `/acquire`'s sentence of a wrong scope.
 | `read-v2-version-refused`: a digest other than the one the subject approved | N | `tool-version-refused`, nothing counted |
 | `read-v2-order`: the subject unauthorized and the version refused | N | `subject-unauthorized` |
 | `read-v2-binding`: `call: null` | P | `admit`, nothing counted |
+| `read-v2-binding-step-12`: a binding read answered `tool-version-refused`, a step-12 refusal | N | `admission-unknown`; the binding refused, nothing counted |
 | `read-v2-standing`: a standing read at version `"2"` | P | `current` |
 | `read-version-unknown`: `readVersion: "3"` | N | `read-version-unsupported`; nothing counted; no version `"1"` read sent |
 | `read-version-not-a-string`: `readVersion: 2` | N | `read-malformed` |

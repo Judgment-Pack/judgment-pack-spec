@@ -3,8 +3,8 @@
 The conformance cases of [RFC 0030](../../rfcs/0030-agent-principals-and-delegated-authority.md)'s
 amendment of 2026-11-22 for the delegation statement, steps 1 to 7 and the narrowing check of §3,
 and for the scope binding: the build-order steps *ES256* and *The scope binding* of its *Acceptance
-plan*. They are staged in no Core corpus, as the
-witness and dialect vectors are, are not served by the site, and are normative for nothing while the
+plan*; and its cases for the admission reads of §2a, tables 4 and 5. They are staged in no Core
+corpus, as the witness and dialect vectors are, are not served by the site, and are normative for nothing while the
 RFC is a Draft. Each case states its expected verdict.
 
 | File | Cases | SHA-256 |
@@ -12,10 +12,11 @@ RFC is a Draft. Each case states its expected verdict.
 | [`es256-statements.json`](es256-statements.json) | 55: table 1 (30) and table 2 (25) | `534e256df9babccc5d8bd9c4f17440b3036f5e85829a25e397cd5774a49887d6` |
 | [`ed25519-statements.json`](ed25519-statements.json) | 39: the row `ed25519-unchanged` of table 1 | `b1bdfe50cbab49f6408395511c0f9fbee897193f6c58f63328a6d677b99c3bd9` |
 | [`scope-binding.json`](scope-binding.json) | 20: table 3, as 9 statement cases, 10 request cases and the row `unbound-unchanged` | `04559c4a04d3f64f059beb47f54790382825b0eb9a5f6c13173762470b54a142` |
+| [`admission-reads.json`](admission-reads.json) | 35: table 4 (22) and table 5 (13) | `a620f8e7280652a1c9402c4862ab3ebafa9b8286569a327fdbdd12492f5291e2` |
 
 Each implementation holds each copy to the SHA-256 above, `ed25519-statements.json` included: the
 reference gateway checks its `testdata/delegation/statements.json`, of which that file is a copy, by
-that digest in a test, as it checks its copies of the other two.
+that digest in a test, as it checks its copies of the others.
 
 `es256-statements.json` was revised once after it was frozen: `link` was set on its two chained
 negative cases, `es256-resigned-parent` and `child-parent-id-differs` (both at link `1`), so that
@@ -99,4 +100,29 @@ synthetic. Its `keys` pin the Ed25519 key and the P-256 key of `01`.
   implementations a case applies to: the `library-` cases are the agent library's alone, and
   `request-bound-source-of-other` is the gateway's alone.
 
-Tables 4 and 5, the reads, are a later step of the build order and are not here.
+## The read cases
+
+`admission-reads.json` is hand-written and needs no signer: a read is not signed, and its bodies
+are `canon` bytes, which are reproducible. It holds one case per name of tables 4 and 5, a row
+naming several cases being several, with `read-v2-binding-step-12` (a step-12 refusal answering a
+binding read). It is frozen once both implementations pin it; a change is a new digest. Each case
+holds:
+
+- `name`, `table` (`4` or `5`) and `kind`, as the RFC's tables give them;
+- `applies`, the side the case is for, `issuing-host`, `sender` or both, each with what that side
+  does. A body no conforming sender emits says `"sender": "never emits; refuses on read-malformed"`
+  (or the answer it names): a sender passes it by never sending such a body and by refusing under
+  that name when it is so answered;
+- `senders`, the implementations whose sender part it is, `gateway`, `library` or both; the
+  `skills` and skill-load cases are the library's;
+- `readVersion`, the sender's configured version, and `hostReads`, the versions the host double
+  reads;
+- `inputs`: the chain, by the name of a case in `ed25519-statements.json`, whose link digests the
+  body's `chain` holds; `host`, `at` and `audience`; the call (`null` for a binding read), the
+  standing read's principal, or the load; the approved `version` and the loaded `skills` as the
+  sender holds them, unordered where a case orders them; and the host double's `policy` where a
+  case needs one;
+- `body` and `answer`, the exact bytes as strings, `null` where none is sent or none comes back;
+  `skill-load-resume` holds one of each per read, in order;
+- `expect`: `verdict`, the RFC's expected verdict; `sender`, what the sender reports; `counted`;
+  `reads`, how many reads the sender makes, so that nothing is resent; and for table 5 `loaded`.
