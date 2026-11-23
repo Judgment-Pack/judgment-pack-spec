@@ -90,11 +90,16 @@ SCHEMA_NAMESPACE = "https://judgmentpack.org/schema/"
 # record cannot change without a reviewed change here. releases/v0.5.0.normative.json was derived
 # from the blobs of tag v0.5.0 (commit 171d4c21d4b13e03ee20e1adb6fc5cc6b182cfae) with `git show`,
 # over the paths normative_paths() gives for that tree; it agrees with `git archive` of the tag and
-# with the four schema digests releases/v0.5.0.md publishes. A specVersion with no entry has no
-# patch release: 0.4.0 was never released, and the rule is normative from v0.5.0 on.
+# with the four schema digests releases/v0.5.0.md publishes. releases/v0.6.0.normative.json was
+# derived the same way from the blobs of tag v0.6.0 (commit
+# 5c2367280813763a8ca7731c57b3ca8b23b6f7d7), agrees with `git archive` of the tag, and holds the
+# four schema digests releases/v0.6.0.md publishes. A specVersion with no entry has no patch
+# release: 0.4.0 was never released, and the rule is normative from v0.5.0 on.
 NORMATIVE_RECORDS = {
     "0.5.0": ("releases/v0.5.0.normative.json",
               "86e175e8786eb6e08a215178ba7099edb074193c83c5ee2dc6a12012555b4aaa"),
+    "0.6.0": ("releases/v0.6.0.normative.json",
+              "c0f3eeb20d533f4853e17d459e8b235063d14094507a50666ac4d9a11c883f28"),
 }
 FINAL_RETAINED_INVENTORY = "releases/v0.3.0.retained-column.json"
 RETAINED_INVENTORIES = {CORE_RC2_TAG: RETAINED_INVENTORY, CORE_FINAL_TAG: FINAL_RETAINED_INVENTORY}

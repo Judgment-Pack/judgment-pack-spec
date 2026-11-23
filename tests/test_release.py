@@ -118,7 +118,7 @@ class ReleaseBuilderTests(unittest.TestCase):
             self.assertIn("v0.4.1 would carry specVersion 0.4.0, which has no normative record",
                           str(raised.exception))
             self.assertNotIn("0.4.0", BUILD_RELEASE.NORMATIVE_RECORDS)
-            self.assertEqual(["0.5.0"], list(BUILD_RELEASE.NORMATIVE_RECORDS))
+            self.assertEqual(["0.5.0", "0.6.0"], list(BUILD_RELEASE.NORMATIVE_RECORDS))
 
     def test_the_0_5_0_notes_state_the_selector_and_the_waived_candidate_period(self) -> None:
         notes = re.sub(r"\s+", " ", (ROOT / "releases" / "v0.5.0.md").read_text(encoding="utf-8"))
@@ -228,11 +228,12 @@ class ReleaseBuilderTests(unittest.TestCase):
         self.assertEqual("0.6.0", version)
         BUILD_RELEASE.validate_artifacts(version, f"v{version}")
         # The ordinary path: the tag is the specVersion, so the release has no distribution mapping,
-        # no generated identity, no normative record and the notes and milestone link the workflow reads.
+        # no generated identity, and the notes and milestone link the workflow reads. Its normative
+        # record was added after the release, for its patch releases (#319).
         self.assertNotIn("v0.6.0", BUILD_RELEASE.CORE_MAPPED_IDENTITIES)
         self.assertNotIn("v0.6.0", BUILD_RELEASE.GENERATED_IDENTITIES)
         self.assertFalse((ROOT / "releases" / "v0.6.0.json").exists())
-        self.assertFalse((ROOT / "releases" / "v0.6.0.normative.json").exists())
+        self.assertIn("0.6.0", BUILD_RELEASE.NORMATIVE_RECORDS)
         self.assertEqual("# v0.6.0", (ROOT / "releases" / "v0.6.0.md").read_text(encoding="utf-8").splitlines()[0])
         self.assertEqual({"number": 8, "title": "v0.6.0"},
                          json.loads((ROOT / "releases" / "v0.6.0.milestone.json").read_text(encoding="utf-8")))
@@ -1262,8 +1263,10 @@ class CorePatchReleaseTests(unittest.TestCase):
                 self.assertIn("conformance specVersion", self.refused(self.fresh_case(), tag=tag))
 
     def test_the_record_is_the_v0_5_0_bytes_the_builder_pins(self):
-        self.assertEqual({"0.5.0": (self.RECORD, hashlib.sha256((ROOT / self.RECORD).read_bytes()).hexdigest())},
-                         BUILD_RELEASE.NORMATIVE_RECORDS)
+        records = {version: (f"releases/v{version}.normative.json",
+                             hashlib.sha256((ROOT / "releases" / f"v{version}.normative.json").read_bytes()).hexdigest())
+                   for version in ("0.5.0", "0.6.0")}
+        self.assertEqual(records, BUILD_RELEASE.NORMATIVE_RECORDS)
         record = json.loads((ROOT / self.RECORD).read_text(encoding="utf-8"))
         self.assertEqual({"tag", "sourceCommit", "specVersion", "files"}, set(record))
         self.assertEqual(("v0.5.0", "0.5.0"), (record["tag"], record["specVersion"]))

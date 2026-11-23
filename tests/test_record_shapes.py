@@ -389,7 +389,8 @@ class FormatStatus(Fixture):
         # Without v0.5.0's notes, and the later files that name that release, the tree reads as it
         # did at v0.4.0: that tag is the four families' last release and v0.3.0 stays their baseline.
         later = [self.root / "releases" / name
-                 for name in ("v0.5.0.md", "v0.5.0.normative.json", "v0.5.1.md", "v0.5.2.md", "v0.6.0.md")]
+                 for name in ("v0.5.0.md", "v0.5.0.normative.json", "v0.5.1.md", "v0.5.2.md", "v0.6.0.md",
+                              "v0.6.0.normative.json")]
         kept = {path: path.read_bytes() for path in later if path.exists()}
         for path in kept:
             path.unlink()
@@ -414,6 +415,7 @@ class FormatStatus(Fixture):
         # v0.6.0 releases the next specVersion; without its notes the tree reads as it did at v0.5.0.
         for tag in (*patches, "v0.6.0"):
             (self.root / "releases" / f"{tag}.md").unlink(missing_ok=True)
+        (self.root / "releases" / "v0.6.0.normative.json").unlink(missing_ok=True)
         before = shapes.derive_status(self.root, shapes.build_catalog(self.root))
         for family in four:
             with self.subTest(family=family):
@@ -465,10 +467,10 @@ class FormatStatus(Fixture):
                 notes.unlink()
         self.assertEqual([], shapes.check(self.root))
         # v0.3.0 released 0.3.0 but has no normative record, so the builder refuses v0.3.1 and so
-        # does this check; v0.5.1 is refused the same way once 0.5.0's record is gone, and v0.6.1 while
-        # 0.6.0 has none (a patch of 0.6.0 needs its record first, #319).
+        # does this check; v0.5.1 is refused the same way once 0.5.0's record is gone, and v0.6.1 once
+        # 0.6.0's is (#319).
         for tag, carried, gone in (("v0.3.1", "0.3.0", None), ("v0.5.1", "0.5.0", "v0.5.0.normative.json"),
-                                   ("v0.6.1", "0.6.0", None)):
+                                   ("v0.6.1", "0.6.0", "v0.6.0.normative.json")):
             with self.subTest(tag=tag):
                 notes = self.root / "releases" / ("%s.md" % tag)
                 kept = notes.read_bytes() if notes.exists() else None
