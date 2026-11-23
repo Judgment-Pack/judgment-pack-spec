@@ -78,7 +78,7 @@ stable feature requires two independent implementations and conformance cases.
 | [0027](0027-pack-design-advisories.md) | Bounded pack-design advisories | Draft | Optional tooling contract, proposed for Core `0.6.0` and not released in it; released conformance unchanged |
 | [0028](0028-complete-workflow-contributors.md) | Complete workflow contributor attribution | Draft | Specification (amendment to Draft workflow; target Spec 0.5.0, unpublished) |
 | [0029](0029-retained-column-conversions.md) | Exact selected retained columns, custody, producer grammar and role ceilings | Accepted | Selected Dialect companion for immutable Core RC2 at draft maturity; acceptance is separate from publication |
-| [0030](0030-agent-principals-and-delegated-authority.md) | Agent principals and delegated authority | Draft | Mixed: the delegation statement is standards track at draft maturity (a proposed companion beside Core); the rest is a cross-project exploratory record (agent, gateway, Desk) |
+| [0030](0030-agent-principals-and-delegated-authority.md) | Agent principals and delegated authority | Draft | Mixed: the delegation statement is standards track at draft maturity (a proposed companion beside Core); the rest is a cross-project exploratory record (agent, gateway, Desk). Amended 2026-11-22 (ES256 statements, a chain bound to one scope identifier, admission read version 2, a skill-load read), proposed for `v0.6.1` |
 | [0031](0031-annotations-and-value-sets.md) | Annotations and annotated value sets | Accepted | Specification (Core amendment released in Core `0.5.0`, staged as `0.4.0-draft`; accepted on a same-vendor review, the different-vendor review waived) |
 | [0032](0032-outcome-severity.md) | Outcome severity, one well-known annotation key | Accepted | Specification (a companion beside Core, [the annotation vocabulary](../spec/annotation-vocabulary.md) `1.0.0`, status `proposed`, released in `v0.5.2`; Core `0.5.0` unchanged; its rows staged; accepted on a same-vendor review, the different-vendor review waived) |
 | [0033](0033-paged-operation-source.md) | A paged operation source | Accepted | Specification (an amendment of the dialect companion, named format `4.1.0`, landed as [`spec/dialect.md`](../spec/dialect.md) §2.3 for `specVersion` `0.6.0`; accepted on same-vendor reviews, the different-vendor review waived) |
@@ -162,6 +162,10 @@ subject's own access untouched, and the connection grant is a principal-held res
 run records would name actor, subject and delegation. Its delegation statement is standards track at
 draft maturity; the rest is a cross-project exploratory record. It is a Draft carried in release
 `v0.4.0`, normative for nothing; no conformance class is claimed and nothing is committed for `0.5.0`.
+Its amendment of 2026-11-22 adds ES256 statements, version 2 of the admission read and a skill-load
+read to the standards-track part, with a chain bound to one scope identifier. It plans acceptance
+on two separately written implementations (same vendor, not a cross-vendor claim), and is proposed
+for release `v0.6.1`, with `specVersion` `0.6.0` unchanged.
 
 [RFC 0031](0031-annotations-and-value-sets.md) proposes inert annotations on the pack, its
 outcomes and rules, in the reserved extension `org.judgmentpack.annotations`, and named value sets
