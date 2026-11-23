@@ -7,6 +7,9 @@ here.
 
 ### Added
 
+- **RFC 0030's ES256 statement cases** (`conformance/delegation/`, staged in no corpus): 55 cases of
+  the amendment's tables 1 and 2, made once by an independent signer and frozen, and the reference
+  gateway's 39 Ed25519 cases, byte for byte.
 - **The terraform-file companion's first release, `terraform-file-v1.0.0`** (reading `1.0.0`,
   status `released`, and not stable; release notes `releases/terraform-file-v1.0.0.md`). The
   text's status sentence and §§11 and 12, the code list, the format table and the vectors' manifest
