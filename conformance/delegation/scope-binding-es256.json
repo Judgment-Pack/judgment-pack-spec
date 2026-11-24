@@ -1,0 +1,286 @@
+{
+  "note": "RFC 0030, amendment of 2026-11-22, conformance table 3: the ES256 counterparts of two of scope-binding.json's Ed25519 negative cases, bound-changed and bound-unbound-child. statements: a chain and the first refusal of steps 1 to 7. Frozen: ES256 signatures are not reproducible.",
+  "generator": "Python 3.8.20, cryptography 44.0.0, a second generator independent of the reference gateway",
+  "keys": {
+    "desk": [
+      "00028d283e279178a6ce561e45f1b89f2a6ac45690fbb5ac48313ad61ab04584",
+      {
+        "alg": "ES256",
+        "key": "026ff03b949241ce1dadd43519e6960e0a85b41a69a05c328103aa2bce1594ca16"
+      }
+    ]
+  },
+  "scopeIds": [
+    "scope-a",
+    "scope-b"
+  ],
+  "statements": [
+    {
+      "name": "es256-bound-changed",
+      "kind": "N",
+      "expect": "widened",
+      "link": 1,
+      "note": "the ES256 counterpart of the Ed25519 case of that name: the child is bound to another scope identifier than its parent",
+      "chain": [
+        {
+          "delegationVersion": "1",
+          "id": "11111111111111111111111111111111",
+          "host": "desk",
+          "keyId": "dbdb99c64b3d511f72c88fb6c054da73",
+          "alg": "ES256",
+          "sub": {
+            "kind": "person",
+            "issuer": "https://login.example.com/",
+            "subject": "approver@example.com"
+          },
+          "act": {
+            "agent": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+            "software": {
+              "package": "judgment-pack-agent",
+              "version": "0.13.0"
+            }
+          },
+          "scope": {
+            "sources": [
+              {
+                "audience": {
+                  "kind": "gateway",
+                  "name": "gateway:test"
+                },
+                "source": "tickets/live",
+                "tools": [
+                  "query"
+                ],
+                "effects": [
+                  "read",
+                  "read-external"
+                ],
+                "limits": {
+                  "calls": 10
+                }
+              },
+              {
+                "audience": {
+                  "kind": "gateway",
+                  "name": "gateway:test"
+                },
+                "source": "tickets/write",
+                "tools": [
+                  "query"
+                ],
+                "effects": [
+                  "act"
+                ],
+                "limits": {}
+              }
+            ],
+            "scopeId": "scope-a"
+          },
+          "mayDelegate": true,
+          "issuedAt": "2026-10-30T00:00:00.000Z",
+          "expiresAt": "2026-10-30T08:00:00.000Z",
+          "parent": null,
+          "depth": 0,
+          "signature": "ef7288126ebaf7f30f41fe19bd78d46aed86e3d3f71ab204e4a5757c9d869052280f410df6c8529474627552c3a86b5ebe5f59e4fed3c62b8512092861e2041b"
+        },
+        {
+          "delegationVersion": "1",
+          "id": "22222222222222222222222222222222",
+          "host": "desk",
+          "keyId": "dbdb99c64b3d511f72c88fb6c054da73",
+          "alg": "ES256",
+          "sub": {
+            "kind": "person",
+            "issuer": "https://login.example.com/",
+            "subject": "approver@example.com"
+          },
+          "act": {
+            "agent": "b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2",
+            "software": {
+              "package": "judgment-pack-agent",
+              "version": "0.13.0"
+            }
+          },
+          "scope": {
+            "sources": [
+              {
+                "audience": {
+                  "kind": "gateway",
+                  "name": "gateway:test"
+                },
+                "source": "tickets/live",
+                "tools": [
+                  "query"
+                ],
+                "effects": [
+                  "read",
+                  "read-external"
+                ],
+                "limits": {
+                  "calls": 10
+                }
+              },
+              {
+                "audience": {
+                  "kind": "gateway",
+                  "name": "gateway:test"
+                },
+                "source": "tickets/write",
+                "tools": [
+                  "query"
+                ],
+                "effects": [
+                  "act"
+                ],
+                "limits": {}
+              }
+            ],
+            "scopeId": "scope-b"
+          },
+          "mayDelegate": true,
+          "issuedAt": "2026-10-30T00:00:00.000Z",
+          "expiresAt": "2026-10-30T08:00:00.000Z",
+          "parent": {
+            "id": "11111111111111111111111111111111",
+            "digest": "sha256:3a58975495607b3173d3d45e28bb8cb11c67c6ffa4dc2adfa5300e0414900f74"
+          },
+          "depth": 1,
+          "signature": "88446895e8cb8e59360c6bfe2cdc0e3682336df74f33b8241169de45b8acc5b31f2c9da3ac0d94b6d6fd8e656bf2266b209292541babb77d2d53d941262ab55b"
+        }
+      ]
+    },
+    {
+      "name": "es256-bound-unbound-child",
+      "kind": "N",
+      "expect": "widened",
+      "link": 1,
+      "note": "the ES256 counterpart of the Ed25519 case of that name: the child of a bound link holds no scopeId",
+      "chain": [
+        {
+          "delegationVersion": "1",
+          "id": "11111111111111111111111111111111",
+          "host": "desk",
+          "keyId": "dbdb99c64b3d511f72c88fb6c054da73",
+          "alg": "ES256",
+          "sub": {
+            "kind": "person",
+            "issuer": "https://login.example.com/",
+            "subject": "approver@example.com"
+          },
+          "act": {
+            "agent": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+            "software": {
+              "package": "judgment-pack-agent",
+              "version": "0.13.0"
+            }
+          },
+          "scope": {
+            "sources": [
+              {
+                "audience": {
+                  "kind": "gateway",
+                  "name": "gateway:test"
+                },
+                "source": "tickets/live",
+                "tools": [
+                  "query"
+                ],
+                "effects": [
+                  "read",
+                  "read-external"
+                ],
+                "limits": {
+                  "calls": 10
+                }
+              },
+              {
+                "audience": {
+                  "kind": "gateway",
+                  "name": "gateway:test"
+                },
+                "source": "tickets/write",
+                "tools": [
+                  "query"
+                ],
+                "effects": [
+                  "act"
+                ],
+                "limits": {}
+              }
+            ],
+            "scopeId": "scope-a"
+          },
+          "mayDelegate": true,
+          "issuedAt": "2026-10-30T00:00:00.000Z",
+          "expiresAt": "2026-10-30T08:00:00.000Z",
+          "parent": null,
+          "depth": 0,
+          "signature": "8e2312a376bb0ea228261f72c75488edf0bcb055b716c92c133af5c67c9a5f3070206ddf9b73027e5ca00ad66020dd82010c7dc9379e9e5741df6f055691edd6"
+        },
+        {
+          "delegationVersion": "1",
+          "id": "22222222222222222222222222222222",
+          "host": "desk",
+          "keyId": "dbdb99c64b3d511f72c88fb6c054da73",
+          "alg": "ES256",
+          "sub": {
+            "kind": "person",
+            "issuer": "https://login.example.com/",
+            "subject": "approver@example.com"
+          },
+          "act": {
+            "agent": "b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2",
+            "software": {
+              "package": "judgment-pack-agent",
+              "version": "0.13.0"
+            }
+          },
+          "scope": {
+            "sources": [
+              {
+                "audience": {
+                  "kind": "gateway",
+                  "name": "gateway:test"
+                },
+                "source": "tickets/live",
+                "tools": [
+                  "query"
+                ],
+                "effects": [
+                  "read",
+                  "read-external"
+                ],
+                "limits": {
+                  "calls": 10
+                }
+              },
+              {
+                "audience": {
+                  "kind": "gateway",
+                  "name": "gateway:test"
+                },
+                "source": "tickets/write",
+                "tools": [
+                  "query"
+                ],
+                "effects": [
+                  "act"
+                ],
+                "limits": {}
+              }
+            ]
+          },
+          "mayDelegate": true,
+          "issuedAt": "2026-10-30T00:00:00.000Z",
+          "expiresAt": "2026-10-30T08:00:00.000Z",
+          "parent": {
+            "id": "11111111111111111111111111111111",
+            "digest": "sha256:1d7bdb88fa3dfaaa24f4633bf318705cde86553939247908951521a406cc41b9"
+          },
+          "depth": 1,
+          "signature": "615608e3b794802a13053486f90f3435891a5dbe860ac6e8d5f92d8d9aec6fd23e14a834ef08d6cc28d8ef730721b44c7fde851e44690e3eeac816db905e3f6b"
+        }
+      ]
+    }
+  ]
+}

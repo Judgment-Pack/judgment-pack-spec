@@ -25,6 +25,12 @@ here.
   corpus): table 3, as 9 statement cases and 10 request cases, made once by the same independent
   signer and frozen. `es256-statements.json` names the link of its two chained `chain-broken`
   cases, and its SHA-256 in the README is the revised file's.
+- **ES256 counterparts of two scope-binding cases** (`conformance/delegation/scope-binding-es256.json`,
+  staged in no corpus): `es256-bound-changed` and `es256-bound-unbound-child`, table 3's
+  `bound-changed` and `bound-unbound-child` under the P-256 key, both `widened` at link 1. Made
+  once by a second generator independent of the reference gateway, which first made every Ed25519
+  signature of `scope-binding.json` again byte for byte, and frozen. `scope-binding.json` is
+  unchanged.
 - **The terraform-file companion's first release, `terraform-file-v1.0.0`** (reading `1.0.0`,
   status `released`, and not stable; release notes `releases/terraform-file-v1.0.0.md`). The
   text's status sentence and §§11 and 12, the code list, the format table and the vectors' manifest
