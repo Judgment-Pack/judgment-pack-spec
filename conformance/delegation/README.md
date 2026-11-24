@@ -12,6 +12,7 @@ RFC is a Draft. Each case states its expected verdict.
 | [`es256-statements.json`](es256-statements.json) | 55: table 1 (30) and table 2 (25) | `534e256df9babccc5d8bd9c4f17440b3036f5e85829a25e397cd5774a49887d6` |
 | [`ed25519-statements.json`](ed25519-statements.json) | 39: the row `ed25519-unchanged` of table 1 | `b1bdfe50cbab49f6408395511c0f9fbee897193f6c58f63328a6d677b99c3bd9` |
 | [`scope-binding.json`](scope-binding.json) | 20: table 3, as 9 statement cases, 10 request cases and the row `unbound-unchanged` | `04559c4a04d3f64f059beb47f54790382825b0eb9a5f6c13173762470b54a142` |
+| [`scope-binding-es256.json`](scope-binding-es256.json) | 2: table 3's `bound-changed` and `bound-unbound-child` under the P-256 key | `d6c2a44f6d06b772d65526bbb590db3a95bc39998f38e4f05ab93f35afb30d2f` |
 | [`admission-reads.json`](admission-reads.json) | 35: table 4 (22) and table 5 (13) | `a620f8e7280652a1c9402c4862ab3ebafa9b8286569a327fdbdd12492f5291e2` |
 
 Each implementation holds each copy to the SHA-256 above, `ed25519-statements.json` included: the
@@ -35,6 +36,18 @@ signatures are not reproducible, so a second run would make other bytes and othe
 ADR-0053's corpus rule). The generator is not part of this repository. `scope-binding.json` was
 made by the same generator, extended with table 3, under the same keys: its ES256 signatures are
 other bytes than any of `es256-statements.json`'s.
+
+`scope-binding-es256.json` was made once, on 2026-11-24, by a second generator, Python 3.8.20 with
+`cryptography` 44.0.0, independent of the gateway and sharing no code with `scope-binding.json`'s
+generator either; it is not part of this repository. It holds the ES256 counterparts of
+`scope-binding.json`'s Ed25519 negative cases `bound-changed` (a child bound to another scope
+identifier) and `bound-unbound-child` (an unbound child of a bound link), as `es256-bound-changed`
+and `es256-bound-unbound-child`: the same members, host `desk`, pins and scope identifiers, under the
+P-256 key of `01` with `alg: "ES256"`, its signatures `r||s` at low S. Both expect `widened` at link
+`1`. Before it was frozen, the generator made every Ed25519 signature and parent digest of
+`scope-binding.json` again, byte for byte (Ed25519 is deterministic), and verified its ES256 links,
+so its `canon`, signing input and digest are the ones that file was made under.
+`scope-binding.json` is unchanged.
 
 Canonical bytes follow `canon` as the RFC's *Common forms* states it. Every link's signing input and
 digest were checked, before the file was frozen, against the reference gateway's own `canon`.
@@ -99,6 +112,9 @@ synthetic. Its `keys` pin the Ed25519 key and the P-256 key of `01`.
   counted; `at`, where the refusal is made at binding as well as at a call. `appliesTo` names the
   implementations a case applies to: the `library-` cases are the agent library's alone, and
   `request-bound-source-of-other` is the gateway's alone.
+
+`scope-binding-es256.json` holds `statements` alone, in the form above, with the same `keys` and
+`scopeIds`; each case's `note` names the Ed25519 case it counterparts.
 
 ## The read cases
 
