@@ -7,6 +7,17 @@ here.
 
 ### Added
 
+- **A receipt's `callRef`, read as no part of an acquisition** (`spec/dialect.md` §5.2, check 1;
+  the reference gateway's ADR-0060, release `v0.40.0`): the per-call reference a gateway sends a
+  binding whose operator set the platform's `callReference`, in the `tools/call` request's
+  `params._meta` as `judgment-pack/callRef` beside `judgment-pack/sessionId`, and signs into the
+  version 3 receipt. The member is optional and signed: no check reads it, check 2's signature
+  covers it, a verifier that does not know it still verifies the receipt, and a receipt carrying it
+  is read as the same receipt without it; no answer changes. The reference gateway's corpus holds
+  the two vectors, `corpus/v3/stores/v3-call-ref-valid.json` (with it) and
+  `corpus/v3/stores/v3-call-ref-absent.json` (without it). A same-selector patch release, `0.6.1`:
+  Core `specVersion` `0.6.0`, its schema, text and corpora are unchanged.
+
 - **RFC 0030's ES256 statement cases** (`conformance/delegation/`, staged in no corpus): 55 cases of
   the amendment's tables 1 and 2, made once by an independent signer and frozen, and the reference
   gateway's 39 Ed25519 cases, byte for byte.
